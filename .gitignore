@@ -1,0 +1,10 @@
+# dependencies
+/node_modules
+/frontend/node_modules
+
+# compiled output
+/frontend/dist
+/frontend/tmp
+
+# IDEs and editors
+/.idea

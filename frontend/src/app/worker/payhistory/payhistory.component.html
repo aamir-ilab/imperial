@@ -1,0 +1,22 @@
+<vex-secondary-toolbar current="Pay History">
+  <!-- <vex-breadcrumbs [crumbs]="['payhistory']" class="flex-auto"></vex-breadcrumbs> -->
+
+  <!-- <button class="ml-2" color="primary" mat-icon-button type="button">
+    <mat-icon [icIcon]="icMoreVert"></mat-icon>
+  </button> -->
+</vex-secondary-toolbar>
+
+<div class="p-gutter"
+     gdColumns="1fr"
+     gdColumns.lt-md="1fr"
+     gdColumns.lt-sm="1fr"
+     gdGap="16px"
+     vexContainer>
+  <vex-widget-table [columns]="tableColumns"
+                    [data]="tableData"
+                    [topic]="'Pay History'"
+                    class="w-full overflow-auto shadow" 
+                    gdColumn.lt-md="1"
+                    gdColumn="1 / -1"
+                    gdColumn.lt-sm="1"></vex-widget-table>
+</div>
