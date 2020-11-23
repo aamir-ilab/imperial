@@ -39,7 +39,7 @@ export class NavigationService {
    },
    {
      type: 'link',
-     label: 'Jobs', 
+     label: 'Jobs',
      route: '/worker/jobs',
      icon: icAssessment,
      routerLinkActiveOptions: { exact: true }
@@ -96,23 +96,6 @@ export class NavigationService {
      routerLinkActiveOptions: { exact: true }
    },
    {
-     type: 'dropdown',
-     label: 'Settings',
-     icon: icSettings,
-     children: [
-           {
-             type: 'link',
-             label: 'Company Details',
-             route: '/client/companydetails'
-           },
-           {
-             type: 'link',
-             label: 'Sub Accounts',
-             route: '/client/subaccounts'
-           }
-         ]
-       },
-   {
      type: 'link',
      label: 'FAQs',
      route: '/faqs',
@@ -125,7 +108,24 @@ export class NavigationService {
      route: '/support',
      icon: icContactSupport,
      routerLinkActiveOptions: { exact: true }
-   }
+   },
+   {
+      type: 'dropdown',
+      label: 'Settings',
+      icon: icSettings,
+      children: [
+        {
+          type: 'link',
+          label: 'Company Details',
+          route: '/client/companydetails'
+        },
+        {
+          type: 'link',
+          label: 'Sub Accounts',
+          route: '/client/subaccounts'
+        }
+      ]
+    }
  ];
   items_admin: NavigationItem[]  = [
    {

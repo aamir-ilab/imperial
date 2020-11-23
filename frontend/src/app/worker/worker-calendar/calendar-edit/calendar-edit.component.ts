@@ -13,18 +13,18 @@ import { AuthService } from 'src/app/services/auth.service';
 export class CalendarEditComponent implements OnInit {
 
   form = this.fb.group({
-    startTime:null,
-    endTime:null,
-    department:null,
-    role:null,
-    title:null
+    startTime: null,
+    endTime: null,
+    department: null,
+    role: null,
+    title: null
   });
 
   constructor(private dialogRef: MatDialogRef<CalendarEditComponent>,
-              @Inject(MAT_DIALOG_DATA) public event: CalendarEvent<any>,
+              @Inject(MAT_DIALOG_DATA) public event: any,
               private fb: FormBuilder,
-              private route:Router,
-              private authService:AuthService) {
+              private route: Router,
+              private authService: AuthService) {
   }
 
   ngOnInit() {
@@ -39,41 +39,42 @@ export class CalendarEditComponent implements OnInit {
   }
   goToJob(){
     this.authService.currentScrumboard = [{
-      id:this.event.client.id, 
+      id: this.event.client.id,
       title: this.event.title,
-      children:[
-        { id:1, label:'In Progress', children:[] },
-        { id:2, label:'Submitted', children:[] },
-        { id:3, label:'Completed', children:[] },
+      children: [
+        { id: 1, label: 'In Progress', children: [] },
+        { id: 2, label: 'Submitted', children: [] },
+        { id: 3, label: 'Completed', children: [] },
       ]
     }];
     this.authService.currentJob = this.event;
-    var arrLabel = ['In Progress', 'Submitted', 'Completed'];
-    console.log('&&&&')
-    console.log(this.event.client)
-    console.log('&&&&')
-    arrLabel.forEach((ele,index) =>{
-      if(ele == this.event.client.statusStr)
+    const arrLabel = ['In Progress', 'Submitted', 'Completed'];
+    console.log('&&&&');
+    console.log(this.event.client);
+    console.log('&&&&');
+    arrLabel.forEach((ele, index) => {
+      if (ele === this.event.client.statusStr) {
         this.authService.currentScrumboard[0].children[index].children.push({
             id: this.event.client.id,
-            title:this.event.title,
+            title: this.event.title,
             client: this.event.client.client,
             department: this.event.client.department,
             role: this.event.client.role,
             shiftDate: this.event.client.shiftDate,
             startTime: this.event.client.startTime,
             endTime: this.event.client.endTime,
-            locationShift:this.event.client.locationShift,
+            locationShift: this.event.client.locationShift,
             purchaseOrderNo: this.event.client.purchaseOrderNo,
-            additionalInformation:this.event.client.additionalInformation,
-            statusStr:this.event.client.statusStr,
+            additionalInformation: this.event.client.additionalInformation,
+            statusStr: this.event.client.statusStr,
             fulfilled: this.event.client.fulfilled,
-            total:this.event.client.total,
-            totalStaff:this.event.client.totalStaff,
-            clientId:this.event.client.clientId,
-            timesheetId:this.event.client.timesheetId
+            total: this.event.client.total,
+            totalStaff: this.event.client.totalStaff,
+            clientId: this.event.client.clientId,
+            timesheetId: this.event.client.timesheetId
         });
-    })
+      }
+    });
     this.authService.setCurrentScrumboardLocal(this.authService.currentScrumboard);
     this.route.navigate(['/worker/jobs/scrumboard', this.event.client.id]);
     this.dialogRef.close({

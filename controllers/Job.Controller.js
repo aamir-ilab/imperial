@@ -78,7 +78,7 @@ exports.invoiceregister = (req, res) => {
 };
 // exports.google = (req,res) =>{
 //     console.log('1');
-//     passport.authenticate('google', { scope: 
+//     passport.authenticate('google', { scope:
 //         [ 'https://www.googleapis.com/auth/plus.login',
 //         , 'https://www.googleapis.com/auth/plus.profile.emails.read' ] })
 // };
@@ -198,23 +198,23 @@ exports.login = (req, res) => {
 //                 infoArr.push('Failed : ' + index + 'th is existed email')
 //             }else{
 //                 const Job = new Client();
-//                 if(element[' fullname '])  
+//                 if(element[' fullname '])
 //                 Job.fullname = element[' fullname '];
-//                 if(element[' email '])  
+//                 if(element[' email '])
 //                     Job.email = element[' email '];
-//                 if(element[' phone '])  
+//                 if(element[' phone '])
 //                     Job.phone = element[' phone '];
-//                 if(element[' clientLocation '])  
+//                 if(element[' clientLocation '])
 //                     Job.clientLocation = element[' clientLocation '];
-//                 if(element[' weddingDate '])  
+//                 if(element[' weddingDate '])
 //                     Job.weddingDate = element[' weddingDate '];
-//                 if(element[' weddingCity '])  
+//                 if(element[' weddingCity '])
 //                     Job.weddingCity = element[' weddingCity '];
-//                 if(element[' brideName '])  
+//                 if(element[' brideName '])
 //                     Job.brideName = element[' brideName '];
-//                 if(element[' groomName '])  
+//                 if(element[' groomName '])
 //                     Job.groomName = element[' groomName '];
-//                 if(element[' position '])  
+//                 if(element[' position '])
 //                     Job.position = element[' position '];
 //                 Job.setPassword('123456');
 //                 Job.save((err) => {
@@ -339,7 +339,7 @@ exports.invoiceupdate = (req, res) => {
         if (!client)
             res.status(404).send("data is not found");
         else {
-            Object.assign(client, req.body); 
+            Object.assign(client, req.body);
             // client.invoiceDate = new Date(req.body.invoiceDate);
             // client.invoiceDueDate = new Date(req.body.invoiceDueDate);
             client.save().then(client => {
@@ -349,7 +349,7 @@ exports.invoiceupdate = (req, res) => {
                 res.status(400).send("Update not possible");
             });
         }
-     
+
     });
 };
 exports.delInvoice = (req, res) =>{
@@ -379,7 +379,7 @@ exports.delInvoice = (req, res) =>{
 
             })
         }
-    }); 
+    });
 }
 exports.updateHash = (req, res) => {
     // var role = req.type;
@@ -472,7 +472,7 @@ exports.findById = (req, res) => {
     }
 }
     exports.getAll = (req, res) => {
-        Job.find({}).sort({ 'shiftDate': -1 }).populate(['clientId','timesheetId']).exec(function(err, client) {
+        Job.find({}).sort({ 'createdAt': -1 }).populate(['clientId','timesheetId']).exec(function(err, client) {
             if (err) {
                 console.log(err);
             } else {
@@ -482,7 +482,7 @@ exports.findById = (req, res) => {
     }
     exports.getAllJob = (req, res) => {
         // Job.find({}).sort({ 'shiftDate': -1 }).populate(['clientId','timesheetId']).exec(function(err, client) {
-        Job.find({}).sort({ 'shiftDate': -1 }).populate({
+        Job.find({}).sort({ 'createdAt': -1 }).populate({
             path: 'clientId',
             model: 'User'
         }).
@@ -524,11 +524,11 @@ exports.findById = (req, res) => {
             }
         })
     }
-    
+
     exports.getAllType = (req, res) => {
         // Job.find({$or:[{statusStr: "In Progress"},{statusStr:"Completed"}]}).sort({ 'shiftDate': -1 }).exec(function(err, client) {
 
-        Job.find({}).sort({ 'shiftDate': -1 }).populate(['clientId','timesheetId']).exec(function(err, client) {
+        Job.find({}).sort({ 'createdAt': -1 }).populate(['clientId','timesheetId']).exec(function(err, client) {
             if (err) {
                 console.log(err);
             } else {
@@ -553,7 +553,7 @@ exports.findById = (req, res) => {
                 console.log(client)
                 res.status(200).json(client);
             }
-        })  
+        })
         // Job.find({'timesheetId.workerId._id':req.body._id}).populate(['timesheetId']).exec( function(err, client){
 //             Job.  find()
 //   .populate('timesheetId')
@@ -1108,7 +1108,7 @@ exports.addWorkerJob = (req, res) => {
                 console.log('cvcvcv')
                 client.fulfilled --;
                 // client.workerId = client.workerId.filter((obj)=> obj.id!=req.body.wId);
-               
+
                 client.timesheetId = client.timesheetId.filter((obj)=> obj._id != req.body.tId);
                 console.log(client.timesheetId);
                 client.save().then(client => {
@@ -1122,7 +1122,7 @@ exports.addWorkerJob = (req, res) => {
                 });
             }
         }
-     
+
     });
 };
 exports.setStatusJob = (req, res) => {
@@ -1148,7 +1148,7 @@ exports.setStatusJob = (req, res) => {
                 client.statusStr = req.body.status;
 
             }
-       
+
         client.save().then(client => {
                 res.status(200).json(client);
             })
@@ -1197,7 +1197,7 @@ exports.canceljob = (req, res) => {
                 res.status(400).send("Update not possible");
             });
         }
-      
+
     });
 };
 exports.setJobWorkers = (req, res) => {
@@ -1266,7 +1266,7 @@ exports.setJobWorkers = (req, res) => {
             //         res.status(400).send("Update not possible");
             //     });
         }
-       
+
     });
 };
 exports.removeTimesheetsJob = (req, res) =>{
@@ -1278,9 +1278,9 @@ exports.removeTimesheetsJob = (req, res) =>{
                     res.status(200).json(city);
                 }
             }
-        }); 
+        });
     })
-   
+
 }
 exports.removeJob = (req, res) =>{
     var temp ;
@@ -1308,7 +1308,7 @@ exports.removeJob = (req, res) =>{
                     });
                 })
         }
-    }); 
+    });
 }
 
 
@@ -1387,7 +1387,7 @@ exports.getGenerateWorkerID = async(req, res) => {
                         }
                     });
                 })
-    
+
             // }
         });
         // userArr.push(ele._id);
@@ -1423,9 +1423,9 @@ exports.getExpertTimesheets = async(req, res) => {
     var tempObj = {};
     userArrObj.forEach(ele =>{
         if(!tempObj[ele.workerId._id]){
-            tempObj[ele.workerId._id] = 0 + (ele.JobId_Id.endTime-ele.JobId_Id.startTime);    
+            tempObj[ele.workerId._id] = 0 + (ele.JobId_Id.endTime-ele.JobId_Id.startTime);
         }else{
-            tempObj[ele.workerId._id] += ele.JobId_Id.endTime-ele.JobId_Id.startTime;    
+            tempObj[ele.workerId._id] += ele.JobId_Id.endTime-ele.JobId_Id.startTime;
         }
     })
     console.log('tempObj')
@@ -1638,7 +1638,7 @@ exports.getImportPayroll = async(req, res) => {
                                     });
                                 }
                             });
-                        }) 
+                        })
                     }
             })
     })
@@ -1659,9 +1659,9 @@ exports.getImportPayroll = async(req, res) => {
     // var tempObj = {};
     // userArrObj.forEach(ele =>{
     //     if(!tempObj[ele.workerId._id]){
-    //         tempObj[ele.workerId._id] = 0 + (ele.JobId_Id.endTime-ele.JobId_Id.startTime);    
+    //         tempObj[ele.workerId._id] = 0 + (ele.JobId_Id.endTime-ele.JobId_Id.startTime);
     //     }else{
-    //         tempObj[ele.workerId._id] += ele.JobId_Id.endTime-ele.JobId_Id.startTime;    
+    //         tempObj[ele.workerId._id] += ele.JobId_Id.endTime-ele.JobId_Id.startTime;
     //     }
     // })
     // console.log('tempObj')

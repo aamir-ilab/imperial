@@ -21,7 +21,7 @@ export class CalendarEditComponent implements OnInit {
   });
 
   constructor(private dialogRef: MatDialogRef<CalendarEditComponent>,
-              @Inject(MAT_DIALOG_DATA) public event: CalendarEvent<any>,
+              @Inject(MAT_DIALOG_DATA) public event: any,
               private fb: FormBuilder,
               private route: Router,
               private authService: AuthService) {

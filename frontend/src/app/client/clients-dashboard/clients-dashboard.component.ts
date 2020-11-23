@@ -15,9 +15,9 @@ import { AuthService } from 'src/app/services/auth.service';
   styleUrls: ['./clients-dashboard.component.scss']
 })
 export class ClientsDashboardComponent implements OnInit {
-  clientJob:any;
-  totalJobs:number;
-  requestTime:number;
+  clientJob: any;
+  totalJobs: number;
+  requestTime: number;
 
   icGroup = icGroup;
   icPageView = icPageView;
@@ -26,23 +26,24 @@ export class ClientsDashboardComponent implements OnInit {
   icMoreVert = icMoreVert;
 
   constructor(private cd: ChangeDetectorRef,
-    private authService:AuthService) { }
+              private authService: AuthService) { }
 
   ngOnInit() {
-    if(!this.authService.clientJob)
+    if (!this.authService.clientJob) {
       this.authService.setClientJob();
+    }
     this.clientJob = this.authService.clientJob;
-    console.log('____________')
-    console.log(this.clientJob)
+    console.log('____________');
+    console.log(this.clientJob);
     // this.totalJobs =  this.clientJob.filter((obj) => obj.statusStr == 'Completed').length;
     this.totalJobs =  this.clientJob.length;
     this.clientJob = this.authService.clientJob;
     this.requestTime = 0;
-    console.log('____________+++=')
-    console.log(this.clientJob)
-    console.log(this.requestTime)
-    console.log(this.totalJobs)
-    this.clientJob.filter((obj) => {this.requestTime += parseInt(obj.endTime) - parseInt(obj.startTime)}).length;
+    console.log('____________+++=');
+    console.log(this.clientJob);
+    console.log(this.requestTime);
+    console.log(this.totalJobs);
+    this.clientJob.filter((obj) => {this.requestTime += parseInt(obj.endTime) - parseInt(obj.startTime); }).length;
     this.clientJob = this.authService.clientJob;
     setTimeout(() => {
       const temp = [

@@ -45,17 +45,18 @@
         <mat-form-field class="flex-auto">
           <mat-label>Department</mat-label>
           <!-- <input formControlName="department" matInput> -->
-          <mat-select formControlName="department" (selectionChange)="changeAccountType($event)" [(ngModel)]="selectedType">
+          <mat-select formControlName="department" (selectionChange)="changeAccountType($event , 1)" [(ngModel)]="selectedType">
             <mat-option value="Housekeeping">Housekeeping</mat-option>
             <mat-option value="Food and Beverage">Food and Beverage</mat-option>
             <mat-option value="Back of House">Back of House</mat-option>
         </mat-select>
           <!-- <mat-icon [icIcon]="icEditLocation" class="mr-3" matPrefix></mat-icon> -->
       </mat-form-field>
-      <!-- <mat-form-field class="sm:ml-6 flex-auto"> -->
-        <!-- <mat-label>Role</mat-label> -->
+
+      <mat-form-field class="sm:ml-6 flex-auto">
+        <mat-label>Role</mat-label>
         <!-- <input formControlName="role" matInput> -->
-        <!-- <mat-select formControlName="role">
+        <mat-select formControlName="role" (selectionChange)="changeAccountType($event , 2)" [(ngModel)]="selectedRole">
           <mat-option *ngIf="selectedType == 'Housekeeping'" value="Linen Porter">Linen Porter</mat-option>
           <mat-option *ngIf="selectedType == 'Housekeeping'" value="Floor Porter">Floor Porter</mat-option>
           <mat-option *ngIf="selectedType == 'Housekeeping'" value="Floor Supervisor">Floor Supervisor</mat-option>
@@ -88,9 +89,9 @@
           <mat-option *ngIf="selectedType == 'Back of House'" value="Chef De Partie">Chef De Partie</mat-option>
           <mat-option *ngIf="selectedType == 'Back of House'" value="Pastry Chef">Pastry Chef</mat-option>
           <mat-option *ngIf="selectedType == 'Back of House'" value="Banqueting Porter">Banqueting Porter</mat-option>
-      </mat-select> -->
+      </mat-select>
         <!-- <mat-icon [icIcon]="icEditLocation" class="mr-3" matPrefix></mat-icon> -->
-      <!-- </mat-form-field> -->
+      </mat-form-field>
     </div>
     <div class="flex flex-col sm:flex-row">
       <mat-form-field class="flex-auto">
@@ -98,14 +99,21 @@
         <input type="date" formControlName="shiftDate" matInput [min]="minDate">
         <mat-icon [icIcon]="icMyLocation" class="mr-3" matPrefix></mat-icon>
       </mat-form-field>
-      <!-- <mat-form-field class="sm:ml-4 flex-auto">
+      <mat-form-field class="sm:ml-3 flex-auto">
         <mat-label>Start Time</mat-label>
-        <input type="number"formControlName="startTime" matInput [(ngModel)]="minStart" min="0"max="23">
+        <input type="number" formControlName="startTime" matInput [(ngModel)]="minStart" min="0" max="23">
+        <!-- <mat-icon [icIcon]="icLocationCity" class="mr-3" matPrefix></mat-icon> -->
       </mat-form-field>
-      <mat-form-field class="sm:ml-4 flex-auto">
+      <mat-form-field class="sm:ml-3 flex-auto">
         <mat-label>End Time</mat-label>
-        <input  type="number"formControlName="endTime" matInput [min]="minStart + 1" [value]="minStart + 1" max="24">
-      </mat-form-field> -->
+        <input  type="number" formControlName="endTime" matInput [min]="minStart + 4" [value]="minStart + 4" max="24">
+        <!-- <mat-icon [icIcon]="icLocationCity" class="mr-3" matPrefix ></mat-icon> -->
+      </mat-form-field>
+      <mat-form-field class="sm:ml-3 flex-auto">
+        <mat-label>Total Staff</mat-label>
+        <input type="number" formControlName="total" matInput min="1">
+        <!-- <mat-icon [icIcon]="icLocationCity" class="mr-3" matPrefix ></mat-icon> -->
+      </mat-form-field>
     </div>
 
     <mat-form-field class="flex-auto">
@@ -127,8 +135,8 @@
   <mat-dialog-actions align="end">
     <button mat-button mat-dialog-close type="button">CANCEL</button>
     <button *ngIf="isUpdateMode()" color="primary" mat-button (click)="openJobs()" type="button">Open Job</button>
-    <button *ngIf="isCreateMode()" color="primary" mat-button type="submit">Create Job</button>
-    <button *ngIf="isUpdateMode()" color="primary" mat-button type="submit">Save Changes</button>
+    <button *ngIf="isCreateMode()" color="primary" mat-button type="submit">CREATE JOB</button>
+    <button *ngIf="isUpdateMode()" color="primary" mat-button type="submit">UPDATE JOB</button>
   </mat-dialog-actions>
 </form>
 

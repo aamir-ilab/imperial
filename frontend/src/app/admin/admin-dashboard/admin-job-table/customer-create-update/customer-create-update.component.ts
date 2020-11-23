@@ -33,6 +33,7 @@ export class CustomerCreateUpdateComponent implements OnInit {
   form: FormGroup;
   mode: 'create' | 'update' = 'create';
   selectedType = 'Housekeeping';
+  selectedRole = 'Linen Porter';
   icMoreVert = icMoreVert;
   icClose = icClose;
 
@@ -47,8 +48,8 @@ export class CustomerCreateUpdateComponent implements OnInit {
   icPhone = icPhone;
   minDate;
   minStart = 0;
-  AllClients:any[];
-  selectedClient ='';
+  AllClients: any[];
+  selectedClient = '';
 
   stateCtrl: FormControl;
   filteredStates$: Observable<CountryState[]>;
@@ -82,32 +83,33 @@ export class CustomerCreateUpdateComponent implements OnInit {
   constructor(@Inject(MAT_DIALOG_DATA) public defaults: any,
               private dialogRef: MatDialogRef<CustomerCreateUpdateComponent>,
               private fb: FormBuilder,
-              private route:Router,
-              private authService:AuthService) {
+              private route: Router,
+              private authService: AuthService) {
   }
   filterStates(name: string) {
     return this.states.filter(state =>
       state.name.toLowerCase().indexOf(name.toLowerCase()) === 0);
   }
   async ngOnInit() {
-    console.log('customer create update')
-    console.log('1')
-    if(!this.authService.AllUser)
+    console.log('customer create update');
+    console.log('1');
+    if (!this.authService.AllUser) {
       await this.authService.getAllUserAuth();
-      this.stateCtrl = new FormControl();
-      this.filteredStates$ = this.stateCtrl.valueChanges.pipe(
+    }
+    this.stateCtrl = new FormControl();
+    this.filteredStates$ = this.stateCtrl.valueChanges.pipe(
         startWith(''),
         map(state => state ? this.filterStates(state) : this.states.slice())
       );
-    console.log('2')
+    console.log('2');
     this.AllClients = this.authService.AllUser;
-    console.log('3')
-    this.AllClients = this.AllClients.filter((obj) => obj.accountType == 'Client');
-    console.log(this.AllClients)
+    console.log('3');
+    this.AllClients = this.AllClients.filter((obj) => obj.accountType === 'Client');
+    console.log(this.AllClients);
     // this.minDate = '2020-08-15';
     this.minDate = formatDate(new Date(), 'yyyy-MM-dd', 'en');
-    console.log('1213123')
-    console.log(this.minDate)
+    console.log('1213123');
+    console.log(this.minDate);
     // this.minDate = formatDate(new Date(), 'YYYY-MM-DD').toString();
     if (this.defaults) {
       this.mode = 'update';
@@ -117,18 +119,18 @@ export class CustomerCreateUpdateComponent implements OnInit {
 
     this.form = this.fb.group({
       id: [CustomerCreateUpdateComponent.id++],
-      _id:[this.defaults._id || ''],
+      _id: [this.defaults._id || ''],
       client: [this.defaults.client || ''],
       department: [this.defaults.department || ''],
-      // role: [this.defaults.role || ''],
+      role: [this.defaults.role || this.selectedRole],
       shiftDate: [this.defaults.shiftDate || new Date()],
       startTime: [this.defaults.startTime || ''],
       endTime: [this.defaults.endTime || ''],
       locationShift: [this.defaults.locationShift || ''],
       purchaseOrderNo: [this.defaults.purchaseOrderNo || ''],
-      additionalInformation:[this.defaults.additionalInformation || ''],
-      status:[this.defaults.status || statusTableLabels[2]],
-      stateCtrl:[this.stateCtrl.value || '']
+      additionalInformation: [this.defaults.additionalInformation || ''],
+      status: [this.defaults.status || statusTableLabels[2]],
+      stateCtrl: [this.stateCtrl.value || '']
     });
     this.selectedClient = this.defaults.client;
   }
@@ -143,12 +145,13 @@ export class CustomerCreateUpdateComponent implements OnInit {
 
   createCustomer() {
     const customer = this.form.value;
-    var tempUser = this.AllClients.filter(obj => {
-      var tempName = obj.firstName + ' ' + obj.lastName;
-      if(tempName == customer.client)
+    const tempUser = this.AllClients.filter(obj => {
+      const tempName = obj.firstName + ' ' + obj.lastName;
+      if (tempName === customer.client) {
         return obj;
+      }
     });
-    customer['clientId']  = tempUser[0]._id;
+    customer.clientId  = tempUser[0]._id;
     // if (!customer.imageSrc) {
     //   customer.imageSrc = 'assets/img/avatars/1.jpg';
     // }
@@ -159,12 +162,13 @@ export class CustomerCreateUpdateComponent implements OnInit {
   updateCustomer() {
     const customer = this.form.value;
     customer.id = this.defaults.id;
-    var tempUser = this.AllClients.filter(obj => {
-      var tempName = obj.firstName + ' ' + obj.lastName;
-      if(tempName == customer.client)
+    const tempUser = this.AllClients.filter(obj => {
+      const tempName = obj.firstName + ' ' + obj.lastName;
+      if (tempName === customer.client) {
         return obj;
+      }
     });
-    customer['clientId']  = tempUser[0]._id;
+    customer.clientId  = tempUser[0]._id;
     this.dialogRef.close(customer);
   }
 
@@ -175,59 +179,65 @@ export class CustomerCreateUpdateComponent implements OnInit {
   isUpdateMode() {
     return this.mode === 'update';
   }
-  changeAccountType(ev){
+  changeAccountType(ev, i){
+    if (i === 1) {
     this.selectedType = ev.value();
+    }
+    else {
+    this.selectedRole = ev.value();
+    }
   }
   changeClient(ev){
     this.selectedClient = ev.value();
   }
   openJobs(){
-    console.log('-----openjobs--------')
-    console.log(this.defaults.client)
-    console.log('------------------')
-    var event :any = this.defaults; 
-    event['title'] = event.client
+    console.log('-----openjobs--------');
+    console.log(this.defaults.client);
+    console.log('------------------');
+    const event: any = this.defaults;
+    event.title = event.client;
     this.authService.currentScrumboard = [{
-      id:event.id, 
-      title:event.client,
-      children:[
+      id: event.id,
+      title: event.client,
+      children: [
         // { id:1, label:'Unassigned Shifts', children:[] },
         // { id:2, label:'Assigned', children:[] },
-        { id:1, label:'In Progress', children:[] },
-        { id:2, label:'Submitted', children:[] },
-        { id:3, label:'Completed', children:[] },
+        { id: 1, label: 'In Progress', children: [] },
+        { id: 2, label: 'Submitted', children: [] },
+        { id: 3, label: 'Completed', children: [] },
       ]
     }];
     this.authService.currentJob = event;
-    console.log('///////////////')
-    console.log(this.authService.currentJob)
-    console.log('///////////////')
-    var arrLabel = ['In Progress', 'Submitted','Completed'];
-    console.log('&&&&')
-    console.log(event)
-    console.log('&&&&')
-    arrLabel.forEach((ele,index) =>{
-      if(ele == event.statusStr)
+    console.log('///////////////');
+    console.log(this.authService.currentJob);
+    console.log('///////////////');
+    const arrLabel = ['In Progress', 'Submitted', 'Completed'];
+    console.log('&&&&');
+    console.log(event);
+    console.log('&&&&');
+    arrLabel.forEach((ele, index) => {
+      if (ele === event.statusStr) {
         this.authService.currentScrumboard[0].children[index].children.push({
             id: event.id,
-            title:event.client,
+            title: event.client,
             client: event.client,
             department: event.department,
             role: event.role,
             shiftDate: event.shiftDate,
             startTime: event.startTime,
             endTime: event.endTime,
-            locationShift:event.locationShift,
+            locationShift: event.locationShift,
             purchaseOrderNo: event.purchaseOrderNo,
-            additionalInformation:event.additionalInformation,
-            statusStr:event.statusStr,
+            additionalInformation: event.additionalInformation,
+            statusStr: event.statusStr,
             fulfilled: event.fulfilled,
-            total:event.total,
-            totalStaff:event.totalStaff,
-            clientId:event.clientId,
-            timesheetId:event.timesheetId
+            total: event.total,
+            totalStaff: event.totalStaff,
+            clientId: event.clientId,
+            timesheetId: event.timesheetId
           });
-    })
+      }
+    });
     this.authService.setCurrentScrumboardLocal(this.authService.currentScrumboard);
     this.route.navigate(['/admin/jobs/scrumboard', event.id]);
     this.dialogRef.close();

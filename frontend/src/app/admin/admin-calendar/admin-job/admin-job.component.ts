@@ -16,8 +16,7 @@ import icAdd from '@iconify/icons-ic/twotone-add';
 import { PopoverService } from '../../../../@vex/components/popover/popover.service';
 import icClose from '@iconify/icons-ic/twotone-close';
 import { FormControl } from '@angular/forms';
-import icStar from '@iconify/icons-ic/twotone-star';
-import icStarBorder from '@iconify/icons-ic/twotone-star-border';
+import icEdit from '@iconify/icons-ic/twotone-edit';
 import { stagger80ms } from '../../../../@vex/animations/stagger.animation';
 import { fadeInUp400ms } from '../../../../@vex/animations/fade-in-up.animation';
 import { AuthService } from 'src/app/services/auth.service';
@@ -35,7 +34,7 @@ export class AdminJobComponent implements OnInit {
 
   static nextId = 100;
   currentScrum = this.authService.currentJob;
-  board$:any;
+  board$: any;
 
   addCardCtrl = new FormControl();
   // addListCtrl = new FormControl();
@@ -46,24 +45,25 @@ export class AdminJobComponent implements OnInit {
   icAttachFile = icAttachFile;
   icAdd = icAdd;
   icClose = icClose;
-  icStar = icStar;
-  icStarBorder = icStarBorder;
+  icEdit = icEdit;
   fulfilled;
   // scrumboardUsers;
 
   constructor(private dialog: MatDialog,
               private route: ActivatedRoute,
               private popover: PopoverService,
-              private authService:AuthService) { 
-    console.log('admin job scrumboard construct')
+              private authService: AuthService) {
+    console.log('admin job scrumboard construct');
 
               }
 
   ngOnInit() {
-    console.log('admin job scrumboard ng on int')
-    if(!this.authService.currentScrumboard)
+    console.log('admin job scrumboard ng on int');
+    if (!this.authService.currentScrumboard){
       this.authService.setCurrentScrumboard();
-    console.log(this.authService.currentScrumboard)
+      this.currentScrum = this.authService.currentScrumboard;
+    }
+    console.log('scrumboard', this.currentScrum);
     this.board$ =  this.route.paramMap.pipe(
       map(paramMap => +paramMap.get('scrumboardId')),
       map(scrumboardId => this.authService.currentScrumboard.find(board => board.id === scrumboardId))
@@ -100,8 +100,8 @@ export class AdminJobComponent implements OnInit {
         event.previousIndex,
         event.currentIndex);
         // alert(event.container.id)
-        this.authService.setStatusJob(event.container.data[0].id,event.container.id).subscribe((res)=>{
-          console.log(res)
+      this.authService.setStatusJob(event.container.data[0].id, event.container.id).subscribe((res) => {
+          console.log(res);
           this.authService.openSnackbar('status has updated successfully');
         });
         // console.log('^&^&^&')

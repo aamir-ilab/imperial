@@ -31,13 +31,13 @@ const colors: any = {
 };
 
 export interface MyCalenderEvent extends CalendarEvent {
-  startTime: number;
-  endTime: number;
-  department: string;
-  role: string;
-  total: number;
-  fulfilled: number;
-  client: object;
+  startTime?: number;
+  endTime?: number;
+  department?: string;
+  role?: string;
+  total?: number;
+  fulfilled?: number;
+  client?: object;
 }
 
 @Component({
@@ -122,7 +122,7 @@ export class AdminCalendarComponent {
         if (ele.statusStr !== 'Pending') {
           this.events.push({
             start: startOfDay(new Date(ele.shiftDate)),
-            title: ele.department + ' ( client: ' + ele.client + ')',
+            title: ele.clientId.companyName + ' — ' + ele.department + ' ( ' + ele.total + '/4 assigned).',
             color: col,
             startTime: ele.startTime,
             endTime: ele.endTime,
@@ -160,21 +160,63 @@ export class AdminCalendarComponent {
     this.handleEvent('Dropped or resized', event);
   }
 
-  handleEvent(action: string, event: CalendarEvent): void {
-    console.log(event);
+  handleEvent(action: string, event: any): void {
+    console.log('jobevent', event.client.id);
+    this.authService.currentScrumboard = [
+      {
+      id: event.client.id,
+      title: event.client.client,
+      children: [
+        // { id:1, label:'Unassigned Shifts', children:[] },
+        // { id:2, label:'Assigned', children:[] },
+        { id: 1, label: 'In Progress', children: [] },
+        { id: 2, label: 'Submitted', children: [] },
+        { id: 3, label: 'Completed', children: [] },
+      ]
+    }];
+    this.authService.currentJob = event;
+    const arrLabel = ['In Progress', 'Submitted', 'Completed'];
+    console.log('&&&&');
+    console.log(event.client);
+    console.log('&&&&');
+    arrLabel.forEach((ele, index) => {
+      if (ele === event.client.statusStr) {
+        this.authService.currentScrumboard[0].children[index].children.push({
+          id: event.client.id,
+          title: event.client.client,
+          client: event.client.client,
+          department: event.client.department,
+          role: event.client.role,
+          shiftDate: event.client.shiftDate,
+          startTime: event.client.startTime,
+          endTime: event.client.endTime,
+          locationShift: event.client.locationShift,
+          purchaseOrderNo: event.client.purchaseOrderNo,
+          additionalInformation: event.client.additionalInformation,
+          statusStr: event.client.statusStr,
+          fulfilled: event.client.fulfilled,
+          total: event.client.total,
+          totalStaff: event.client.totalStaff,
+          clientId: event.client.clientId,
+          timesheetId: event.client.timesheetId
+        });
+      }
+    });
+    this.authService.setCurrentScrumboardLocal(this.authService.currentScrumboard);
+    this.router.navigate(['/admin/jobs/scrumboard', event.client.id]);
     // if(action == 'Clicked')
-    // this.router.navigate(['/admin/jobs/scrumboard']);
-    const dialogRef = this.dialog.open(CalendarEditComponent, {
-      data: event
-    });
+    // this.router.navigate(['/admin/jobs/scrumboard', event.client.id]);
+    // const dialogRef = this.dialog.open(CalendarEditComponent, {
+    //   data: event
+    // });
 
-    dialogRef.afterClosed().subscribe(result => {
-      // if (result) {
-        // event = result;
-        // this.snackbar.open('Updated Event: ' + event.title);
-        this.refresh.next();
-      // }
-    });
+    // dialogRef.afterClosed().subscribe(result => {
+    //   if (result) {
+    //     event = result;
+    //     this.snackbar.open('Updated Event: ' + event.title);
+    //     this.refresh.next();
+    //   }
+    // });
   }
 
   addEvent(): void {

@@ -88,17 +88,17 @@
       </mat-form-field>
       <mat-form-field class="sm:ml-3 flex-auto">
         <mat-label>Start Time</mat-label>
-        <input type="number"formControlName="startTime" matInput [(ngModel)]="minStart" min="0"max="23">
+        <input type="number" formControlName="startTime" matInput [(ngModel)]="minStart" min="0" max="23">
         <!-- <mat-icon [icIcon]="icLocationCity" class="mr-3" matPrefix></mat-icon> -->
       </mat-form-field>
       <mat-form-field class="sm:ml-3 flex-auto">
         <mat-label>End Time</mat-label>
-        <input  type="number"formControlName="endTime" matInput [min]="minStart + 1" [value]="minStart + 1" max="24">
+        <input type="number" formControlName="endTime" matInput [min]="minStart + 4" [value]="minStart + 4" max="24">
         <!-- <mat-icon [icIcon]="icLocationCity" class="mr-3" matPrefix ></mat-icon> -->
       </mat-form-field>
       <mat-form-field class="sm:ml-3 flex-auto">
         <mat-label>Total Staff</mat-label>
-        <input  type="number"formControlName="total" matInput min="1">
+        <input type="number" formControlName="total" matInput min="1">
         <!-- <mat-icon [icIcon]="icLocationCity" class="mr-3" matPrefix ></mat-icon> -->
       </mat-form-field>
     </div>

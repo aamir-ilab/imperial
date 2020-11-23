@@ -25,6 +25,16 @@ const colors: any = {
   }
 };
 
+export interface MyCalenderEvent extends CalendarEvent {
+  startTime?: number;
+  endTime?: number;
+  department?: string;
+  role?: string;
+  total?: number;
+  fulfilled?: number;
+  client?: object;
+}
+
 @Component({
   selector: 'vex-worker-calendar',
   templateUrl: './worker-calendar.component.html',
@@ -45,7 +55,7 @@ export class WorkerCalendarComponent {
 
   modalData: {
     action: string;
-    event: CalendarEvent;
+    event: MyCalenderEvent;
   };
   refresh: Subject<any> = new Subject();
   actions: CalendarEventAction[] = [
@@ -63,7 +73,7 @@ export class WorkerCalendarComponent {
       }
     }
   ];
-  events: CalendarEvent[] ;
+  events: MyCalenderEvent[] ;
   // = [
   //   {
   //     start: subDays(startOfDay(new Date()), 1),

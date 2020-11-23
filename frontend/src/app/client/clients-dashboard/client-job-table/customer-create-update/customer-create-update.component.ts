@@ -50,8 +50,8 @@ export class CustomerCreateUpdateComponent implements OnInit {
   ngOnInit() {
     // this.minDate = '2020-08-15';
     this.minDate = formatDate(new Date(), 'yyyy-MM-dd', 'en');
-    console.log('1213123')
-    console.log(this.minDate)
+    console.log('1213123');
+    console.log(this.minDate);
     // this.minDate = formatDate(new Date(), 'YYYY-MM-DD').toString();
     if (this.defaults) {
       this.mode = 'update';
@@ -61,7 +61,7 @@ export class CustomerCreateUpdateComponent implements OnInit {
 
     this.form = this.fb.group({
       id: [CustomerCreateUpdateComponent.id++],
-      _id:[this.defaults._id || ''],
+      _id: [this.defaults._id || ''],
       client: [this.defaults.client || ''],
       department: [this.defaults.department || this.selectedType],
       role: [this.defaults.role || this.selectedRole],
@@ -70,9 +70,9 @@ export class CustomerCreateUpdateComponent implements OnInit {
       endTime: [this.defaults.endTime || 1],
       locationShift: [this.defaults.locationShift || ''],
       purchaseOrderNo: [this.defaults.purchaseOrderNo || ''],
-      additionalInformation:[this.defaults.additionalInformation || ''],
-      total:[this.defaults.total || 1],
-      status:[this.defaults.status || statusTableLabels[1]]
+      additionalInformation: [this.defaults.additionalInformation || ''],
+      total: [this.defaults.total || 1],
+      status: [this.defaults.status || statusTableLabels[1]]
     });
   }
 
@@ -108,10 +108,12 @@ export class CustomerCreateUpdateComponent implements OnInit {
   isUpdateMode() {
     return this.mode === 'update';
   }
-  changeAccountType(ev,i){
-    if(i == 1)
+  changeAccountType(ev, i){
+    if (i === 1) {
     this.selectedType = ev.value();
-    else
+    }
+    else {
     this.selectedRole = ev.value();
+    }
   }
 }

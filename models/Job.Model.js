@@ -21,5 +21,9 @@ var JobSchema = new mongoose.Schema({
     fulfilled: {type:Number, default: 0},
     total:{type:Number, default: 1},
     totalStaff:{type:String},
-}, { toJSON: { getters: true } });
+    createdAt: {
+      type: Date,
+      default: Date.now
+    }
+}, { toJSON: { getters: true }});
 module.exports = mongoose.model('Job', JobSchema);
