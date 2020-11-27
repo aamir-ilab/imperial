@@ -9,7 +9,7 @@ module.exports = () => {
     app.use(bodyParser.json());
     // for parsing application/xwww-
     app.use(bodyParser.urlencoded({ extended: true }));
-    app.use(express.static(path.join(__dirname, "../public", "client", "demo")));
+    app.use(express.static(path.join(__dirname, "../frontend", "dist", "vex")));
     app.use(cors());
     app.use(passport.initialize());
     app.use(passport.session());
@@ -26,9 +26,9 @@ module.exports = () => {
             next();
         });
         app.get('*',(req,res)=>{
-            res.sendFile(path.join(__dirname, '../client', 'demo', 'index.html'));
+            res.sendFile(path.join(__dirname, '../dist', 'vex', 'index.html'));
             // console.log
         })
-    } 
+    }
     return app;
 };

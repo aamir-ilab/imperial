@@ -86,9 +86,9 @@ exports.register = (req, res) => {
                         res.status(200).json(client)
                             // res.status(200).json("Registered successfully");
                     }
-                }); 
+                });
                 }
-               
+
             })
 
         }
@@ -114,7 +114,7 @@ exports.sendmsg= (req, res) => {
                         console.log(client);
                         res.status(200).json(client)
                     }
-                }); 
+                });
             })
 
         }
@@ -122,7 +122,7 @@ exports.sendmsg= (req, res) => {
 };
 // exports.google = (req,res) =>{
 //     console.log('1');
-//     passport.authenticate('google', { scope: 
+//     passport.authenticate('google', { scope:
 //         [ 'https://www.googleapis.com/auth/plus.login',
 //         , 'https://www.googleapis.com/auth/plus.profile.emails.read' ] })
 // };
@@ -216,15 +216,20 @@ exports.login = (req, res) => {
     // console.log(req)
     console.log('login2');
     passport.authenticate("user", (err, client, info) => {
-        console.log(client);
+        console.log('client',client);
         let token;
         if (err) {
             console.log('err');
             return res.status(200).json(false);
         }
         if (client) {
-            console.log('client');
-            // token = client.generateJwt();
+            token = jwt.sign({
+              "user": {
+              email: client.emailAddress,
+              // password: client.hash,
+              accountType: client.accountType
+            }}, 'secret');
+            client.accessToken = token;
             res.status(200).json(client);
         } else {
             console.log('login3');
@@ -242,23 +247,23 @@ exports.login = (req, res) => {
 //                 infoArr.push('Failed : ' + index + 'th is existed email')
 //             }else{
 //                 const user = new Client();
-//                 if(element[' fullname '])  
+//                 if(element[' fullname '])
 //                 user.fullname = element[' fullname '];
-//                 if(element[' email '])  
+//                 if(element[' email '])
 //                     user.email = element[' email '];
-//                 if(element[' phone '])  
+//                 if(element[' phone '])
 //                     user.phone = element[' phone '];
-//                 if(element[' clientLocation '])  
+//                 if(element[' clientLocation '])
 //                     user.clientLocation = element[' clientLocation '];
-//                 if(element[' weddingDate '])  
+//                 if(element[' weddingDate '])
 //                     user.weddingDate = element[' weddingDate '];
-//                 if(element[' weddingCity '])  
+//                 if(element[' weddingCity '])
 //                     user.weddingCity = element[' weddingCity '];
-//                 if(element[' brideName '])  
+//                 if(element[' brideName '])
 //                     user.brideName = element[' brideName '];
-//                 if(element[' groomName '])  
+//                 if(element[' groomName '])
 //                     user.groomName = element[' groomName '];
-//                 if(element[' position '])  
+//                 if(element[' position '])
 //                     user.position = element[' position '];
 //                 user.setPassword('123456');
 //                 user.save((err) => {
@@ -479,12 +484,12 @@ exports.removeUser = (req, res) =>{
                                 });
                         }
                     });
-    
+
                 })
             }
-            
+
         }
-    }); 
+    });
 }
 exports.findByIdNum = (req, res) => {
     User.findOne({ id: req.body.id }, function(err, client) {
@@ -517,34 +522,34 @@ exports.findById = (req, res) => {
     }
 }
 exports.getAll = (req, res) => {
-        User.find({}, function(err, client) {
-            if (err) {
-                console.log(err);
-            } else {
-                res.json(client);
-            }
-        })
-    }
-    exports.getAllType = (req, res) => {
-        User.find({accountType: req.body.accountType}, function(err, client) {
-            if (err) {
-                console.log(err);
-            } else {
-                res.json(client);
-            }
-        })
-    }
-    exports.getAllSubType = (req, res) => {
-        User.find({accountType: 'Client',parentId: req.body.clientId }, function(err, client) {
-            if (err) {
-                console.log(err);
-            } else {
-                res.json(client);
-            }
-        })
-    }
-    
-    // exports.updateClientVendor = (req, res) => {
+  User.find({}, function(err, client) {
+      if (err) {
+          console.log(err);
+      } else {
+          res.json(client);
+      }
+  })
+}
+exports.getAllType = (req, res) => {
+    User.find({accountType: req.body.accountType}, function(err, client) {
+        if (err) {
+            console.log(err);
+        } else {
+            res.json(client);
+        }
+    })
+}
+exports.getAllSubType = (req, res) => {
+    User.find({accountType: 'Client',parentId: req.body.clientId }, function(err, client) {
+        if (err) {
+            console.log(err);
+        } else {
+            res.json(client);
+        }
+    })
+}
+
+// exports.updateClientVendor = (req, res) => {
     //     // var role = req.type;
     //     // var clientId = req.clientId;
     //     // if (role == 0){
@@ -643,7 +648,7 @@ exports.emailverify = (req, res) => {
             },
             process.env.JWT_SECRET);
          }
-        
+
         let HelperOptions = {
             from: 'Verify Notification',
             to: req.body.email,
@@ -653,13 +658,13 @@ exports.emailverify = (req, res) => {
             <meta name="viewport" content="width=device-width">
             <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
             <style>
-              
+
               img {
                 border: none;
                 -ms-interpolation-mode: bicubic;
-                max-width: 100%; 
+                max-width: 100%;
               }
-        
+
               body {
                 background-color: #f6f6f6;
                 font-family: sans-serif;
@@ -669,9 +674,9 @@ exports.emailverify = (req, res) => {
                 margin: 0;
                 padding: 0;
                 -ms-text-size-adjust: 100%;
-                -webkit-text-size-adjust: 100%; 
+                -webkit-text-size-adjust: 100%;
               }
-        
+
               table {
                 border-collapse: separate;
                 mso-table-lspace: 0pt;
@@ -680,51 +685,51 @@ exports.emailverify = (req, res) => {
                 table td {
                   font-family: sans-serif;
                   font-size: 14px;
-                  vertical-align: top; 
+                  vertical-align: top;
               }
-        
+
               .body {
                 background-color: #f6f6f6;
-                width: 100%; 
+                width: 100%;
               }
-        
+
               .container {
                 display: block;
                 margin: 0 auto !important;
                 /* makes it centered */
                 max-width: 580px;
                 padding: 10px;
-                width: 580px; 
+                width: 580px;
               }
-        
+
               .content {
                 box-sizing: border-box;
                 display: block;
                 margin: 0 auto;
                 max-width: 580px;
-                padding: 10px; 
+                padding: 10px;
               }
               .main {
                 background: #ffffff;
                 border-radius: 3px;
-                width: 100%; 
+                width: 100%;
               }
-        
+
               .wrapper {
                 box-sizing: border-box;
-                padding: 20px; 
+                padding: 20px;
               }
-        
+
               .content-block {
                 padding-bottom: 10px;
                 padding-top: 10px;
               }
-        
+
               .footer {
                 clear: both;
                 margin-top: 10px;
                 text-align: center;
-                width: 100%; 
+                width: 100%;
               }
                 .footer td,
                 .footer p,
@@ -732,7 +737,7 @@ exports.emailverify = (req, res) => {
                 .footer a {
                   color: #999999;
                   font-size: 12px;
-                  text-align: center; 
+                  text-align: center;
               }
               h1,
               h2,
@@ -743,16 +748,16 @@ exports.emailverify = (req, res) => {
                 font-weight: 400;
                 line-height: 1.4;
                 margin: 0;
-                margin-bottom: 30px; 
+                margin-bottom: 30px;
               }
-        
+
               h1 {
                 font-size: 35px;
                 font-weight: 300;
                 text-align: center;
-                text-transform: capitalize; 
+                text-transform: capitalize;
               }
-        
+
               p,
               ul,
               ol {
@@ -760,18 +765,18 @@ exports.emailverify = (req, res) => {
                 font-size: 14px;
                 font-weight: normal;
                 margin: 0;
-                margin-bottom: 15px; 
+                margin-bottom: 15px;
               }
                 p li,
                 ul li,
                 ol li {
                   list-style-position: inside;
-                  margin-left: 5px; 
+                  margin-left: 5px;
               }
-        
+
               a {
                 color: #3498db;
-                text-decoration: underline; 
+                text-decoration: underline;
               }
               .btn {
                 box-sizing: border-box;
@@ -779,12 +784,12 @@ exports.emailverify = (req, res) => {
                 .btn > tbody > tr > td {
                   padding-bottom: 15px; }
                 .btn table {
-                  width: auto; 
+                  width: auto;
               }
                 .btn table td {
                   background-color: #ffffff;
                   border-radius: 5px;
-                  text-align: center; 
+                  text-align: center;
               }
                 .btn a {
                   background-color: #ffffff;
@@ -799,50 +804,50 @@ exports.emailverify = (req, res) => {
                   margin: 0;
                   padding: 12px 25px;
                   text-decoration: none;
-                  text-transform: capitalize; 
+                  text-transform: capitalize;
               }
-        
+
               .btn-primary table td {
-                background-color: #3498db; 
+                background-color: #3498db;
               }
-        
+
               .btn-primary a {
                 background-color: #3498db;
                 border-color: #3498db;
-                color: #ffffff; 
+                color: #ffffff;
               }
               .last {
-                margin-bottom: 0; 
+                margin-bottom: 0;
               }
-        
+
               .first {
-                margin-top: 0; 
+                margin-top: 0;
               }
-        
+
               .align-center {
-                text-align: center; 
+                text-align: center;
               }
-        
+
               .align-right {
-                text-align: right; 
+                text-align: right;
               }
-        
+
               .align-left {
-                text-align: left; 
+                text-align: left;
               }
-        
+
               .clear {
-                clear: both; 
+                clear: both;
               }
-        
+
               .mt0 {
-                margin-top: 0; 
+                margin-top: 0;
               }
-        
+
               .mb0 {
-                margin-bottom: 0; 
+                margin-bottom: 0;
               }
-        
+
               .preheader {
                 color: transparent;
                 display: none;
@@ -853,22 +858,22 @@ exports.emailverify = (req, res) => {
                 overflow: hidden;
                 mso-hide: all;
                 visibility: hidden;
-                width: 0; 
+                width: 0;
               }
-        
+
               .powered-by a {
-                text-decoration: none; 
+                text-decoration: none;
               }
-        
+
               hr {
                 border: 0;
                 border-bottom: 1px solid #f6f6f6;
-                margin: 20px 0; 
+                margin: 20px 0;
               }
               @media only screen and (max-width: 620px) {
                 table[class=body] h1 {
                   font-size: 28px !important;
-                  margin-bottom: 10px !important; 
+                  margin-bottom: 10px !important;
                 }
                 table[class=body] p,
                 table[class=body] ul,
@@ -876,39 +881,39 @@ exports.emailverify = (req, res) => {
                 table[class=body] td,
                 table[class=body] span,
                 table[class=body] a {
-                  font-size: 16px !important; 
+                  font-size: 16px !important;
                 }
                 table[class=body] .wrapper,
                 table[class=body] .article {
-                  padding: 10px !important; 
+                  padding: 10px !important;
                 }
                 table[class=body] .content {
-                  padding: 0 !important; 
+                  padding: 0 !important;
                 }
                 table[class=body] .container {
                   padding: 0 !important;
-                  width: 100% !important; 
+                  width: 100% !important;
                 }
                 table[class=body] .main {
                   border-left-width: 0 !important;
                   border-radius: 0 !important;
-                  border-right-width: 0 !important; 
+                  border-right-width: 0 !important;
                 }
                 table[class=body] .btn table {
-                  width: 100% !important; 
+                  width: 100% !important;
                 }
                 table[class=body] .btn a {
-                  width: 100% !important; 
+                  width: 100% !important;
                 }
                 table[class=body] .img-responsive {
                   height: auto !important;
                   max-width: 100% !important;
-                  width: auto !important; 
+                  width: auto !important;
                 }
               }
               @media all {
                 .ExternalClass {
-                  width: 100%; 
+                  width: 100%;
                 }
                 .ExternalClass,
                 .ExternalClass p,
@@ -916,7 +921,7 @@ exports.emailverify = (req, res) => {
                 .ExternalClass font,
                 .ExternalClass td,
                 .ExternalClass div {
-                  line-height: 100%; 
+                  line-height: 100%;
                 }
                 .apple-link a {
                   color: inherit !important;
@@ -924,7 +929,7 @@ exports.emailverify = (req, res) => {
                   font-size: inherit !important;
                   font-weight: inherit !important;
                   line-height: inherit !important;
-                  text-decoration: none !important; 
+                  text-decoration: none !important;
                 }
                 #MessageViewBody a {
                   color: inherit;
@@ -935,14 +940,14 @@ exports.emailverify = (req, res) => {
                   line-height: inherit;
                 }
                 .btn-primary table td:hover {
-                  background-color: #34495e !important; 
+                  background-color: #34495e !important;
                 }
                 .btn-primary a:hover {
                   background-color: #34495e !important;
-                  border-color: #34495e !important; 
-                } 
+                  border-color: #34495e !important;
+                }
               }
-        
+
             </style>
           </head>
           <body class="">
@@ -985,11 +990,11 @@ exports.emailverify = (req, res) => {
                           </tbody></table>
                         </td>
                       </tr>
-        
+
                     <!-- END MAIN CONTENT AREA -->
                     </tbody></table>
                     <!-- END CENTERED WHITE CONTAINER -->
-        
+
                     <!-- START FOOTER -->
                     <div class="footer">
                       <table role="presentation" border="0" cellpadding="0" cellspacing="0">
@@ -1002,7 +1007,7 @@ exports.emailverify = (req, res) => {
                       </tbody></table>
                     </div>
                     <!-- END FOOTER -->
-        
+
                   </div>
                 </td>
                 <td>&nbsp;</td>

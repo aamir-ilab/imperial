@@ -10,11 +10,11 @@ module.exports = () => {
         usernameField: 'emailAddress',
         passwordField: 'hash'
     }, (username, password, done) => {
-        console.log('dddd');
-        // console.log('hash' + username);     
+        // console.log('dddd');
+        // console.log('hash' + username);
         User.findOne({ 'emailAddress': username }, (err, client) => {
-            console.log(err)
-            console.log(password)
+            // console.log('err',err)
+            // console.log('password', password)
             if (err) {
                 return done(err);
             }

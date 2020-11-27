@@ -28,11 +28,12 @@ export class ClientsDashboardComponent implements OnInit {
   constructor(private cd: ChangeDetectorRef,
               private authService: AuthService) { }
 
-  ngOnInit() {
-    if (!this.authService.clientJob) {
-      this.authService.setClientJob();
-    }
-    this.clientJob = this.authService.clientJob;
+  async ngOnInit() {
+    // if (!this.authService.clientJob) {
+    //   this.authService.setClientJob();
+    // }
+    // this.clientJob = this.authService.clientJob;
+    await this.authService.getAuthClientJob();
     console.log('____________');
     console.log(this.clientJob);
     // this.totalJobs =  this.clientJob.filter((obj) => obj.statusStr == 'Completed').length;

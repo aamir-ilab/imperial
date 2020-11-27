@@ -481,6 +481,7 @@ exports.findById = (req, res) => {
         })
     }
     exports.getAllJob = (req, res) => {
+      console.log('---req---', req.user)
         // Job.find({}).sort({ 'shiftDate': -1 }).populate(['clientId','timesheetId']).exec(function(err, client) {
         Job.find({}).sort({ 'createdAt': -1 }).populate({
             path: 'clientId',

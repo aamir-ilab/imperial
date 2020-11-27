@@ -5,6 +5,8 @@
 # compiled output
 /frontend/dist
 /frontend/tmp
+/public/client/demo
 
 # IDEs and editors
 /.idea
+

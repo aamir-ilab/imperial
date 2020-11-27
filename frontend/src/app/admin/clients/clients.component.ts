@@ -102,7 +102,7 @@ export class ClientsComponent implements OnInit, AfterViewInit {
   @ViewChild(MatSort, { static: true }) sort: MatSort;
 
   constructor(private dialog: MatDialog,
-    private authService:AuthService) {
+              private authService: AuthService) {
   }
 
   get visibleColumns() {
@@ -114,13 +114,12 @@ export class ClientsComponent implements OnInit, AfterViewInit {
    * We are simulating this request here.
    */
   getData() {
-    this.authService.getTypeUsers('Client').subscribe((clients)=>{
-      of(clients.map(client =>new Client(client))).subscribe(clientes =>{
-        console.log('123213123')  
-        console.log(clientes)  
-        this.subject$.next(clientes)
+    this.authService.getTypeUsers('Client').subscribe((clients) => {
+      of(clients.map(client => new Client(client))).subscribe(clientes => {
+        console.log('--clientsComp--', clientes);
+        this.subject$.next(clientes);
       });
-    })
+    });
     // return of(aioTableData.map(client => new Client(client)));
   }
 
@@ -156,10 +155,10 @@ export class ClientsComponent implements OnInit, AfterViewInit {
          * Here we are updating our local array.
          * You would probably make an HTTP request here.
          */
-        this.authService.register(client, 'Client').subscribe((res)=>{
-          console.log('new created client')
+        this.authService.register(client, 'Client').subscribe((res) => {
+          console.log('new created client');
           this.authService.openSnackbar('New Client Added!');
-        })
+        });
         this.clients.unshift(new Client(client));
         this.subject$.next(this.clients);
       }
@@ -178,11 +177,11 @@ export class ClientsComponent implements OnInit, AfterViewInit {
          * Here we are updating our local array.
          * You would probably make an HTTP request here.
          */
-        console.log('********')
-        console.log(updatedClient)
-        this.authService.updateUser(updatedClient).subscribe((res =>{
-            this.authService.openSnackbar('Updated Successfully!')
-        }))
+        console.log('********');
+        console.log(updatedClient);
+        this.authService.updateUser(updatedClient).subscribe((res => {
+            this.authService.openSnackbar('Updated Successfully!');
+        }));
         const index = this.clients.findIndex((existingClient) => existingClient.id === updatedClient.id);
         this.clients[index] = new Client(updatedClient);
         this.subject$.next(this.clients);
@@ -195,12 +194,12 @@ export class ClientsComponent implements OnInit, AfterViewInit {
      * Here we are updating our local array.
      * You would probably make an HTTP request here.
      */
-      this.authService.deleteUser(client,'Client').subscribe((res =>{
-      this.authService.openSnackbar('Removed Successfully!')
-  }))
-    this.clients.splice(this.clients.findIndex((existingClient) => existingClient.id === client.id), 1);
-    this.selection.deselect(client);
-    this.subject$.next(this.clients);
+      this.authService.deleteUser(client, 'Client').subscribe((res => {
+      this.authService.openSnackbar('Removed Successfully!');
+  }));
+      this.clients.splice(this.clients.findIndex((existingClient) => existingClient.id === client.id), 1);
+      this.selection.deselect(client);
+      this.subject$.next(this.clients);
   }
 
   deleteClients(clients: Client[]) {
@@ -208,11 +207,11 @@ export class ClientsComponent implements OnInit, AfterViewInit {
      * Here we are updating our local array.
      * You would probably make an HTTP request here.
      */
-    clients.forEach(c =>{
-      this.authService.deleteUser(c,'Client').subscribe((res) =>{
+    clients.forEach(c => {
+      this.authService.deleteUser(c, 'Client').subscribe((res) => {
         console.log(res);
         // this.authService.openSnackbar('Removed Successfully!')
-    })});
+    }); });
         // this.authService.openSnackbar('Removed Successfully!')
 
     clients.forEach(c => this.deleteClient(c));

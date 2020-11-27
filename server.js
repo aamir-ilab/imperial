@@ -6,8 +6,7 @@ var dotenv = require('dotenv'),
     // Passport_vendor = require('./config/passport_vendor');
 
 
-
-dotenv.config();    
+dotenv.config();
 var mongo = MongoDB();
 var mongoose = Mongoose();
 var server = Express();

@@ -30,7 +30,7 @@ export class LoginComponent implements OnInit {
   constructor(private router: Router,
               private fb: FormBuilder,
               private cd: ChangeDetectorRef,
-              private authService:AuthService,
+              private authService: AuthService,
               private snackbar: MatSnackBar
   ) {}
 
@@ -44,80 +44,83 @@ export class LoginComponent implements OnInit {
 
    async send() {
     this.loading = true;
-       await this.authService.getAllUserAuth();
-      await this.authService.getAllJobAuth();
-    console.log('---- send -----')
+    // await this.authService.getAllUserAuth();
+    // await this.authService.getAllJobAuth();
+    console.log('---- send -----');
     // await this.authService.getAll();
-    const adminUser = this.authService.AllUser.filter(ele => ele.emailAddress == 'admin@admin.com');
-    localStorage.setItem('adminUser',JSON.stringify(adminUser[0]));
+    // const adminUser = this.authService.AllUser.filter(ele => ele.emailAddress === 'admin@admin.com');
+    // localStorage.setItem('adminUser', JSON.stringify(adminUser[0]));
     const controls = this.form.controls;
-    
-    if(this.form.invalid){
+
+    if (this.form.invalid){
       Object.keys(controls).forEach(controlName =>
           controls[controlName].markAsTouched());
-        return;
+      return;
     }
-    console.log('1')
-    this.authService.login(controls.emailAddress.value, controls.hash.value).subscribe(user =>{
-        if(user){
-          console.log('log')
-          var txt = user['accountType'];
-          console.log(txt)
-          console.log(user)
+    console.log('1');
+    this.authService.login(controls.emailAddress.value, controls.hash.value).subscribe(user => {
+        if (user){
+          const txt = user.accountType;
           localStorage.setItem('loggedIn', txt);
           this.authService.loggedInType = txt;
           this.authService.currenctUser = user;
-          localStorage.setItem('userInfo',JSON.stringify(user));
-          // this.authService.getAllJobAuth();
-          console.log("7 1_JOB 7")
-          
-          if(user['accountType'] == 'Client'){
-            this.authService.getClientJob(user['_id']).subscribe((res)=>{
-              this.authService.setClientJobLocal(res);
-              console.log('cccc')
-              console.log(res)
-              console.log(this.authService.clientJob)
-              if(user['clientType'] == 'User' || user['clientType'] == 'Admin')
-              this.authService.getParent(user['parentId']).subscribe((res1)=>{
-                this.authService.setCurrentParentLocal(res1);
-                console.log('cccc')
-                console.log(res1)
-                console.log(this.authService.currentParent)
-                this.snackbar.open('Logged in Successfully', 'Cancel', {
-                  duration: 10000
-                });
-               this.router.navigate(['/client']);
+          localStorage.setItem('userInfo', JSON.stringify(user));
+          if (user.accountType === 'Client'){
+            // this.authService.getClientJob(user._id).subscribe((res) => {
+            //   this.authService.setClientJobLocal(res);
+            //   console.log('cccc');
+            //   console.log(res);
+            //   console.log(this.authService.clientJob);
+            //   if (user.clientType === 'User' || user.clientType === 'Admin') {
+            //     this.authService.getParent(user['parentId']).subscribe((res1) => {
+            //       this.authService.setCurrentParentLocal(res1);
+            //       console.log('cccc');
+            //       console.log(res1);
+            //       console.log(this.authService.currentParent);
+            //       this.snackbar.open('Logged in Successfully', 'Cancel', {
+            //         duration: 10000
+            //       });
+            //       this.router.navigate(['/client']);
 
-              });
-              else{
-                this.snackbar.open('Logged in Successfully', 'Cancel', {
-                  duration: 10000
-                });
-               this.router.navigate(['/client']);
-              }
+            //     });
+            //   }
+            //   else{
+            //     this.snackbar.open('Logged in Successfully', 'Cancel', {
+            //       duration: 10000
+            //     });
+            //     this.router.navigate(['/client']);
+            //   }
+            // });
+            this.snackbar.open('Logged in Successfully', 'Cancel', {
+              duration: 10000
             });
+            this.router.navigate(['/client']);
           }
-          else if(user['accountType'] == 'Worker'){
-              this.authService.getWorkerJob(user['_id']).subscribe((res2)=>{
+          else if (user.accountType === 'Worker'){
+              this.authService.getWorkerJob(user._id).subscribe((res2) => {
                 this.authService.setCurrentWorkerJobLocal(res2);
-                console.log('ddd')
-                console.log(res2)
-                console.log(this.authService.workerJobInfo)
+                console.log('ddd');
+                console.log(res2);
+                console.log(this.authService.workerJobInfo);
                 this.snackbar.open('Logged in Successfully', 'Cancel', {
                   duration: 10000
                 });
                 this.router.navigate(['/']);
               });
-            }
-          else
-             this.router.navigate(['/admin']);
+          }
+          else {
+            this.snackbar.open('Logged in Successfully', 'Cancel', {
+              duration: 10000
+            });
+            this.router.navigate(['/admin']);
+          }
         }else{
           this.snackbar.open('You have to Input Email & Password correctly ', 'Cancel', {
             duration: 10000
           });
           this.form.reset();
         }
-      }, (err) =>{
+      }, (err) => {
         this.loading = false;
         this.snackbar.open('You have to Input Email & Password correctly ', 'Cancel', {
           duration: 10000
@@ -125,7 +128,7 @@ export class LoginComponent implements OnInit {
         this.form.reset();
       });
     // this.router.navigate(['/']);
-    
+
   }
 
   toggleVisibility() {

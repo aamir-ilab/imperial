@@ -6,7 +6,7 @@ export const environment = {
   production: false,
   authTokenKey: 'authce9d77b308c149d5992a80073637e4d5',
   baseUrl: 'http://imperial-recruitment.herokuapp.com/',
-  authURL: 'https://imperial-recruitment.herokuapp.com/',
+  authURL: 'http://stagings.tk:5500/',
    firebaseConfig : {
     apiKey: "AIzaSyBn3Qgdeotyhwqvi3D_PzZBhXspA0HG1-s",
     authDomain: "crud-1054b.firebaseapp.com",

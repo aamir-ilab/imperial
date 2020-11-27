@@ -67,7 +67,7 @@ export class ClientJobTableComponent implements OnInit {
     { label: 'Shift Date', property: 'shiftDateStr', type: 'text', visible: true },
     { label: 'Start Time', property: 'startTime', type: 'text', visible: true },
     { label: 'End Time', property: 'endTime', type: 'text', visible: true },
-    { label: 'Total Staff', property:'totalStaff', type:'text', visible:true},
+    { label: 'Total Staff', property: 'totalStaff', type: 'text', visible: true},
     { label: 'Status', property: 'status', type: 'button', visible: true },
     { label: 'ID', property: '_id', type: 'text', visible: false },
     // { label: 'Actions', property: 'actions', type: 'button', visible: true }
@@ -95,34 +95,38 @@ export class ClientJobTableComponent implements OnInit {
   @ViewChild(MatSort, { static: true }) sort: MatSort;
 
   constructor(private dialog: MatDialog,
-    private authService:AuthService) {
-      if(!this.authService.currenctUser)
+              private authService: AuthService) {
+      if (!this.authService.currenctUser) {
        this.authService.setCurrentUser();
+      }
       this.currentUser = this.authService.currenctUser;
   }
 
   get visibleColumns() {
     return this.columns.filter(column => column.visible).map(column => column.property);
   }
-  
+
   /**
    * Example on how to get data and pass it to the table - usually you would want a dedicated service with a HTTP request for this
    * We are simulating this request here.
    */
   getData() {
-    this.authService.getTypeJobs().subscribe((clients)=>{
-      of(clients.map(client =>new Job(client))).subscribe(clientes =>{
-        console.log('123213123')  
-        console.log(clientes)  
-        this.subject$.next(clientes)
+    const current = JSON.parse(localStorage.getItem('userInfo'));
+    console.log('--current client--', current);
+    this.authService.getClientJob(current).subscribe((clients) => {
+      of(clients.map(client => new Job(client))).subscribe(clientes => {
+        console.log('123213123');
+        console.log(clientes);
+        this.subject$.next(clientes);
       });
-    })
+    });
     // return of(statusTableData.map(customer => new Job(customer)));
   }
 
   ngOnInit() {
-    if(!this.authService.currenctUser)
+    if (!this.authService.currenctUser) {
     this.authService.setCurrentUser();
+    }
     this.currentUser = this.authService.currenctUser;
     this.getData();
 
@@ -155,25 +159,25 @@ export class ClientJobTableComponent implements OnInit {
          * Here we are updating our local array.
          * You would probably make an HTTP request here.
          */
-        this.authService.addJob(customer, this.authService.currenctUser._id).subscribe((res)=>{
-          console.log('1')
+        this.authService.addJob(customer, this.authService.currenctUser._id).subscribe((res) => {
+          console.log('1');
           this.authService.openSnackbar('New Job Added!');
-          var tempJob = new Job(customer);
-          var obj = {
-            subject : "New job request from " + this.currentUser['firstName'] + ' '+ this.currentUser['lastName'],
-            name : this.currentUser['firstName'] + ' '+ this.currentUser['lastName'],
+          const tempJob = new Job(customer);
+          const obj = {
+            subject : 'New job request from ' + this.currentUser.firstName + ' ' + this.currentUser.lastName,
+            name : this.currentUser.firstName + ' ' + this.currentUser.lastName,
             email: 'fujingforward@gmail.com',
-            content1: `${this.currentUser['firstName']} ${this.currentUser['lastName']} has posted a new job on the portal for ${tempJob.shiftDateStr} looking for ${tempJob.total}workers.`,
+            content1: `${this.currentUser.firstName} ${this.currentUser.lastName} has posted a new job on the portal for ${tempJob.shiftDateStr} looking for ${tempJob.total}workers.`,
             content2: `You can review the applications by logging into the Portal.`,
-            btn:'LOGIN TO PORTAL',
-            btn_link:'http://imperial-recruitment.herokuapp.com/#/login',
-            link:''
+            btn: 'LOGIN TO PORTAL',
+            btn_link: 'http://imperial-recruitment.herokuapp.com/#/login',
+            link: ''
           };
-          this.authService.sendEmail(obj).subscribe((sendemail_res)=>{
-              console.log('crate job email')
-          })
-        })
-        customer['']
+          this.authService.sendEmail(obj).subscribe((sendemail_res) => {
+              console.log('crate job email');
+          });
+        });
+        customer[''];
         this.customers.unshift(new Job(customer));
         this.subject$.next(this.customers);
       }

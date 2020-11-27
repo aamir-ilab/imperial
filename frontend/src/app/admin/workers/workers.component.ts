@@ -68,7 +68,7 @@ export class WorkersComponent implements OnInit, AfterViewInit {
     { label: 'Worker ID', property: 'workerId', type: 'text', visible: true, cssClasses: ['font-medium'] },
     { label: 'Worker Email Address', property: 'emailAddress', type: 'text', visible: true },
     { label: 'Phone Number', property: 'mobileNumber', type: 'text', visible: true },
-    { label: 'Date Joined', property: 'createdDateStr', type: 'text', visible: true },
+    { label: 'Date Joined', property: 'createdDate', type: 'text', visible: true },
     // { label: 'Labels', property: 'labels', type: 'button', visible: true },
     { label: 'Actions', property: 'actions', type: 'button', visible: true },
     { label: 'ID', property: '_id', type: 'text', visible: false }
@@ -96,8 +96,8 @@ export class WorkersComponent implements OnInit, AfterViewInit {
   @ViewChild(MatSort, { static: true }) sort: MatSort;
 
   constructor(private dialog: MatDialog,
-    private authService:AuthService,
-    private router:Router) {
+              private authService: AuthService,
+              private router: Router) {
   }
 
   get visibleColumns() {
@@ -109,11 +109,11 @@ export class WorkersComponent implements OnInit, AfterViewInit {
    * We are simulating this request here.
    */
   getData() {
-    this.authService.getTypeUsers('Worker').subscribe((clients)=>{
-      of(clients.map(client =>new Worker(client))).subscribe(clientes =>{
-        this.subject$.next(clientes)
+    this.authService.getTypeUsers('Worker').subscribe((clients) => {
+      of(clients.map(client => new Worker(client))).subscribe(clientes => {
+        this.subject$.next(clientes);
       });
-    })
+    });
     // return of(aioTableData.map(customer => new Customer(customer)));
   }
 
@@ -140,7 +140,7 @@ export class WorkersComponent implements OnInit, AfterViewInit {
   }
 
   createCustomer() {
-    this.dialog.open(CustomerCreateUpdateComponent,{width:'700px'}).afterClosed().subscribe((customer: Worker) => {
+    this.dialog.open(CustomerCreateUpdateComponent, {width: '700px'}).afterClosed().subscribe((customer: Worker) => {
       /**
        * Customer is the updated customer (if the user pressed Save - otherwise it's null)
        */
@@ -149,10 +149,10 @@ export class WorkersComponent implements OnInit, AfterViewInit {
          * Here we are updating our local array.
          * You would probably make an HTTP request here.
          */
-        this.authService.register(customer, 'Worker').subscribe((res)=>{
-          console.log('new created client')
+        this.authService.register(customer, 'Worker').subscribe((res) => {
+          console.log('new created client');
           this.authService.openSnackbar('New Worker Added!');
-        })
+        });
         this.customers.unshift(new Worker(customer));
         this.subject$.next(this.customers);
       }
@@ -175,7 +175,7 @@ export class WorkersComponent implements OnInit, AfterViewInit {
     //   }
     // });
     localStorage.setItem('editCustomer', JSON.stringify(customer));
-    this.router.navigate(['/admin/workers/edit'])
+    this.router.navigate(['/admin/workers/edit']);
   }
 
   deleteCustomer(customer: Worker) {
@@ -183,9 +183,9 @@ export class WorkersComponent implements OnInit, AfterViewInit {
      * Here we are updating our local array.
      * You would probably make an HTTP request here.
      */
-    this.authService.deleteUser(customer,'Worker').subscribe((res =>{
-      this.authService.openSnackbar('Removed Successfully!')
-  }))
+    this.authService.deleteUser(customer, 'Worker').subscribe((res => {
+      this.authService.openSnackbar('Removed Successfully!');
+  }));
     this.customers.splice(this.customers.findIndex((existingCustomer) => existingCustomer.id === customer.id), 1);
     this.selection.deselect(customer);
     this.subject$.next(this.customers);
@@ -196,11 +196,11 @@ export class WorkersComponent implements OnInit, AfterViewInit {
      * Here we are updating our local array.
      * You would probably make an HTTP request here.
      */
-    customers.forEach(c =>{
-      this.authService.deleteUser(c,'Worker').subscribe((res) =>{
+    customers.forEach(c => {
+      this.authService.deleteUser(c, 'Worker').subscribe((res) => {
         console.log(res);
         // this.authService.openSnackbar('Removed Successfully!')
-    })});
+    });});
     customers.forEach(c => this.deleteCustomer(c));
   }
 

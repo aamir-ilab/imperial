@@ -16,20 +16,20 @@ const USERS_URL = environment.authURL;
 export class AuthService {
   public progressSource = new BehaviorSubject<number>(0);
   public loggedInType ;
-  currenctUser :User;
-  AllUser:User[];
-  AllJob:Job[];
-  currentScrumboard:any;
-  currentJob:any;
-  currentParent:User;
-  workerJobInfo:any;
-  adminInfo:any;
-  clientJob:any;
-   constructor(private http:HttpClient,
-    private snackBar:MatSnackBar) {
+  currenctUser: User;
+  AllUser: User[];
+  AllJob: Job[];
+  currentScrumboard: any;
+  currentJob: any;
+  currentParent: User;
+  workerJobInfo: any;
+  adminInfo: any;
+  clientJob: any;
+   constructor(private http: HttpClient,
+               private snackBar: MatSnackBar) {
 
     }
-    
+
     setCurrentUser(){
       this.currenctUser = JSON.parse(localStorage.getItem('userInfo'));
     }
@@ -58,37 +58,38 @@ export class AuthService {
       localStorage.setItem('scrumboardInfo', JSON.stringify(res));
       this.setCurrentScrumboard();
     }
-    setClientJob(){
-      this.clientJob = JSON.parse(localStorage.getItem('clientJobInfo'));
-    }
-    setClientJobLocal(res){
-      localStorage.setItem('clientJobInfo', JSON.stringify(res));
-      this.setClientJob();
-    }
-    
+    // setClientJob(){
+    //   this.clientJob = JSON.parse(localStorage.getItem('clientJobInfo'));
+    // }
+    // setClientJobLocal(res){
+    //   localStorage.setItem('clientJobInfo', JSON.stringify(res));
+    //   this.setClientJob();
+    // }
+
     setCurrentParent(){
-      this.currentParent = JSON.parse(localStorage.getItem('parentInfo'))
+      this.currentParent = JSON.parse(localStorage.getItem('parentInfo'));
     }
     setCurrentParentLocal(res){
       localStorage.setItem('parentInfo', JSON.stringify(res));
       this.setCurrentParent();
     }
     setCurrentWorkerJob(){
-      this.workerJobInfo = JSON.parse(localStorage.getItem('WorkerJobInfo'))
+      this.workerJobInfo = JSON.parse(localStorage.getItem('WorkerJobInfo'));
     }
     setCurrentWorkerJobLocal(res){
       localStorage.setItem('WorkerJobInfo', JSON.stringify(res));
       this.setCurrentWorkerJob();
     }
-  login(email:string, password:string):Observable<any>{
-    return this.http.post<User>(`${USERS_URL}login`,{'emailAddress':email, 'hash':password}).pipe(
-      map((res:User) =>{
+  login(email: string, password: string): Observable<any>{
+    return this.http.post<User>(`${USERS_URL}login`, {emailAddress: email, hash: password}).pipe(
+      map((res: User) => {
+        localStorage.setItem('token', res.accessToken);
         return res;
       }),
-      catchError(err=>{
+      catchError(err => {
         return null;
       })
-    )
+    );
   }
 
   // public uploadProfile(formData){
@@ -97,36 +98,36 @@ export class AuthService {
   //     observe:'events'
   //   });
   // }
-  addJob(user:any,str):Observable<any>{
+  addJob(user: any, str): Observable<any>{
     // if(type != 'other')
     //   user['accountType'] = type;
     // const httpHeaders = new HttpHeaders();
     // httpHeaders.set('Content-Type', 'application/json');
-    user['clientId'] = str;
+    user.clientId = str;
     return this.http.post<Job>(`${USERS_URL}job/register`, user).pipe(
-      map((res:Job) =>{
+      map((res: Job) => {
         return res;
       }),
-      catchError(err=>{
+      catchError(err => {
         return null;
       })
-    )
+    );
   }
-  getExpertTimesheets():Observable<any>{
-    return this.http.post<any>(`${USERS_URL}getExpertTimesheets`,{});
+  getExpertTimesheets(): Observable<any>{
+    return this.http.post<any>(`${USERS_URL}getExpertTimesheets`, {});
   }
-  getImportPayroll(linesR:any):Observable<any>{
-    return this.http.post<any>(`${USERS_URL}getImportPayroll`,{linesR:linesR});
+  getImportPayroll(linesR: any): Observable<any>{
+    return this.http.post<any>(`${USERS_URL}getImportPayroll`, {linesR});
   }
-  getAllPayroll():Observable<any>{
-    return this.http.post<any>(`${USERS_URL}getAllPayroll`,{});
+  getAllPayroll(): Observable<any>{
+    return this.http.post<any>(`${USERS_URL}getAllPayroll`, {});
   }
-  getGenerateWorkerID():Observable<any>{
-    return this.http.post<any>(`${USERS_URL}getGenerateWorkerID`,{});
+  getGenerateWorkerID(): Observable<any>{
+    return this.http.post<any>(`${USERS_URL}getGenerateWorkerID`, {});
   }
-  getUserByToken():Observable<User>{
+  getUserByToken(): Observable<User>{
     const userToken = localStorage.getItem(environment.authTokenKey);
-    if(!userToken){
+    if (!userToken){
       return of(null);
     }
     // return this.getAllUsers().pipe(
@@ -145,21 +146,22 @@ export class AuthService {
     //   })
     // )
   }
-  register(user:any, type = 'other'):Observable<any>{
-    if(type != 'other')
-      user['accountType'] = type;
+  register(user: any, type = 'other'): Observable<any>{
+    if (type !== 'other') {
+      user.accountType = type;
+    }
     // const httpHeaders = new HttpHeaders();
     // httpHeaders.set('Content-Type', 'application/json');
     return this.http.post<User>(`${USERS_URL}register`, user).pipe(
-      map((res:User) =>{
+      map((res: User) => {
         return res;
       }),
-      catchError(err=>{
+      catchError(err => {
         return null;
       })
-    )
+    );
   }
-  public requestPassword(email:string):Observable<any>{
+  public requestPassword(email: string): Observable<any>{
     return this.http.post(`${USERS_URL}` + 'forgot/' + email, {})
       .pipe(catchError(this.handleError('forgot-password', [])));
   }
@@ -168,8 +170,8 @@ export class AuthService {
   // }
   async getAllUsers(): Promise<User[]> {
     try {
-      let response = await this.http
-        .post(`${USERS_URL}getAll`,{})
+      const response = await this.http
+        .post(`${USERS_URL}getAll`, {})
         .toPromise();
       return response as User[];
     } catch (error) {
@@ -183,8 +185,7 @@ export class AuthService {
     //   console.log(res)
     // })
     this.AllUser = await this.getAllUsers();
-    console.log(this.AllUser)
-    console.log('3232323')
+    console.log('AllUser', this.AllUser);
   }
   async getAllJobAuth(){
     // await this.getAllJobs().subscribe((res)=>{
@@ -193,58 +194,61 @@ export class AuthService {
     //   console.log(res)
     // })
     this.AllJob = await this.getAllJobs();
-    console.log(this.AllJob)
-    console.log('3232321212')
+    console.log('AllJob', this.AllJob);
   }
-  async getAllJobs():Promise<Job[]>{
-    return await this.http.post<Job[]>(`${USERS_URL}job/getAllJob`,{}).toPromise();
+  async getAllJobs(): Promise<Job[]>{
+    return await this.http.post<Job[]>(`${USERS_URL}job/getAllJob`, {}).toPromise();
   }
-   getAllJobsSync():Observable<Job[]>{
-    return  this.http.post<Job[]>(`${USERS_URL}job/getAllJob`,{});
+   getAllJobsSync(): Observable<Job[]>{
+    return  this.http.post<Job[]>(`${USERS_URL}job/getAllJob`, {});
   }
-  getParent(id):Observable<User>{
-    return this.http.post<User>(`${USERS_URL}getParent`,{_id:id});
+  getParent(id): Observable<User>{
+    return this.http.post<User>(`${USERS_URL}getParent`, {_id: id});
   }
-  getWorkerJob(id):Observable<Job[]>{
-    return this.http.post<Job[]>(`${USERS_URL}getWorkerJob`,{_id:id});
+  getWorkerJob(id): Observable<Job[]>{
+    return this.http.post<Job[]>(`${USERS_URL}getWorkerJob`, {_id: id});
 
   }
-  private handleError<T>(operation = 'operation', result?:any){
-    return (error:any):Observable<any> =>{
+  private handleError<T>(operation = 'operation', result?: any){
+    return (error: any): Observable<any> => {
       console.error(error);
       return of(result);
-    }
+    };
   }
-  getTypeJobs():Observable<Job[]>{
-    return this.http.post<Job[]>(`${USERS_URL}job/getAllType`,{});
+  getTypeJobs(): Observable<Job[]>{
+    return this.http.post<Job[]>(`${USERS_URL}job/getAllType`, {});
   }
-  getAllInvoices():Observable<Invoice[]>{
-    return this.http.post<Invoice[]>(`${USERS_URL}getAllInvoices`,{});
+  getAllInvoices(): Observable<Invoice[]>{
+    return this.http.post<Invoice[]>(`${USERS_URL}getAllInvoices`, {});
 
   }
-  getSelectedJobs():Observable<Job[]>{
-    return this.http.post<Job[]>(`${USERS_URL}job/getAll`,{});
+  getSelectedJobs(): Observable<Job[]>{
+    return this.http.post<Job[]>(`${USERS_URL}job/getAll`, {});
   }
-  getTypeUsers(type):Observable<User[]>{
-    return this.http.post<User[]>(`${USERS_URL}getAllType`,{accountType:type});
+  getTypeUsers(type): Observable<User[]>{
+    return this.http.post<User[]>(`${USERS_URL}getAllType`, {accountType: type});
   }
-  getTimesheets(type):Observable<any[]>{
-    return this.http.post<any[]>(`${USERS_URL}getFindTimesheets`,{status:type});
+  getTimesheets(type): Observable<any[]>{
+    return this.http.post<any[]>(`${USERS_URL}getFindTimesheets`, {status: type});
   }
-  getTypeSubUsers(id):Observable<User[]>{
-    return this.http.post<User[]>(`${USERS_URL}getAllSubType`,{clientId:id});
+  getTypeSubUsers(id): Observable<User[]>{
+    return this.http.post<User[]>(`${USERS_URL}getAllSubType`, {clientId: id});
+  }
+  async getAuthClientJob(){
+    this.clientJob = await this.getClientJob(this.currenctUser._id);
+    console.log(this.clientJob);
   }
 
-  getClientJob(id):Observable<Job[]>{
-    return this.http.post<Job[]>(`${USERS_URL}getClientJob`,{_id:id});
+  getClientJob(id): Observable<Job[]>{
+    return this.http.post<Job[]>(`${USERS_URL}getClientJob`, {_id: id});
   }
   upload(file: File) {
-    let formData = new FormData();
-    formData.append("avatar", file);
+    const formData = new FormData();
+    formData.append('avatar', file);
 
     const req = new HttpRequest(
-      "POST",
-      "http://localhost:5000/upload",
+      'POST',
+      'http://localhost:5000/upload',
       formData,
       {
         reportProgress: true
@@ -259,7 +263,7 @@ export class AuthService {
   }
 
   processProgress(envelope: any): void {
-    if (typeof envelope === "number") {
+    if (typeof envelope === 'number') {
       this.progressSource.next(envelope);
     }
   }
@@ -280,15 +284,15 @@ export class AuthService {
     const httpHeaders = new HttpHeaders();
     httpHeaders.set('Content-Type', 'application/json');
         //   return this.http.put(API_USERS_URL, _user, { headers: httpHeaders });
-        console.log('... auth update user ..')
-        console.log(_user)
-        console.log('----------------')
-        return this.http.post(`${USERS_URL}profile`, _user, { headers: httpHeaders });
+    console.log('... auth update user ..');
+    console.log(_user);
+    console.log('----------------');
+    return this.http.post(`${USERS_URL}profile`, _user, { headers: httpHeaders });
   }
-  updateJob(_job:any): Observable<any> {
-        console.log('... auth update user ..')
-        console.log(_job)
-        console.log('----------------')
+  updateJob(_job: any): Observable<any> {
+        console.log('... auth update user ..');
+        console.log(_job);
+        console.log('----------------');
         return this.http.post(`${USERS_URL}updatejob`, _job);
   }
   openSnackbar(str) {
@@ -297,48 +301,48 @@ export class AuthService {
       horizontalPosition: 'center'
     });
   }
-  setWorkerJob(id, tId,wId, img, name, flag): Observable<any> {
-    return this.http.post<any>(`${USERS_URL}addWorkerJob`, {id:id, tId:tId,wId:wId,img:img,name:name, flag:flag});
+  setWorkerJob(id, tId, wId, img, name, flag): Observable<any> {
+    return this.http.post<any>(`${USERS_URL}addWorkerJob`, {id, tId, wId, img, name, flag});
   }
-  setStatusJob(id, status):Observable<any>{
-    return this.http.post<any>(`${USERS_URL}setStatusJob`, {id:id,status:status});
+  setStatusJob(id, status): Observable<any>{
+    return this.http.post<any>(`${USERS_URL}setStatusJob`, {id, status});
   }
-  setStatusTimesheet(id, status):Observable<any>{
-    return this.http.post<any>(`${USERS_URL}setStatusTimesheet`, {id:id,status:status});
+  setStatusTimesheet(id, status): Observable<any>{
+    return this.http.post<any>(`${USERS_URL}setStatusTimesheet`, {id, status});
   }
-  setJobWorkers(str:any[], id):Observable<any>{
-    return this.http.post<any>(`${USERS_URL}setJobWorkers`, {str:str, id:id});
+  setJobWorkers(str: any[], id): Observable<any>{
+    return this.http.post<any>(`${USERS_URL}setJobWorkers`, {str, id});
 
   }
-  deleteUser(obj:any, type):Observable<any>{
-    obj['accountType'] = type;
+  deleteUser(obj: any, type): Observable<any>{
+    obj.accountType = type;
     return this.http.post<any>(`${USERS_URL}removeUser`, obj);
   }
-  deleteJob(obj:any):Observable<any>{
+  deleteJob(obj: any): Observable<any>{
     return this.http.post<any>(`${USERS_URL}removeJob`, obj);
   }
-  cancelJob(obj, str):Observable<any>{
-    return this.http.post<any>(`${USERS_URL}canceljob`, {id:obj.id, str:str});
+  cancelJob(obj, str): Observable<any>{
+    return this.http.post<any>(`${USERS_URL}canceljob`, {id: obj.id, str});
   }
-  sendMsg(obj):Observable<any>{
+  sendMsg(obj): Observable<any>{
     return this.http.post<any>(`${USERS_URL}sendmsg`, obj);
   }
-  addInvoice(obj):Observable<any>{
+  addInvoice(obj): Observable<any>{
     return this.http.post<any>(`${USERS_URL}invoiceregister`, obj);
   }
-  updateInvoice(obj):Observable<any>{
+  updateInvoice(obj): Observable<any>{
     return this.http.post<any>(`${USERS_URL}invoice/profile`, obj);
   }
-  removeTimesheetsJob(obj):Observable<any>{
-    return this.http.post<any>(`${USERS_URL}removeTimesheetsJob`, {arr:obj});
+  removeTimesheetsJob(obj): Observable<any>{
+    return this.http.post<any>(`${USERS_URL}removeTimesheetsJob`, {arr: obj});
   }
-  sendEmail(obj):Observable<any>{
+  sendEmail(obj): Observable<any>{
     return this.http.post<any>(`${USERS_URL}client/verify/email`, obj);
   }
-  resetPassword(obj):Observable<any>{
+  resetPassword(obj): Observable<any>{
     return this.http.post<any>(`${USERS_URL}resetpassword`, obj);
   }
-  emailVerify(token):Observable<any>{
+  emailVerify(token): Observable<any>{
     return this.http.post<any>(`${USERS_URL}setVerify`, token);
   }
 }

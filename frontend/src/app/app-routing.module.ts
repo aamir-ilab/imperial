@@ -3,7 +3,7 @@ import { RouterModule } from '@angular/router';
 import { CustomLayoutComponent } from './custom-layout/custom-layout.component';
 import { VexRoutes } from '../@vex/interfaces/vex-route.interface';
 import { AuthGuard } from './guards/auth.guard';
-
+import { RoleGuard } from './guards/role.guard';
 const routes: VexRoutes = [
   {
     path: 'login',
@@ -67,6 +67,7 @@ const routes: VexRoutes = [
       },
       {
         path: 'admin',
+        canActivate: [RoleGuard],
         children: [
           {
             path: '',
@@ -142,10 +143,14 @@ const routes: VexRoutes = [
               }
             ]
           }
-        ]
+        ],
+        data: {
+          role: 'Admin'
+        }
       },
       {
         path: 'client',
+        canActivate: [RoleGuard],
         children: [
             {
               path: '',
@@ -167,10 +172,14 @@ const routes: VexRoutes = [
               path: 'subaccounts',
               loadChildren: () => import('./client/settings/subaccounts/subaccounts.module').then(m => m.SubaccountsModule),
             },
-        ]
+        ],
+        data: {
+          role: 'Client'
+        }
       },
       {
         path: 'worker',
+        canActivate: [RoleGuard],
         children: [
           {
             path: 'jobs',
@@ -191,7 +200,10 @@ const routes: VexRoutes = [
             path: 'payhistory',
             loadChildren: () => import('./worker/payhistory/payhistory.module').then(m => m.PayhistoryModule),
           }
-        ]
+        ],
+        data: {
+          role: 'Worker'
+        }
       },
       {
         path: 'apps',

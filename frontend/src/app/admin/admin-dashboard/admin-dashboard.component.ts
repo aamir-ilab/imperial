@@ -16,21 +16,21 @@ import icStar from '@iconify/icons-ic/twotone-star';
 import icContactSupport from '@iconify/icons-ic/twotone-contact-support';
 import icBubbleChart from '@iconify/icons-ic/twotone-bubble-chart';
 import icReceipt from '@iconify/icons-ic/twotone-receipt';
-  
+
 @Component({
   selector: 'vex-admin-dashboard',
   templateUrl: './admin-dashboard.component.html',
   styleUrls: ['./admin-dashboard.component.scss']
 })
 export class AdminDashboardComponent implements OnInit {
-  clientJob:any;
-  totalJobs:number;
-  requestTime:number;
+  clientJob: any;
+  totalJobs: number;
+  requestTime: number;
   icAssigment = icAssigment;
   icContacts = icContacts;
   icPersonOutline = icPersonOutline;
   icGroup = icGroup;
-  icReceipt =icReceipt;
+  icReceipt = icReceipt;
   icContactSupport = icContactSupport;
   icStar = icStar;
   icPageView = icPageView;
@@ -39,33 +39,33 @@ export class AdminDashboardComponent implements OnInit {
   icMoreVert = icMoreVert;
   icBook = icBook;
   icBubbleChart = icBubbleChart;
-  AllJob:any;
-  AllUsers:any;
-  totalStaff:number = 0;
-  pendingClient:number = 0;
-  pendingWorker:number = 0;
-  totalClient:number = 0;
-  reviewTimesheets:number = 0;
+  AllJob: any;
+  AllUsers: any;
+  totalStaff = 0;
+  pendingClient = 0;
+  pendingWorker = 0;
+  totalClient = 0;
+  reviewTimesheets = 0;
   constructor(private cd: ChangeDetectorRef,
-    private authService:AuthService) { }
+              private authService: AuthService) { }
 
   async ngOnInit() {
-       await this.authService.getAllUserAuth();
+      await this.authService.getAllUserAuth();
       await this.authService.getAllJobAuth();
-    this.authService.getTimesheets('Completed').subscribe((res)=>{
+      this.authService.getTimesheets('Completed').subscribe((res) => {
       this.reviewTimesheets = res.length;
-    })
+    });
     // if(!this.authService.AllJob)
     //   this.authService.setAllJob();
     // if(!this.authService.AllUser)
     //   this.authService.setAllUser();
-    this.AllJob = this.authService.AllJob;
-    this.AllUsers = this.authService.AllUser;
-    var temp = this.AllUsers;
-    this.totalStaff = temp.filter((obj) => obj.accountType == 'Worker').length;
-    this.pendingWorker =  temp.filter((obj) => obj.accountType == 'Worker' && obj.clientStatus == 'Pending').length;
-    this.pendingClient =  temp.filter((obj) => obj.accountType == 'Client' && obj.clientStatus == 'Pending').length;
-    this.totalClient = this.AllUsers.length - this.totalStaff - 2;
+      this.AllJob = this.authService.AllJob;
+      this.AllUsers = this.authService.AllUser;
+      const temp = this.AllUsers;
+      this.totalStaff = temp.filter((obj) => obj.accountType === 'Worker').length;
+      this.pendingWorker =  temp.filter((obj) => obj.accountType === 'Worker' && obj.clientStatus === 'Pending').length;
+      this.pendingClient =  temp.filter((obj) => obj.accountType === 'Client' && obj.clientStatus === 'Pending').length;
+      this.totalClient = this.AllUsers.length - this.totalStaff - 2;
     // console.log('____________')
     // console.log(this.clientJob)
     // this.totalJobs =  this.clientJob.filter((obj) => obj.statusStr == 'Completed').length;
@@ -77,7 +77,7 @@ export class AdminDashboardComponent implements OnInit {
     // console.log(this.totalJobs)
     // this.clientJob.filter((obj) => {this.requestTime += parseInt(obj.endTime) - parseInt(obj.startTime)}).length;
     // this.clientJob = this.authService.clientJob;
-    setTimeout(() => {
+      setTimeout(() => {
       const temp = [
         {
           name: 'Subscribers',

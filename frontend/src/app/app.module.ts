@@ -5,11 +5,13 @@ import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { VexModule } from '../@vex/vex.module';
-import { HttpClientModule } from '@angular/common/http';
+import { HttpClientModule, HTTP_INTERCEPTORS } from '@angular/common/http';
 import { CustomLayoutModule } from './custom-layout/custom-layout.module';
 import { AuthGuard } from './guards/auth.guard';
+import { RoleGuard } from './guards/role.guard';
 import { MatSnackBarModule } from '@angular/material/snack-bar';
 import { LocationStrategy, HashLocationStrategy } from '@angular/common';
+import { AppInterceptor } from './app.interceptors';
 @NgModule({
   declarations: [AppComponent],
   imports: [
@@ -22,7 +24,7 @@ import { LocationStrategy, HashLocationStrategy } from '@angular/common';
     VexModule,
     CustomLayoutModule
   ],
-  providers: [AuthGuard, {provide: LocationStrategy, useClass:HashLocationStrategy}],
+  providers: [{ provide: HTTP_INTERCEPTORS, useClass: AppInterceptor, multi: true }, AuthGuard, RoleGuard, {provide: LocationStrategy, useClass: HashLocationStrategy}],
   bootstrap: [AppComponent]
 })
 export class AppModule { }

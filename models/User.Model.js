@@ -92,7 +92,6 @@ var UserSchema = new mongoose.Schema({
     companyRegNumber: { type: String },
     companyUrl:{type:String},// optional
     tradingName:{type:String},//optional
-    phoneNumber: { type: String },
     position: { type: String },
     firstName: { type: String },
     lastName: { type: String },
@@ -103,6 +102,7 @@ var UserSchema = new mongoose.Schema({
     hash: { type: String },
     salt: { type: String },
     createdDate:{type:Date},
+    accessToken:{ type: String },
     companyLogo:{type:String},
     clientType:{type:String, default:'Master Admin'},
     parentId:{type:String, default:''},

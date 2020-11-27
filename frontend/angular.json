@@ -83,7 +83,6 @@
               "extractLicenses": true,
               "vendorChunk": false,
               "buildOptimizer": true,
-              "es5BrowserSupport": true,
               "budgets": [
                 {
                   "type": "initial",
