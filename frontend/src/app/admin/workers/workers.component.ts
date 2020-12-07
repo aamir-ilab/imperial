@@ -14,6 +14,10 @@ import icDelete from '@iconify/icons-ic/twotone-delete';
 import icSearch from '@iconify/icons-ic/twotone-search';
 import icAdd from '@iconify/icons-ic/twotone-add';
 import icFilterList from '@iconify/icons-ic/twotone-filter-list';
+import icTimes from '@iconify/icons-fa-solid/times';
+import icCheck from '@iconify/icons-fa-solid/check';
+import icStop from '@iconify/icons-ic/twotone-stop-circle';
+import icInfo from '@iconify/icons-fa-solid/info-circle';
 import { SelectionModel } from '@angular/cdk/collections';
 import icMoreHoriz from '@iconify/icons-ic/twotone-more-horiz';
 import icFolder from '@iconify/icons-ic/twotone-folder';
@@ -63,12 +67,14 @@ export class WorkersComponent implements OnInit, AfterViewInit {
 
   @Input()
   columns: TableColumn<Worker>[] = [
-    { label: 'Checkbox', property: 'checkbox', type: 'checkbox', visible: true },
+    { label: 'Checkbox', property: 'checkbox', type: 'checkbox', visible: false },
     { label: 'Profile Photo', property: 'profilePhoto', type: 'image', visible: true },
     { label: 'Worker ID', property: 'workerId', type: 'text', visible: true, cssClasses: ['font-medium'] },
+    { label: 'WORKER NAME', property: 'name', type: 'text', visible: true, cssClasses: ['font-medium'] },
     { label: 'Worker Email Address', property: 'emailAddress', type: 'text', visible: true },
     { label: 'Phone Number', property: 'mobileNumber', type: 'text', visible: true },
     { label: 'Date Joined', property: 'createdDate', type: 'text', visible: true },
+    { label: 'Status', property: 'clientStatus', type: 'text', visible: true },
     // { label: 'Labels', property: 'labels', type: 'button', visible: true },
     { label: 'Actions', property: 'actions', type: 'button', visible: true },
     { label: 'ID', property: '_id', type: 'text', visible: false }
@@ -81,6 +87,8 @@ export class WorkersComponent implements OnInit, AfterViewInit {
 
   // labels = aioTableLabels;
 
+  icTimes = icTimes;
+  icCheck = icCheck;
   icPhone = icPhone;
   icMail = icMail;
   icMap = icMap;
@@ -91,6 +99,8 @@ export class WorkersComponent implements OnInit, AfterViewInit {
   icFilterList = icFilterList;
   icMoreHoriz = icMoreHoriz;
   icFolder = icFolder;
+  icStop = icStop;
+  icInfo = icInfo;
 
   @ViewChild(MatPaginator, { static: true }) paginator: MatPaginator;
   @ViewChild(MatSort, { static: true }) sort: MatSort;
@@ -111,6 +121,7 @@ export class WorkersComponent implements OnInit, AfterViewInit {
   getData() {
     this.authService.getTypeUsers('Worker').subscribe((clients) => {
       of(clients.map(client => new Worker(client))).subscribe(clientes => {
+        console.log('--Worker--', clientes);
         this.subject$.next(clientes);
       });
     });
@@ -186,8 +197,17 @@ export class WorkersComponent implements OnInit, AfterViewInit {
     this.authService.deleteUser(customer, 'Worker').subscribe((res => {
       this.authService.openSnackbar('Removed Successfully!');
   }));
-    this.customers.splice(this.customers.findIndex((existingCustomer) => existingCustomer.id === customer.id), 1);
+    this.customers.splice(this.customers.findIndex((existingCustomer) => existingCustomer._id === customer._id), 1);
     this.selection.deselect(customer);
+    this.subject$.next(this.customers);
+  }
+
+  statusUpdate(client: Worker, status) {
+    this.authService.updateClientStatus(client, status).subscribe((res => {
+      this.authService.openSnackbar('Worker Status Updated Successfully!');
+    }));
+    const index = this.customers.findIndex((existingClient) => existingClient.id === client.id);
+    this.customers[index] = new Worker(client);
     this.subject$.next(this.customers);
   }
 

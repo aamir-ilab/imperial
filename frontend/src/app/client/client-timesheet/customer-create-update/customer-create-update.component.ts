@@ -36,29 +36,31 @@ export class CustomerCreateUpdateComponent implements OnInit {
   icLocationCity = icLocationCity;
   icEditLocation = icEditLocation;
   icPhone = icPhone;
-  timesheets:any[];
-  user:any;
-  workerId:any;
+  timesheets: any[];
+  user: any;
+  workerId: any;
   constructor(@Inject(MAT_DIALOG_DATA) public defaults: any,
               private dialogRef: MatDialogRef<CustomerCreateUpdateComponent>,
               private fb: FormBuilder,
-              private authService:AuthService) {
+              private authService: AuthService) {
   }
 
   ngOnInit() {
-    console.log('000000')
+    console.log('000000');
     console.log(this.defaults);
-      this.timesheets = this.defaults.timesheetId;
+    this.timesheets = this.defaults.timesheetId;
 
-    if(!this.authService.AllUser)
+    if (!this.authService.AllUser) {
       this.authService.setAllUser();
-    console.log('<><><><><><><><><><><<><><><><><><><><>')
-    console.log(this.authService.AllUser)
-    var tempArr = this.authService.AllUser;
+    }
+    console.log('<><><><><><><><><><><<><><><><><><><><>');
+    console.log(this.authService.AllUser);
+    const tempArr = this.authService.AllUser;
     this.workerId = [];
-    tempArr.forEach(obj =>{
-      if(obj.accountType == 'Worker')
-        this.workerId.push({profilePhoto:obj.profilePhoto, workerId:obj.workerId, id:obj._id});
+    tempArr.forEach(obj => {
+      if (obj.accountType === 'Worker') {
+        this.workerId.push({profilePhoto: obj.profilePhoto, workerId: obj.workerId, id: obj._id});
+      }
     });
     if (this.defaults) {
       this.mode = 'update';
@@ -104,50 +106,59 @@ export class CustomerCreateUpdateComponent implements OnInit {
     return this.mode === 'update';
   }
   createRange(number){
-  var items: number[] = [];
-  for(var i = 1; i <= number; i++){
+  const items: number[] = [];
+  for (let i = 1; i <= number; i++){
      items.push(i);
   }
   return items;
   }
   setSubmit(){
-    this.timesheets.forEach((ele, index, arr) =>{
-      this.authService.setStatusTimesheet(ele._id, ele.statusStr).subscribe((res)=>{
+    this.timesheets.forEach((ele, index, arr) => {
+      this.authService.setStatusTimesheet(ele._id, ele.statusStr).subscribe((res) => {
         console.log(res);
-        if(index == (arr.length - 1)){
-          this.authService.setStatusJob(this.defaults.id, 'Completed').subscribe((res1)=>{
+        if (index === (arr.length - 1)){
+          this.authService.setStatusJob(this.defaults.id, 'Completed').subscribe((res1) => {
             console.log(res1);
             this.authService.openSnackbar('Confirmed Successfully!');
             this.defaults.statusStr = 'Completed';
             this.dialogRef.close(this.defaults);
-            })
+            });
         }
-      })
-  
-    })
+      });
+
+    });
   }
-  changeStatus(item,i){
-    if(item['statusStr'] == 'Pending')
-      item['statusStr'] = 'Completed';
-    else if(item['statusStr'] == 'Completed')
-      item['statusStr'] = 'UnCompleted';
-    else
-      item['statusStr'] = 'Pending';
+  changeStatus(item, i){
+    if (item.statusStr === 'Pending') {
+      item.statusStr = 'Completed';
+    }
+    else if (item.statusStr === 'Completed') {
+      item.statusStr = 'UnCompleted';
+ }
+    else {
+      item.statusStr = 'Pending';
+ }
     this.timesheets[i] = item;
   }
   getStatusClass(status, i)
   {
-    if(i == 0 && status == 'Pending')
+    if (i === 0 && status === 'Pending') {
       return 'text-green';
-    if(i == 0 && status == 'Completed')
+    }
+    if (i === 0 && status === 'Completed') {
       return 'text-purple';
-    if(i == 0 && status == 'UnCompleted')
+    }
+    if (i === 0 && status === 'UnCompleted') {
       return 'text-cyan';
-    if(i == 1 && status == 'Pending')
+    }
+    if (i === 1 && status === 'Pending') {
       return 'bg-green-light';
-    if(i == 1 && status == 'Completed')
+    }
+    if (i === 1 && status === 'Completed') {
       return 'bg-purple-light';
-    if(i == 1 && status == 'UnCompleted')
+    }
+    if (i === 1 && status === 'UnCompleted') {
       return 'bg-cyan-light';
+    }
   }
 }

@@ -472,7 +472,8 @@ exports.findById = (req, res) => {
     }
 }
     exports.getAll = (req, res) => {
-        Job.find({}).sort({ 'createdAt': -1 }).populate(['clientId','timesheetId']).exec(function(err, client) {
+        console.log('--req--', req.body.id)
+        Job.find({clientId:req.body.id}).sort({ 'createdAt': -1 }).populate(['clientId','timesheetId']).exec(function(err, client) {
             if (err) {
                 console.log(err);
             } else {
@@ -1179,10 +1180,8 @@ exports.setStatusTimesheet = (req, res) => {
         }
     });
 };
-exports.canceljob = (req, res) => {
-    // var role = req.type;
-    console.log('canceljob')
-    console.log(req.body)
+exports.updateStatus = (req, res) => {
+    console.log('updateStatus', req.body),
         // var clientId = req.clientId;
         // if (role == 0){
     Job.findOne({id:req.body.id}, function(err, client) {

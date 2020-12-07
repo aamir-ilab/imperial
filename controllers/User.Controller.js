@@ -209,14 +209,15 @@ exports.userToken = (req, res) => {
     });
 }
 exports.login = (req, res) => {
-    console.log('login1');
+    console.log('login1', req.body);
     if (!req.body.emailAddress || !req.body.hash) {
         return res.status(400).json(req.body.emailAddress);
     }
     // console.log(req)
     console.log('login2');
     passport.authenticate("user", (err, client, info) => {
-        console.log('client',client);
+      console.log('client',client);
+      if(client.clientStatus != 'Archived' || client.clientStatus != 'Dismissed'){
         let token;
         if (err) {
             console.log('err');
@@ -235,6 +236,7 @@ exports.login = (req, res) => {
             console.log('login3');
             res.status(200).json(false);
         }
+      }
     })(req, res);
 };
 // exports.addMulti = (req, res) =>{
@@ -348,25 +350,47 @@ exports.updateProfile = (req, res) => {
         // if (role == 0){
     User.findById(req.body._id, function(err, client) {
         if (!client)
-            res.status(404).send("data is not found");
+          res.status(404).send("data is not found");
         else {
-            tempPass = client.hash;
-            Object.assign(client, req.body);
+          tempPass = client.hash;
+          Object.assign(client, req.body);
         }
-        console.log(req.body.hash)
-        console.log(client)
-        if (req.body.hash && req.body.hash != '')
+        console.log('hash',req.body.hash)
+        console.log('hash client',client)
+        if(req.body.Password && req.body.Password != ''){
+          console.log('assign new password');
+          client.setPassword(req.body.Password);
+        }
+        else if (req.body.hash && req.body.hash != '')
             client.setPassword(req.body.hash);
         else {
             client.hash = tempPass;
         }
         client.save().then(client => {
-                res.status(200).json(client);
-            })
-            .catch(err => {
-                res.status(400).send("Update not possible");
-            });
+          res.status(200).json(client);
+        })
+        .catch(err => {
+          res.status(400).send(err);
+        });
     });
+};
+exports.updateClientStatus = (req, res) => {
+  console.log('updateClientStatus', req.body);
+  User.findById(req.body._id, function(err, client) {
+      if (!client)
+          res.status(404).send("data is not found");
+      else {
+          Object.assign(client, req.body);
+      }
+      console.log('client updated', client);
+      client.save().then(client => {
+        res.status(200).json(client);
+        console.log('--client updated--', client);
+      })
+      .catch(err => {
+          res.status(400).send("Update not possible");
+      });
+  });
 };
 exports.updateHash = (req, res) => {
     // var role = req.type;
@@ -416,80 +440,16 @@ exports.delete = (req, res) => {
     });
 };
 exports.removeUser = (req, res) =>{
-    var temp ;
-      User.findOneAndDelete({ id: req.body.id }, function(err, city) {
-        if (err) res.json(err);
-        else {
-            console.log('remove')
-            console.log(city)
-            console.log(req.body)
-            if(req.body.accountType == 'Worker'){
-                User.countDocuments({ "surename": { "$regex": "^"+ req.body.surename.charAt(0) , "$options": "i" }, 'accountType':'Worker' }, function(err, c1){
-                    console.log('asdsda')
-                    temp = req.body.surename.charAt(0);
-                    if(c1 < 10){
-                        temp += '000' + c1;
-                    }else if(c1 < 100){
-                        temp += '0' + c1;
-                    }else if(c1 < 1000){
-                        temp += '0' + c1;
-                    }else{
-                        temp += c1;
-                    }
-                })
-                User.findOne({workerId: temp}, function(err, user3){
-                    if(user3){
-                        user3.workerId = req.body.workerId;
-                        user3.save().then(user => {
-                            console.log('sucess user3')
-                            User.countDocuments({}, function(err1, c) {
-                                console.log('c')
-                                var tempNum = c + 1;
-                                User.findOne({ id: tempNum }, function(err, client) {
-                                    if (!client)
-                                        res.status(500).send("data is not found");
-                                    else {
-                                        client.id = city.id;
-                                        client.save().then(user => {
-                                                // res.json('city updated!');
-                                            })
-                                            .catch(err => {
-                                                res.status(400).send("Update not possible");
-                                            });
-                                    }
-                                });
-
-                            })
-                        })
-                        .catch(err => {
-                            res.status(400).send("Update not possible");
-                        });
-                    }
-                })
-            }
-            else{
-                User.countDocuments({}, function(err1, c) {
-                    console.log('c')
-                    var tempNum = c + 1;
-                    User.findOne({ id: tempNum }, function(err, client) {
-                        if (!client)
-                            res.status(500).send("data is not found");
-                        else {
-                            client.id = city.id;
-                            client.save().then(user => {
-                                    res.json('city updated!');
-                                })
-                                .catch(err => {
-                                    res.status(400).send("Update not possible");
-                                });
-                        }
-                    });
-
-                })
-            }
-
-        }
-    });
+  console.log('--removeUserReq--', req.body._id)
+  User.findOneAndDelete({ _id: req.body._id }, function(err, city) {
+    if (err) res.json(err);
+    else {
+      console.log('remove')
+      console.log(city)
+      console.log(req.body)
+      res.status(200);
+    }
+  });
 }
 exports.findByIdNum = (req, res) => {
     User.findOne({ id: req.body.id }, function(err, client) {
@@ -531,7 +491,13 @@ exports.getAll = (req, res) => {
   })
 }
 exports.getAllType = (req, res) => {
-    User.find({accountType: req.body.accountType}, function(err, client) {
+  console.log('---getAllType req---', req)
+    User.find({accountType: req.body.accountType})
+    // .populate({
+    //   path: 'parentId',
+    //   model: 'User'
+    // })
+  .exec(function(err, client) {
         if (err) {
             console.log(err);
         } else {
@@ -540,7 +506,7 @@ exports.getAllType = (req, res) => {
     })
 }
 exports.getAllSubType = (req, res) => {
-    User.find({accountType: 'Client',parentId: req.body.clientId }, function(err, client) {
+    User.find({accountType: 'Client',parentId:req.body.clientId}, function(err, client) {
         if (err) {
             console.log(err);
         } else {

@@ -106,7 +106,7 @@ var UserSchema = new mongoose.Schema({
     companyLogo:{type:String},
     clientType:{type:String, default:'Master Admin'},
     parentId:{type:String, default:''},
-    clientStatus:{type:String, default:'Active'},
+    clientStatus:{type:String, default:'Pending'},
 
 
 // admin-setting
@@ -184,13 +184,17 @@ var UserSchema = new mongoose.Schema({
 }, { toJSON: { getters: true } });
 
 UserSchema.methods.setPassword = function(password) {
+    console.log('setPassword req', password);
     this.salt = crypto.randomBytes(16).toString('hex');
     this.hash = crypto.pbkdf2Sync(password, this.salt, 1000, 64, 'sha512').toString('hex');
+    console.log('setPassword', this.hash)
 };
 
 
 UserSchema.methods.ValidPassword = function(password) {
+    console.log('ValidPassword req', password);
     const hash = crypto.pbkdf2Sync(password, this.salt, 1000, 64, 'sha512').toString('hex');
+    console.log('ValidPassword', this.hash , hash, this.hash === hash)
     return this.hash === hash;
 };
 

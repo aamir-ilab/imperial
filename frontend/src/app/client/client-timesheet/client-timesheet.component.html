@@ -83,7 +83,7 @@
         <!-- Checkbox Column -->
         <!-- <ng-container matColumnDef="checkbox">
           <th *matHeaderCellDef mat-header-cell>
-            <mat-checkbox 
+            <mat-checkbox
                           (change)="$event ? masterToggle() : null"
                           [checked]="selection.hasValue() && isAllSelected()"
                           [indeterminate]="selection.hasValue() && !isAllSelected()"
@@ -184,7 +184,7 @@
 
         <tr *matHeaderRowDef="visibleColumns" mat-header-row></tr>
         <!-- (click)="updateCustomer(row)" -->
-        <tr 
+        <tr
           (click)="selectRow(row)"
             *matRowDef="let row; columns: visibleColumns;"
             @fadeInUp
@@ -210,11 +210,11 @@
 
 <mat-menu #actionsMenu="matMenu" xPosition="before" yPosition="below">
   <ng-template let-customer="customer" matMenuContent>
-    <button (click)="cancelCustomer(customer,'Submitted')" *ngIf="customer.statusStr == 'Pending'" mat-menu-item>
+    <button (click)="updateStatus(customer,'Submitted')" *ngIf="customer.statusStr == 'Pending'" mat-menu-item>
       <mat-icon [icIcon]="icEdit"></mat-icon>
       <span>Submitting</span>
     </button>
-    <button (click)="cancelCustomer(customer,'Cancelled')" [disabled]="customer.statusStr == 'Cancelled'" mat-menu-item>
+    <button (click)="updateStatus(customer,'Cancelled')" [disabled]="customer.statusStr == 'Cancelled'" mat-menu-item>
       <!-- <button (click)="deleteCustomer(customer)" mat-menu-item> -->
       <mat-icon [icIcon]="icDelete"></mat-icon>
       <span>Cancelling</span>

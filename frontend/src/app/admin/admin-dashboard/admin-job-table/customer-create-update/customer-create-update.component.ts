@@ -1,5 +1,5 @@
 import { Component, Inject, OnInit } from '@angular/core';
-import { FormBuilder, FormGroup, FormControl } from '@angular/forms';
+import { FormBuilder, FormGroup, FormControl, FormArray } from '@angular/forms';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { Job } from '../interfaces/job.model';
 import icMoreVert from '@iconify/icons-ic/twotone-more-vert';
@@ -20,6 +20,8 @@ import { Observable } from 'rxjs';
 import { startWith, map } from 'rxjs/operators';
 import icArrowDropDown from '@iconify/icons-ic/twotone-arrow-drop-down';
 import { Router } from '@angular/router';
+import icAdd from '@iconify/icons-fa-solid/plus-square';
+import icMinus from '@iconify/icons-fa-solid/minus-square';
 
 @Component({
   selector: 'vex-customer-create-update',
@@ -40,7 +42,8 @@ export class CustomerCreateUpdateComponent implements OnInit {
   icPrint = icPrint;
   icDownload = icDownload;
   icDelete = icDelete;
-
+  icAdd = icAdd;
+  icMinus = icMinus;
   icPerson = icPerson;
   icMyLocation = icMyLocation;
   icLocationCity = icLocationCity;
@@ -79,6 +82,7 @@ export class CustomerCreateUpdateComponent implements OnInit {
       flag: 'https://upload.wikimedia.org/wikipedia/commons/f/f7/Flag_of_Texas.svg'
     }
   ];
+  public headers: any[] = [];
   icArrowDropDown = icArrowDropDown;
   constructor(@Inject(MAT_DIALOG_DATA) public defaults: any,
               private dialogRef: MatDialogRef<CustomerCreateUpdateComponent>,
@@ -121,16 +125,18 @@ export class CustomerCreateUpdateComponent implements OnInit {
       id: [CustomerCreateUpdateComponent.id++],
       _id: [this.defaults._id || ''],
       client: [this.defaults.client || ''],
-      department: [this.defaults.department || ''],
-      role: [this.defaults.role || this.selectedRole],
       shiftDate: [this.defaults.shiftDate || new Date()],
-      startTime: [this.defaults.startTime || ''],
-      endTime: [this.defaults.endTime || ''],
+      // department: [this.defaults.department || ''],
+      // role: [this.defaults.role || this.selectedRole],
+      // startTime: [this.defaults.startTime || ''],
+      // endTime: [this.defaults.endTime || ''],
+      // total: [this.defaults.total || ''],
       locationShift: [this.defaults.locationShift || ''],
       purchaseOrderNo: [this.defaults.purchaseOrderNo || ''],
       additionalInformation: [this.defaults.additionalInformation || ''],
       status: [this.defaults.status || statusTableLabels[2]],
-      stateCtrl: [this.stateCtrl.value || '']
+      stateCtrl: [this.stateCtrl.value || ''],
+      shifts: this.fb.array([])
     });
     this.selectedClient = this.defaults.client;
   }
@@ -144,19 +150,18 @@ export class CustomerCreateUpdateComponent implements OnInit {
   }
 
   createCustomer() {
-    const customer = this.form.value;
-    const tempUser = this.AllClients.filter(obj => {
-      const tempName = obj.firstName + ' ' + obj.lastName;
-      if (tempName === customer.client) {
-        return obj;
-      }
-    });
-    customer.clientId  = tempUser[0]._id;
-    // if (!customer.imageSrc) {
-    //   customer.imageSrc = 'assets/img/avatars/1.jpg';
-    // }
+    // const customer = this.form.value;
+    // const tempUser = this.AllClients.filter(obj => {
+    //   const tempName = obj.firstName + ' ' + obj.lastName;
+    //   if (tempName === customer.client) {
+    //     return obj;
+    //   }
+    // });
+    // customer.clientId  = tempUser[0]._id;
 
-    this.dialogRef.close(customer);
+    // this.dialogRef.close(customer);
+
+    console.log('SUCCESS!!' + JSON.stringify(this.form.value, null, 4));
   }
 
   updateCustomer() {
@@ -241,5 +246,26 @@ export class CustomerCreateUpdateComponent implements OnInit {
     this.authService.setCurrentScrumboardLocal(this.authService.currentScrumboard);
     this.route.navigate(['/admin/jobs/scrumboard', event.id]);
     this.dialogRef.close();
+  }
+
+  // get f() { return this.form.controls; }
+  get shifts() { return this.form.get('shifts') as FormArray; }
+
+
+  addShift(){
+    console.log('addShift');
+    // this.headers.splice(index, 0, item);
+    this.shifts.push(this.fb.control({
+      department: [''],
+      role: [''],
+      startTime: [''],
+      endTime: [''],
+      total: [''],
+
+    }));
+  }
+  removeShift(index){
+    console.log('removeShift');
+    this.shifts.removeAt(index);
   }
 }

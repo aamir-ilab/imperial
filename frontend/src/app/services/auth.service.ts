@@ -223,7 +223,8 @@ export class AuthService {
 
   }
   getSelectedJobs(): Observable<Job[]>{
-    return this.http.post<Job[]>(`${USERS_URL}job/getAll`, {});
+    const id = JSON.parse(localStorage.getItem('userInfo'))._id;
+    return this.http.post<Job[]>(`${USERS_URL}job/getAll`, {id});
   }
   getTypeUsers(type): Observable<User[]>{
     return this.http.post<User[]>(`${USERS_URL}getAllType`, {accountType: type});
@@ -281,13 +282,17 @@ export class AuthService {
     }
   }
   updateUser(_user: any): Observable<any> {
-    const httpHeaders = new HttpHeaders();
-    httpHeaders.set('Content-Type', 'application/json');
-        //   return this.http.put(API_USERS_URL, _user, { headers: httpHeaders });
     console.log('... auth update user ..');
     console.log(_user);
     console.log('----------------');
-    return this.http.post(`${USERS_URL}profile`, _user, { headers: httpHeaders });
+    return this.http.post(`${USERS_URL}profile`, _user);
+  }
+  updateClientStatus(_user: any, status): Observable<any> {
+    console.log('... status ..', status);
+    _user.clientStatus = status;
+    console.log('... auth updateClientStatus ..', _user);
+    console.log('----------------');
+    return this.http.post(`${USERS_URL}updateClientStatus`, _user);
   }
   updateJob(_job: any): Observable<any> {
         console.log('... auth update user ..');
@@ -315,14 +320,15 @@ export class AuthService {
 
   }
   deleteUser(obj: any, type): Observable<any>{
+    console.log('removeUser', obj);
     obj.accountType = type;
     return this.http.post<any>(`${USERS_URL}removeUser`, obj);
   }
   deleteJob(obj: any): Observable<any>{
     return this.http.post<any>(`${USERS_URL}removeJob`, obj);
   }
-  cancelJob(obj, str): Observable<any>{
-    return this.http.post<any>(`${USERS_URL}canceljob`, {id: obj.id, str});
+  updateStatus(obj, str): Observable<any>{
+    return this.http.post<any>(`${USERS_URL}updateStatus`, {id: obj.id, str});
   }
   sendMsg(obj): Observable<any>{
     return this.http.post<any>(`${USERS_URL}sendmsg`, obj);

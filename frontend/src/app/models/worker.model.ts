@@ -4,6 +4,7 @@ export class Worker {
     _id: string;
     id: number;
     title: string;
+    clientStatus: string;
     workerId: string;
     forename: string;
     surename: string;
@@ -93,6 +94,7 @@ export class Worker {
     }
     constructor(worker){
         this.department = worker.department;
+        this.clientStatus = worker.clientStatus;
         this._id = worker._id;
         this.id = worker.id;
         this.title = worker.title;

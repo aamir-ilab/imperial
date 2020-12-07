@@ -6,9 +6,9 @@
         class="headline m-0"
         fxFlex="auto">{{ form.get('firstName').value + ' ' + form.get('lastName').value }}</h2> -->
     <!-- <h2 *ngIf="!form.get('firstName').value && !form.get('lastName').value" -->
-    <h2 
+    <h2
         class="headline m-0"
-        fxFlex="auto">Time Sheets</h2>
+        fxFlex="auto">Edit Timesheet: #</h2>
 
     <button class="text-secondary" mat-dialog-close mat-icon-button type="button">
       <mat-icon [icIcon]="icClose"></mat-icon>
@@ -20,14 +20,14 @@
   <mat-dialog-content fxLayout="column">
    <!--  <div class="flex flex-col sm:flex-row">
       <div fxLayout="row" fxLayoutAlign="start center">
-       <img 
+       <img
               *ngIf="user"
               [matTooltip]="user.workerId"
              [src]="user.profilePhoto"
              class="avatar"
              fxFlex="none">
          <div (click)="memberSelect.open()"
-        <div 
+        <div
              class="avatar text-secondary bg-app-bar cursor-pointer"
              fxFlex="none"
              fxLayout="row"

@@ -64,9 +64,10 @@ export class AdminTimesheetComponent implements OnInit, AfterViewInit {
 
   @Input()
   columns: TableColumn<Job>[] = [
-    { label: 'Client', property: 'client', type: 'text', visible: true },
-    { label: 'Department', property: 'department', type: 'text', visible: true },
-    { label: 'Role', property: 'role', type: 'text', visible: false },
+    { label: 'Job ID', property: 'JobId', type: 'text', visible: true },
+    { label: 'Client', property: 'clientId', type: 'text', visible: true },
+    // { label: 'Department', property: 'department', type: 'text', visible: false },
+    // { label: 'Role', property: 'role', type: 'text', visible: false },
     { label: 'Shift Date', property: 'shiftDateStr', type: 'text', visible: true, cssClasses: ['text-secondary', 'font-medium'] },
     { label: 'Total Staff', property: 'totalStaff', type: 'text', visible: true, cssClasses: ['text-secondary', 'font-medium'] },
     { label: 'Status', property: 'status', type: 'button', visible: true },
@@ -95,7 +96,7 @@ export class AdminTimesheetComponent implements OnInit, AfterViewInit {
   @ViewChild(MatSort, { static: true }) sort: MatSort;
 
   constructor(private dialog: MatDialog,
-    private authService:AuthService) {
+              private authService: AuthService) {
   }
 
   get visibleColumns() {
@@ -107,18 +108,19 @@ export class AdminTimesheetComponent implements OnInit, AfterViewInit {
    * We are simulating this request here.
    */
   getData() {
-    this.authService.getTypeJobs().subscribe((clients)=>{
-      of(clients.map(client =>new Job(client))).subscribe(clientes =>{
-        console.log('123213123')  
-        console.log(clientes)  
-        this.subject$.next(clientes)
+    this.authService.getTypeJobs().subscribe((clients) => {
+      of(clients.map(client => new Job(client))).subscribe(clientes => {
+        console.log('123213123');
+        console.log(clientes);
+        this.subject$.next(clientes);
       });
-    })
+    });
   }
 
   ngOnInit() {
-    if(!this.authService.currenctUser)
+    if (!this.authService.currenctUser) {
     this.authService.setCurrentUser();
+    }
     this.currentUser = this.authService.currenctUser;
     this.getData();
 
@@ -232,19 +234,20 @@ export class AdminTimesheetComponent implements OnInit, AfterViewInit {
     // this.customers[index].labels = change.value;
     this.subject$.next(this.customers);
   }
-  acceptJob(customer:Job){
-    this.authService.setStatusJob(customer.id,'In Progress').subscribe((res)=>{
-      console.log(res)
+  updateStatus(customer: Job , status){
+    this.authService.setStatusJob(customer.id, status).subscribe((res) => {
+      console.log(res);
       this.authService.openSnackbar('status has updated successfully');
     });
     const index = this.customers.findIndex((existingCustomer) => existingCustomer.id === customer.id);
-    customer.setStatus('In Progress');
+    customer.setStatus(status);
     this.customers[index] = customer;
-    this.subject$.next(this.customers)
+    this.subject$.next(this.customers);
 
   }
-  confirmJob(customer:Job){
-    this.dialog.open(AddTimesheetComponent,{
+  confirmJob(customer: Job){
+    console.log('confirmJob', customer);
+    this.dialog.open(AddTimesheetComponent, {
       data: customer
     }).afterClosed().subscribe((customer: Job) => {
       /**
@@ -258,18 +261,8 @@ export class AdminTimesheetComponent implements OnInit, AfterViewInit {
         const index = this.customers.findIndex((existingCustomer) => existingCustomer.id === customer.id);
         customer.setStatus('Submitted');
         this.customers[index] = customer;
-        this.subject$.next(this.customers)
+        this.subject$.next(this.customers);
       }
     });
-  }
-  cancelJob(customer:Job){
-    this.authService.setStatusJob(customer.id,'Cancelled').subscribe((res)=>{
-      console.log(res)
-      this.authService.openSnackbar('status has updated successfully');
-    });
-    const index = this.customers.findIndex((existingCustomer) => existingCustomer.id === customer.id);
-    customer.setStatus('Cancelled');
-    this.customers[index] = customer;
-    this.subject$.next(this.customers)
   }
 }

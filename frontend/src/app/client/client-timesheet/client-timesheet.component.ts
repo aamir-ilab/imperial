@@ -71,7 +71,7 @@ export class ClientTimesheetComponent implements OnInit, AfterViewInit {
     { label: 'Role', property: 'role', type: 'text', visible: true },
     // { label: 'Start Time', property: 'startTime', type: 'text', visible: true },
     // { label: 'End Time', property: 'endTime', type: 'text', visible: true },
-    { label: 'Total Staff', property:'totalStaff', type: 'text', visible:true},
+    { label: 'Total Staff', property: 'totalStaff', type: 'text', visible: true},
     { label: 'Status', property: 'status', type: 'button', visible: true },
     { label: 'ID', property: '_id', type: 'button', visible: false },
     { label: 'jobID', property: 'id', type: 'button', visible: false },
@@ -100,7 +100,7 @@ export class ClientTimesheetComponent implements OnInit, AfterViewInit {
   @ViewChild(MatSort, { static: true }) sort: MatSort;
 
   constructor(private dialog: MatDialog,
-    private authService:AuthService) {
+              private authService: AuthService) {
   }
 
   get visibleColumns() {
@@ -112,13 +112,13 @@ export class ClientTimesheetComponent implements OnInit, AfterViewInit {
    * We are simulating this request here.
    */
   getData() {
-    this.authService.getSelectedJobs().subscribe((clients)=>{
-      of(clients.map(client =>new Job(client))).subscribe(clientes =>{
-        console.log('123213123')  
-        console.log(clientes)  
-        this.subject$.next(clientes)
+    this.authService.getSelectedJobs().subscribe((clients) => {
+      of(clients.map(client => new Job(client))).subscribe(clientes => {
+        console.log('123213123');
+        console.log(clientes);
+        this.subject$.next(clientes);
       });
-    })
+    });
   }
 
   ngOnInit() {
@@ -187,16 +187,18 @@ export class ClientTimesheetComponent implements OnInit, AfterViewInit {
     this.selection.deselect(customer);
     this.subject$.next(this.customers);
   }
-  cancelCustomer(customer:Job, str){
+  updateStatus(customer: Job, str){
 
-    this.authService.cancelJob(customer, str).subscribe((res)=>{
+    this.authService.updateStatus(customer, str).subscribe((res) => {
       this.authService.openSnackbar(`${str} Job Successfully!`);
-    })
-         const index = this.customers.findIndex((existingCustomer) => existingCustomer.id === customer.id);
-    if(str == 'Cancelled')
+    });
+    const index = this.customers.findIndex((existingCustomer) => existingCustomer.id === customer.id);
+    if (str == 'Cancelled') {
          this.customers[index]['status'] = aioTableLabelsOne[3];
-    else
+    }
+    else {
     this.customers[index]['status'] = aioTableLabelsOne[0];
+    }
 
     this.subject$.next(this.customers);
   }
@@ -241,8 +243,9 @@ export class ClientTimesheetComponent implements OnInit, AfterViewInit {
     return column.property;
   }
   selectRow(column){
-    if(column.statusStr =='Submitted'){
-      this.dialog.open(CustomerCreateUpdateComponent,{
+    console.log('selectRow')
+    if (column.statusStr == 'Submitted'){
+      this.dialog.open(CustomerCreateUpdateComponent, {
         data: column
       }).afterClosed().subscribe((customer: Job) => {
       /**
@@ -255,16 +258,16 @@ export class ClientTimesheetComponent implements OnInit, AfterViewInit {
          */
         const index = this.customers.findIndex((existingCustomer) => existingCustomer.id === customer.id);
         // if(customer.statusStr == 'Completed')
-             this.customers[index]['status'] = aioTableLabelsOne[4];
+        this.customers[index].status = aioTableLabelsOne[4];
         // else
         // this.customers[index]['status'] = aioTableLabelsOne[0];
-        console.log(this.customers[index])
+        console.log(this.customers[index]);
         this.subject$.next(this.customers);
       }
     });
     }
-    console.log('selectRow')
-    console.log(column)
+    console.log('selectRow');
+    console.log(column);
   }
   // onLabelChange(change: MatSelectChange, row: Customer) {
   //   const index = this.customers.findIndex(c => c === row);

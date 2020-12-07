@@ -40,29 +40,31 @@ export class AddTimesheetComponent implements OnInit {
   icLocationCity = icLocationCity;
   icEditLocation = icEditLocation;
   icPhone = icPhone;
-  timesheets:any[];
-  user:any;
-  workerId:any;
+  timesheets: any[];
+  user: any;
+  workerId: any;
   constructor(@Inject(MAT_DIALOG_DATA) public defaults: any,
               private dialogRef: MatDialogRef<AddTimesheetComponent>,
               private fb: FormBuilder,
-              private authService:AuthService) {
+              private authService: AuthService) {
   }
 
   ngOnInit() {
-    console.log('000000')
+    console.log('000000');
     console.log(this.defaults);
-      this.timesheets = this.defaults.timesheetId;
+    this.timesheets = this.defaults.timesheetId;
 
-    if(!this.authService.AllUser)
+    if (!this.authService.AllUser) {
       this.authService.setAllUser();
-    console.log('<><><><><><><><><><><<><><><><><><><><>')
-    console.log(this.authService.AllUser)
-    var tempArr = this.authService.AllUser;
+    }
+    console.log('<><><><><><><><><><><<><><><><><><><><>');
+    console.log(this.authService.AllUser);
+    const tempArr = this.authService.AllUser;
     this.workerId = [];
-    tempArr.forEach(obj =>{
-      if(obj.accountType == 'Worker')
-        this.workerId.push({profilePhoto:obj.profilePhoto, workerId:obj.workerId, id:obj._id});
+    tempArr.forEach(obj => {
+      if (obj.accountType === 'Worker') {
+        this.workerId.push({profilePhoto: obj.profilePhoto, workerId: obj.workerId, id: obj._id});
+      }
     });
     if (this.defaults) {
       this.mode = 'update';
@@ -73,7 +75,7 @@ export class AddTimesheetComponent implements OnInit {
     this.form = this.fb.group({
       id: [AddTimesheetComponent.id++],
       // imageSrc: this.defaults.imageSrc,
-      workerId:'',
+      workerId: '',
       // firstName: [this.defaults.firstName || ''],
       // lastName: [this.defaults.lastName || ''],
       // street: this.defaults.street || '',
@@ -117,17 +119,17 @@ export class AddTimesheetComponent implements OnInit {
     return this.mode === 'update';
   }
   createRange(number){
-  var items: number[] = [];
-  for(var i = 1; i <= number; i++){
+  const items: number[] = [];
+  for (let i = 1; i <= number; i++){
      items.push(i);
   }
   return items;
   }
   setSubmit(){
-    this.authService.setStatusJob(this.defaults.id, 'Submitted').subscribe((res)=>{
+    this.authService.setStatusJob(this.defaults.id, 'Submitted').subscribe((res) => {
       console.log(res);
       this.authService.openSnackbar('Submitted Successfully!');
-    })
+    });
     this.dialogRef.close(this.defaults);
   }
 }

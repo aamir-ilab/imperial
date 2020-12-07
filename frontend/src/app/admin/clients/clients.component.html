@@ -185,18 +185,19 @@
         <ng-container matColumnDef="actions">
           <th *matHeaderCellDef mat-header-cell mat-sort-header></th>
           <td *matCellDef="let row" class="w-10 text-secondary" mat-cell>
-            <button (click)="$event.stopPropagation()"
-                    [matMenuTriggerData]="{ client: row }"
-                    [matMenuTriggerFor]="actionsMenu"
-                    mat-icon-button
-                    type="button">
+            <button
+              (click)="$event.stopPropagation()"
+              [matMenuTriggerData]="{ client: row }"
+              [matMenuTriggerFor]="actionsMenu"
+              mat-icon-button
+              type="button">
               <mat-icon [icIcon]="icMoreHoriz"></mat-icon>
             </button>
           </td>
         </ng-container>
 
         <tr *matHeaderRowDef="visibleColumns" mat-header-row></tr>
-        <tr (click)="updateClient(row)"
+        <tr
             *matRowDef="let row; columns: visibleColumns;"
             @fadeInUp
             class="hover:bg-hover trans-ease-out cursor-pointer"
@@ -221,9 +222,21 @@
 
 <mat-menu #actionsMenu="matMenu" xPosition="before" yPosition="below">
   <ng-template let-client="client" matMenuContent>
-    <button (click)="updateClient(client)" mat-menu-item>
+    <button (click)="updateClient(client, 'client')" mat-menu-item>
       <mat-icon [icIcon]="icEdit"></mat-icon>
-      <span>Modify</span>
+      <span>Edit Client</span>
+    </button>
+    <button (click)="updateClient(client, 'account')" mat-menu-item>
+      <mat-icon [icIcon]="icEdit"></mat-icon>
+      <span>Edit Main User Account</span>
+    </button>
+    <button (click)="statusUpdate(client, 'Active')" *ngIf="client.clientStatus === 'Pending'" mat-menu-item>
+      <mat-icon [icIcon]="icCheck"></mat-icon>
+      <span>Accept Application</span>
+    </button>
+    <button (click)="statusUpdate(client, 'Archived')" *ngIf="client.clientStatus === 'Pending'" mat-menu-item>
+      <mat-icon [icIcon]="icTimes"></mat-icon>
+      <span>Deny Application</span>
     </button>
     <button (click)="deleteClient(client)" mat-menu-item>
       <mat-icon [icIcon]="icDelete"></mat-icon>

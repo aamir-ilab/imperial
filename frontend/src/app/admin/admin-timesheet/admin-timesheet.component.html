@@ -83,67 +83,24 @@
 
       <table @stagger [dataSource]="dataSource" class="w-full" mat-table matSort>
 
-        <!--- Note that these columns can be defined in any order.
-              The actual rendered columns are set as a property on the row definition" -->
-
-        <!-- Checkbox Column -->
-        <ng-container matColumnDef="checkbox">
-          <th *matHeaderCellDef mat-header-cell>
-            <mat-checkbox (change)="$event ? masterToggle() : null"
-                          [checked]="selection.hasValue() && isAllSelected()"
-                          [indeterminate]="selection.hasValue() && !isAllSelected()"
-                          color="primary">
-            </mat-checkbox>
-          </th>
-          <td *matCellDef="let row" class="w-4" mat-cell>
-            <mat-checkbox (change)="$event ? selection.toggle(row) : null"
-                          (click)="$event.stopPropagation()"
-                          [checked]="selection.isSelected(row)"
-                          color="primary">
-            </mat-checkbox>
-          </td>
+        <ng-container matColumnDef="JobId">
+          <th *matHeaderCellDef class="uppercase" mat-header-cell mat-sort-header> Job ID </th>
+          <td mat-cell *matCellDef="let element"> {{element.JobId}} </td>
         </ng-container>
 
-        <!-- Image Column -->
-        <!-- <ng-container matColumnDef="image">
-          <th *matHeaderCellDef mat-header-cell></th>
-          <td *matCellDef="let row" class="w-8 min-w-8 pr-0" mat-cell>
-            <img [src]="row['imageSrc']" class="avatar h-8 w-8 align-middle">
-          </td>
-        </ng-container> -->
-
-        <!-- Text Columns -->
-        <ng-container *ngFor="let column of columns; trackBy: trackByProperty">
-          <ng-container *ngIf="column.type === 'text'" [matColumnDef]="column.property">
-            <th *matHeaderCellDef class="uppercase" mat-header-cell mat-sort-header> {{ column.label }}</th>
-            <td *matCellDef="let row" [ngClass]="column.cssClasses" mat-cell>{{ row[column.property] }}</td>
-          </ng-container>
+        <ng-container matColumnDef="clientId">
+          <th *matHeaderCellDef class="uppercase" mat-header-cell mat-sort-header> Client Name </th>
+          <td mat-cell *matCellDef="let element"> {{element.clientId.companyName}} </td>
         </ng-container>
 
-        <!-- Contact Column -->
-        <ng-container matColumnDef="contact">
-          <th *matHeaderCellDef mat-header-cell mat-sort-header></th>
-          <td *matCellDef="let row" mat-cell>
-            <div class="flex">
-              <a (click)="$event.stopPropagation()"
-                 class="w-8 h-8 leading-none flex items-center justify-center hover:bg-hover text-primary bg-primary-light"
-                 mat-icon-button>
-                <mat-icon [icIcon]="icPhone" size="18px"></mat-icon>
-              </a>
+        <ng-container matColumnDef="shiftDateStr">
+          <th *matHeaderCellDef class="uppercase" mat-header-cell mat-sort-header> Shift Date </th>
+          <td mat-cell *matCellDef="let element"> {{element.shiftDateStr | date:'dd MMMM yyyy'}} </td>
+        </ng-container>
 
-              <a (click)="$event.stopPropagation()"
-                 class="w-8 h-8 leading-none flex items-center justify-center ml-1 hover:bg-hover text-teal bg-teal-light"
-                 mat-icon-button>
-                <mat-icon [icIcon]="icMail" size="18px"></mat-icon>
-              </a>
-
-              <a (click)="$event.stopPropagation()"
-                 class="w-8 h-8 leading-none flex items-center justify-center ml-1 hover:bg-hover text-green bg-green-light"
-                 mat-icon-button>
-                <mat-icon [icIcon]="icMap" size="18px"></mat-icon>
-              </a>
-            </div>
-          </td>
+        <ng-container matColumnDef="totalStaff">
+          <th *matHeaderCellDef class="uppercase" mat-header-cell mat-sort-header> TOTAL STAFF</th>
+          <td mat-cell *matCellDef="let element"> {{element.totalStaff}} </td>
         </ng-container>
 
         <!-- Label Column -->
@@ -156,39 +113,6 @@
                    fxFlex="none">
                    {{row.status.text}}
               </div>
-              <!-- <div (click)="labelSelect.open()"
-                   class="text-green bg-green-light cursor-pointer hover:bg-hover"
-                   fxFlex="none"
-                   fxLayout="row"
-                   fxLayoutAlign="center center">
-                  Accept
-              </div>
-              <div (click)="labelSelect.open()"
-                   class="text-secondary bg-secondary-light text-hint cursor-pointer hover:bg-hover"
-                   fxFlex="none"
-                   fxLayout="row"
-                   fxLayoutAlign="center center">
-                  No
-              </div> -->
-              <!-- <div (click)="labelSelect.open()"
-                   class="text-secondary bg-base text-hint cursor-pointer hover:bg-hover"
-                   fxFlex="none"
-                   fxLayout="row"
-                   fxLayoutAlign="center center">
-                <ic-icon [icon]="icAdd" size="18px"></ic-icon>
-              </div>
-              <mat-select #labelSelect="matSelect"
-                          (selectionChange)="onLabelChange($event, row)"
-                          [value]="row.labels"
-                          class="invisible w-0 h-0 text-sm"
-                          fxFlex="0 1 0px"
-                          multiple>
-                <mat-option *ngFor="let label of labels" [value]="label">
-                  <div [ngClass]="label.previewClass"
-                       class="h-6 w-6 align-middle ltr:mr-2 rtl:ml-2 rounded inline-block"></div>
-                  <span>{{ label.text }}</span>
-                </mat-option>
-              </mat-select> -->
             </div>
           </td>
         </ng-container>
@@ -208,7 +132,6 @@
         </ng-container>
 
         <tr *matHeaderRowDef="visibleColumns" mat-header-row></tr>
-        <!-- <tr (click)="updateCustomer(row)" -->
         <tr (click)="confirmJob(row)"
             *matRowDef="let row; columns: visibleColumns;"
             @fadeInUp
@@ -234,22 +157,14 @@
 
 <mat-menu #actionsMenu="matMenu" xPosition="before" yPosition="below">
   <ng-template let-customer="customer" matMenuContent>
-    <button (click)="acceptJob(customer)" *ngIf="customer.statusStr == 'Pending'" mat-menu-item>
+    <button (click)="updateStatus(customer, 'In Progress')" *ngIf="customer.statusStr == 'Pending'" mat-menu-item>
       <span>Accept</span>
     </button>
     <button (click)="confirmJob(customer)" *ngIf="customer.statusStr == 'In Progress'" mat-menu-item>
       <span>Confirm</span>
     </button>
-    <button (click)="cancelJob(customer)" *ngIf="customer.statusStr != 'Cancelled'"mat-menu-item>
+    <button (click)="updateStatus(customer, 'Cancelled')" *ngIf="customer.statusStr != 'Cancelled'"mat-menu-item>
       <span>Cancel</span>
     </button>
-    <!-- <button (click)="updateCustomer(customer)" mat-menu-item>
-      <mat-icon [icIcon]="icEdit"></mat-icon>
-      <span>Modify</span>
-    </button> -->
-    <!-- <button (click)="deleteCustomer(customer)" mat-menu-item>
-      <mat-icon [icIcon]="icDelete"></mat-icon>
-      <span>Delete</span>
-    </button> -->
   </ng-template>
 </mat-menu>

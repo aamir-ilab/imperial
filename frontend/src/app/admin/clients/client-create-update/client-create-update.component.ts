@@ -24,6 +24,7 @@ export class ClientCreateUpdateComponent implements OnInit {
 
   form: FormGroup;
   mode: 'create' | 'update' = 'create';
+  updateType: string;
 
   icMoreVert = icMoreVert;
   icClose = icClose;
@@ -37,6 +38,8 @@ export class ClientCreateUpdateComponent implements OnInit {
   icLocationCity = icLocationCity;
   icEditLocation = icEditLocation;
   icPhone = icPhone;
+  password; password2;
+  valid = true;
 
   constructor(@Inject(MAT_DIALOG_DATA) public defaults: any,
               private dialogRef: MatDialogRef<ClientCreateUpdateComponent>,
@@ -45,7 +48,9 @@ export class ClientCreateUpdateComponent implements OnInit {
 
   ngOnInit() {
     if (this.defaults) {
+      console.log('this.defaults', this.defaults);
       this.mode = 'update';
+      this.updateType = this.defaults.updateType;
     } else {
       this.defaults = {} as Client;
     }
@@ -53,7 +58,7 @@ export class ClientCreateUpdateComponent implements OnInit {
     this.form = this.fb.group({
       id: [ClientCreateUpdateComponent.id++],
       // profilePhoto: this.defaults.profilePhoto,
-      _id:[this.defaults._id],
+      _id: [this.defaults._id],
       emailAddress: [this.defaults.emailAddress || ''],
       firstName: [this.defaults.firstName || ''],
       lastName: [this.defaults.lastName || ''],
@@ -64,7 +69,8 @@ export class ClientCreateUpdateComponent implements OnInit {
       VATNumber: this.defaults.VATNumber || '',
       companyRegNumber: this.defaults.companyRegNumber || '',
       position: this.defaults.position || '',
-      phoneNumber: this.defaults.phoneNumber || '',
+      Password: '',
+      password2: ''
     });
   }
 

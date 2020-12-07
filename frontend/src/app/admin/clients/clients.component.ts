@@ -13,6 +13,8 @@ import icEdit from '@iconify/icons-ic/twotone-edit';
 import icDelete from '@iconify/icons-ic/twotone-delete';
 import icSearch from '@iconify/icons-ic/twotone-search';
 import icAdd from '@iconify/icons-ic/twotone-add';
+import icTimes from '@iconify/icons-fa-solid/times';
+import icCheck from '@iconify/icons-fa-solid/check';
 import icFilterList from '@iconify/icons-ic/twotone-filter-list';
 import { SelectionModel } from '@angular/cdk/collections';
 import icMoreHoriz from '@iconify/icons-ic/twotone-more-horiz';
@@ -64,20 +66,20 @@ export class ClientsComponent implements OnInit, AfterViewInit {
   @Input()
   columns: TableColumn<Client>[] = [
     { label: 'Checkbox', property: 'checkbox', type: 'checkbox', visible: true },
+    { label: 'Client ID', property: 'id', type: 'text', visible: true },
     // { label: 'Image', property: 'profilePhoto', type: 'image', visible: true },
-    { label: 'Name', property: 'name', type: 'text', visible: true, cssClasses: ['font-medium'] },
+    { label: 'Company Name', property: 'companyName', type: 'text', visible: true },
+    { label: 'Point of Contact', property: 'name', type: 'text', visible: true, cssClasses: ['font-medium'] },
+    { label: 'Email Address', property: 'emailAddress', type: 'text', visible: true },
     { label: 'First Name', property: 'firstName', type: 'text', visible: false },
     { label: 'Last Name', property: 'lastName', type: 'text', visible: false },
-    { label: 'Email', property: 'emailAddress', type: 'text', visible: true },
-    { label: 'Company Name', property: 'companyName', type: 'text', visible: true },
     { label: 'Company Address', property: 'companyAddress', type: 'text', visible: true },
-    { label: 'Company PhoneNumber', property: 'companyPhoneNumber', type: 'text', visible: true },
+    { label: 'Phone Number', property: 'companyPhoneNumber', type: 'text', visible: true },
     { label: 'Email Address AccountsTeam', property: 'emailAddressAccountsTeam', type: 'text', visible: false },
     { label: 'VATNumber', property: 'VATNumber', type: 'text', visible: false },
     { label: 'CompanyRegNumber', property: 'companyRegNumber', type: 'text', visible: false },
-    { label: 'Position', property: 'position', type: 'text', visible: true },
+    { label: 'Position', property: 'position', type: 'text', visible: false },
     { label: 'Actions', property: 'actions', type: 'button', visible: true },
-    { label: 'ID', property: '_id', type: 'button', visible: false }
   ];
   pageSize = 10;
   pageSizeOptions: number[] = [5, 10, 20, 50];
@@ -87,6 +89,8 @@ export class ClientsComponent implements OnInit, AfterViewInit {
 
   labels = aioTableLabels;
 
+  icTimes = icTimes;
+  icCheck = icCheck;
   icPhone = icPhone;
   icMail = icMail;
   icMap = icMap;
@@ -165,7 +169,9 @@ export class ClientsComponent implements OnInit, AfterViewInit {
     });
   }
 
-  updateClient(client: Client) {
+  updateClient(client: Client, updateType) {
+    console.log('client', client);
+    client['updateType'] = updateType;
     this.dialog.open(ClientCreateUpdateComponent, {
       data: client
     }).afterClosed().subscribe(updatedClient => {
@@ -200,6 +206,15 @@ export class ClientsComponent implements OnInit, AfterViewInit {
       this.clients.splice(this.clients.findIndex((existingClient) => existingClient.id === client.id), 1);
       this.selection.deselect(client);
       this.subject$.next(this.clients);
+  }
+
+  statusUpdate(client: Client, status) {
+    this.authService.updateClientStatus(client, status).subscribe((res => {
+      this.authService.openSnackbar('Client Status Updated Successfully!');
+    }));
+    const index = this.clients.findIndex((existingClient) => existingClient.id === client.id);
+    this.clients[index] = new Client(client);
+    this.subject$.next(this.clients);
   }
 
   deleteClients(clients: Client[]) {

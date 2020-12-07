@@ -11,19 +11,21 @@ module.exports = () => {
         passwordField: 'hash'
     }, (username, password, done) => {
         // console.log('dddd');
-        // console.log('hash' + username);
+        console.log('authenticate', username, password);
         User.findOne({ 'emailAddress': username }, (err, client) => {
             // console.log('err',err)
-            // console.log('password', password)
+            console.log('auth client', client)
             if (err) {
                 return done(err);
             }
             if (!client) {
+                console.log('Incorrect fullname');
                 return done(null, false, {
                     message: "Incorrect fullname."
                 });
             }
             if (!client.ValidPassword(password)) {
+                console.log('Incorrect password');
                 return done(null, false, {
                     message: "Incorrect password."
                 });
