@@ -136,7 +136,7 @@ export class CustomerCreateUpdateComponent implements OnInit {
       additionalInformation: [this.defaults.additionalInformation || ''],
       status: [this.defaults.status || statusTableLabels[2]],
       stateCtrl: [this.stateCtrl.value || ''],
-      shifts: this.fb.array([])
+      shifts: new FormArray([])
     });
     this.selectedClient = this.defaults.client;
   }
@@ -255,7 +255,7 @@ export class CustomerCreateUpdateComponent implements OnInit {
   addShift(){
     console.log('addShift');
     // this.headers.splice(index, 0, item);
-    this.shifts.push(this.fb.control({
+    this.shifts.push(this.fb.group({
       department: [''],
       role: [''],
       startTime: [''],
