@@ -110,7 +110,10 @@
     <mat-icon class="sm:ml-3 text-green-500 mt-3" [icIcon]="icAdd" (click)="addShift()" ></mat-icon>
     <div formArrayName="shifts"></div>
     <div *ngFor="let shift of shifts.controls; let i = index" class="list-group list-group-flush">
-      <mat-form-field class="lg:w-3/12">
+					
+					<div [formGroup]="shift">
+					
+					<mat-form-field class="lg:w-3/12">
           <mat-label>Department</mat-label>
           <mat-select formControlName="department" (selectionChange)="changeAccountType($event , 1)" [(ngModel)]="selectedType">
             <mat-option value="Housekeeping">Housekeeping</mat-option>
@@ -167,7 +170,9 @@
         <mat-label>Staff</mat-label>
         <input type="number" formControlName="total" matInput min="1">
 
-      </mat-form-field>
+						</mat-form-field>
+						
+					</div>
       <mat-icon class="sm:ml-3 text-green-500 mt-3" [icIcon]="icAdd" (click)="addShift()" ></mat-icon>
       <mat-icon class="sm:ml-3 text-red-500 mt-3" [icIcon]="icMinus" (click)="removeShift(i)" ></mat-icon>
     </div>
