@@ -188,11 +188,6 @@ export class AuthService {
     console.log('AllUser', this.AllUser);
   }
   async getAllJobAuth(){
-    // await this.getAllJobs().subscribe((res)=>{
-    //   this.AllJob = res;
-    //   this.setAllJobsLocal(this.AllJob);
-    //   console.log(res)
-    // })
     this.AllJob = await this.getAllJobs();
     console.log('AllJob', this.AllJob);
   }

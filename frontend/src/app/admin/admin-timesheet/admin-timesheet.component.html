@@ -93,14 +93,14 @@
           <td mat-cell *matCellDef="let element"> {{element.clientId.companyName}} </td>
         </ng-container>
 
-        <ng-container matColumnDef="shiftDateStr">
+        <ng-container matColumnDef="shiftDate">
           <th *matHeaderCellDef class="uppercase" mat-header-cell mat-sort-header> Shift Date </th>
-          <td mat-cell *matCellDef="let element"> {{element.shiftDateStr | date:'dd MMMM yyyy'}} </td>
+          <td mat-cell *matCellDef="let element"> {{element.shiftDate | date:'dd MMMM yyyy'}} </td>
         </ng-container>
 
-        <ng-container matColumnDef="totalStaff">
+        <ng-container matColumnDef="timesheetId">
           <th *matHeaderCellDef class="uppercase" mat-header-cell mat-sort-header> TOTAL STAFF</th>
-          <td mat-cell *matCellDef="let element"> {{element.totalStaff}} </td>
+          <td mat-cell *matCellDef="let element"> {{element.timesheetId.totalStaff}} </td>
         </ng-container>
 
         <!-- Label Column -->

@@ -1,22 +1,13 @@
-<div *ngIf="board$ | async as board" class="h-full w-full overflow-hidden" fxLayout="column">
-
+<div class="h-full w-full overflow-hidden" fxLayout="column">
   <div class="py-4 px-gutter" fxFlex="none" fxLayout="row" fxLayoutAlign="start center" vexContainer>
-    <h1 class="title m-0">{{currentScrum.client.clientId.companyName}}</h1>
+    <h1 class="title m-0">{{currentJob.client.clientId.companyName}}</h1>
     <!-- <button (click)="toggleStar(board)" class="ml-2" mat-icon-button type="button"> -->
       <span class="ml-8">Edit Job
         <!-- <mat-icon [icIcon]="icEdit" class="text-amber"></mat-icon> -->
       </span>
-      <!-- <mat-icon *ngIf="!board.starred" [icIcon]="icStarBorder"></mat-icon> -->
-    <!-- </button> -->
 
     <span fxFlex></span>
 
-    <!-- <div *ngIf="users?.length > 0" fxFlex fxLayout="row" fxLayoutAlign="end center">
-      <img *ngFor="let user of users"
-           [matTooltip]="user.workerId"
-           [src]="user.profilePhoto"
-           class="avatar overlapping">
-    </div> -->
   </div>
 
   <div (cdkDropListDropped)="dropList($event)"
@@ -30,7 +21,7 @@
        fxLayoutAlign="start start"
        fxLayoutGap="24px"
        vexContainer>
-    <div *ngFor="let list of board.children; trackBy: trackById"
+    <div *ngFor="let list of board.children;"
          @fadeInUp
          [cdkDragData]="list"
          cdkDrag
@@ -48,56 +39,27 @@
              [cdkDropListData]="list.children"
              cdkDropList
              class="px-4 pb-4"
-             id="{{ list.id }}">
-          <div (click)="open(board, list, card)"
-               *ngFor="let card of list.children; trackBy: trackById"
+             id="{{ list.shiftId }}">
+          <div (click)="open()"
+               *ngFor="let card of list.children;"
                [cdkDragData]="card"
                cdkDrag
                class="scrumboard-card card w-full cursor-pointer overflow-hidden">
 
-            <!-- <div *ngIf="card.cover" class="w-full h-40 overflow-hidden">
-              <img [src]="card.cover.path" class="object-cover w-full h-full">
-            </div> -->
-
             <div class="p-4">
-              <div *ngIf="card.labels?.length > 0" class="mb-2" fxLayout="row" fxLayoutGap="8px">
+              <!-- <div *ngIf="card.labels?.length > 0" class="mb-2" fxLayout="row" fxLayoutGap="8px">
                 <div *ngFor="let label of card.labels"
                      [ngClass]="label.bgClass"
                      class="label"
                      fxFlex></div>
-              </div>
-
-
-              <!-- <h3 class="body-2 m-0 select-none">client {{ card.client }} - {{card.total}} Workers need</h3> -->
-              <h3 class="body-2 m-0 select-none">{{card.title}} -  {{card.timesheetId?.length}}/{{card.total}}</h3>
+              </div> -->
+              <!--TODO need to get assigned worker/{{card.shift.total}} -->
+              <h3 class="body-2 m-0 select-none">{{card.title}} -  {{card.shift.total}}/{{card.shift.total}}</h3>
 
               <div *ngIf="card.workerId?.length > 0"
                    class="mt-2"
                    fxLayout="row"
                    fxLayoutGap="8px">
-                <!-- <div *ngIf="card.dueDate"
-                     [ngClass]="{ 'bg-green text-contrast-white': card.dueDate.done }"
-                     class="box bg-app-bar text-secondary rounded caption">
-                  <ic-icon [icon]="icNotifications" inline="true" size="16px"></ic-icon>
-                  <span class="box-text">{{ card.dueDate.date | dateTokens:'MMM, dd' }}</span>
-                </div> -->
-
-                <!-- <div *ngIf="card.comments?.length > 0" class="box bg-app-bar text-secondary rounded caption">
-                  <ic-icon [icon]="icInsertComment" class="ml-1" inline="true" size="15px"></ic-icon>
-                  <span class="box-text">{{ card.comments.length }}</span>
-                </div>
-
-                <div *ngIf="card.attachments?.length > 0" class="box bg-app-bar text-secondary rounded caption">
-                  <ic-icon [icon]="icAttachFile" inline="true" size="16px"></ic-icon>
-                  <span class="box-text">{{ card.attachments.length }}</span>
-                </div>
--->
-                <div *ngIf="card.timesheetId?.length > 0" fxFlex fxLayout="row" fxLayoutAlign="end center">
-                  <img *ngFor="let user of card.timesheetId"
-                       [matTooltip]="user.workerId"
-                       [src]="user.profilePhoto"
-                       class="avatar overlapping">
-                </div>
               </div>
             </div>
           </div>
@@ -122,41 +84,9 @@
           </div>
         </ng-template>
 
-        <!-- <button (click)="openAddCard(list, addCardTemplate, addCardOriginRef)"
-                class="w-full"
-                mat-button
-                type="button">
-          <ic-icon [icon]="icAdd" class="mr-1 -ml-1" inline="true"></ic-icon>
-          <span>ADD CARD</span>
-        </button> -->
       </div>
+
     </div>
-
-    <!-- <div #addListOriginRef class="w-full max-w-xxs rounded bg-app-bar" fxFlex="none">
-      <ng-template #addListTemplate let-close="close">
-        <div class="card px-4 pt-3 pb-2">
-          <mat-form-field class="vex-dense-form-field">
-            <mat-label>List Title</mat-label>
-            <input [formControl]="addListCtrl" matInput placeholder="Enter your title...">
-          </mat-form-field>
-
-          <div class="mt-3" fxLayout="row" fxLayoutAlign="space-between center">
-            <button (click)="close()" class="text-secondary w-8 h-8 leading-none" mat-icon-button type="button">
-              <mat-icon [icIcon]="icClose" size="18px"></mat-icon>
-            </button>
-            <button (click)="createList(board, close)" color="primary" mat-button type="button">CREATE</button>
-          </div>
-        </div>
-      </ng-template>
-
-      <button (click)="openAddList(board, addListTemplate, addListOriginRef)"
-              class="w-full"
-              mat-button
-              type="button">
-        <ic-icon [icon]="icAdd" class="mr-1 -ml-1" inline="true"></ic-icon>
-        <span>ADD LIST</span>
-      </button>
-    </div> -->
   </div>
 
 </div>

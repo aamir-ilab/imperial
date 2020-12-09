@@ -26,11 +26,11 @@ const colors: any = {
 };
 
 export interface MyCalenderEvent extends CalendarEvent {
-  startTime?: number;
-  endTime?: number;
-  department?: string;
-  role?: string;
-  total?: number;
+  startTime?: any;
+  endTime?: any;
+  department?: any;
+  role?: any;
+  total?: any;
   fulfilled?: number;
   client?: object;
 }
@@ -139,18 +139,20 @@ export class WorkerCalendarComponent {
           col = colors.yellow;
  }
         if (ele.statusStr !== 'Pending') {
-          this.events.push({
-            start: startOfDay(new Date(ele.shiftDate)),
-            title: ele.department + ' ( client: ' + ele.client + ')',
-            color: col,
-            startTime: ele.startTime,
-            endTime: ele.endTime,
-            department: ele.department,
-            role: ele.role,
-            total: ele.total,
-            fulfilled: ele.fulfilled,
-            actions: this.actions,
-            client: ele
+          ele.shifts.forEach(e => {
+            this.events.push({
+              start: startOfDay(new Date(ele.shiftDate)),
+              title: e.department + ' ( client: ' + ele.client + ')',
+              color: col,
+              startTime: e.startTime,
+              endTime: e.endTime,
+              department: e.department,
+              role: e.role,
+              total: e.total,
+              fulfilled: ele.fulfilled,
+              actions: this.actions,
+              client: ele
+            });
           });
         }
       });

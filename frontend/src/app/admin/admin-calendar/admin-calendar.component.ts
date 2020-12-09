@@ -31,11 +31,11 @@ const colors: any = {
 };
 
 export interface MyCalenderEvent extends CalendarEvent {
-  startTime?: number;
-  endTime?: number;
-  department?: string;
-  role?: string;
-  total?: number;
+  startTime?: any;
+  endTime?: any;
+  department?: any;
+  role?: any;
+  total?: any;
   fulfilled?: number;
   client?: object;
 }
@@ -120,18 +120,21 @@ export class AdminCalendarComponent {
           console.log('col', ele.statusStr, col);
         }
         if (ele.statusStr !== 'Pending') {
-          this.events.push({
-            start: startOfDay(new Date(ele.shiftDate)),
-            title: ele.clientId.companyName + ' — ' + ele.department + ' ( ' + ele.total + '/4 assigned).',
-            color: col,
-            startTime: ele.startTime,
-            endTime: ele.endTime,
-            department: ele.department,
-            role: ele.role,
-            total: ele.total,
-            fulfilled: ele.fulfilled,
-            actions: this.actions,
-            client: ele
+          ele.shifts.forEach(e => {
+            this.events.push({
+              start: startOfDay(new Date(ele.shiftDate)),
+              title: ele.clientId.companyName + ' — ' + e.department + ' ( ' + e.total + '/4 assigned).',
+              color: col,
+              startTime: e.startTime,
+              endTime: e.endTime,
+              department: e.department,
+              role: e.role,
+              total: e.total,
+              fulfilled: ele.fulfilled,
+              actions: this.actions,
+              client: ele
+            });
+
           });
         }
       });
@@ -161,46 +164,49 @@ export class AdminCalendarComponent {
   }
 
   handleEvent(action: string, event: any): void {
-    console.log('jobevent', event.client.id);
-    this.authService.currentScrumboard = [
-      {
-      id: event.client.id,
-      title: event.client.client,
-      children: [
-        // { id:1, label:'Unassigned Shifts', children:[] },
-        // { id:2, label:'Assigned', children:[] },
-        { id: 1, label: 'In Progress', children: [] },
-        { id: 2, label: 'Submitted', children: [] },
-        { id: 3, label: 'Completed', children: [] },
-      ]
-    }];
-    this.authService.currentJob = event;
-    const arrLabel = ['In Progress', 'Submitted', 'Completed'];
-    console.log('&&&&');
-    console.log(event.client);
-    console.log('&&&&');
-    arrLabel.forEach((ele, index) => {
-      if (ele === event.client.statusStr) {
-        this.authService.currentScrumboard[0].children[index].children.push({
-          id: event.client.id,
-          title: event.client.client,
-          client: event.client.client,
-          department: event.client.department,
-          role: event.client.role,
-          shiftDate: event.client.shiftDate,
-          startTime: event.client.startTime,
-          endTime: event.client.endTime,
-          locationShift: event.client.locationShift,
-          purchaseOrderNo: event.client.purchaseOrderNo,
-          additionalInformation: event.client.additionalInformation,
-          statusStr: event.client.statusStr,
-          fulfilled: event.client.fulfilled,
-          total: event.client.total,
-          totalStaff: event.client.totalStaff,
-          clientId: event.client.clientId,
-          timesheetId: event.client.timesheetId
-        });
-      }
+    console.log('jobevent', event.client.shifts[0].department);
+    this.authService.currentScrumboard = [];
+    event.client.shifts.forEach((element, i) => {
+      this.authService.currentScrumboard.push({
+        id: event.client.id,
+        title: event.client.shifts[i].department,
+        shiftId: event.client.shifts[i]._id,
+        children: [
+          // { id:1, label:'Unassigned Shifts', children:[] },
+          // { id:2, label:'Assigned', children:[] },
+          { id: 1, label: 'In Progress', children: [] },
+          { id: 2, label: 'Submitted', children: [] },
+          { id: 3, label: 'Completed', children: [] },
+        ]
+      });
+      this.authService.currentJob = event;
+      console.log('currentJob', this.authService.currentJob);
+      const arrLabel = ['In Progress', 'Submitted', 'Completed'];
+      console.log('&&&&', event.client);
+      arrLabel.forEach((ele, index) => {
+        if (ele === event.client.statusStr) {
+          this.authService.currentScrumboard[i].children[index].children.push({
+            id: event.client.id,
+            title: event.client.shifts[i].department,
+            client: event.client.client,
+            // department: event.client.department,
+            // role: event.client.role,
+            shiftDate: event.client.shiftDate,
+            // startTime: event.client.startTime,
+            // endTime: event.client.endTime,
+            locationShift: event.client.locationShift,
+            purchaseOrderNo: event.client.purchaseOrderNo,
+            additionalInformation: event.client.additionalInformation,
+            statusStr: event.client.statusStr,
+            fulfilled: event.client.fulfilled,
+            // total: event.client.total,
+            shift: event.client.shifts[i],
+            totalStaff: event.client.totalStaff,
+            clientId: event.client.clientId,
+            timesheetId: event.client.timesheetId
+          });
+        }
+      });
     });
     this.authService.setCurrentScrumboardLocal(this.authService.currentScrumboard);
     this.router.navigate(['/admin/jobs/scrumboard', event.client.id]);

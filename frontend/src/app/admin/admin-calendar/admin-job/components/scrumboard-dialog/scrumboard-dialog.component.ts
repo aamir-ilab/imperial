@@ -29,22 +29,22 @@ import { formatDate } from '@angular/common';
 export class ScrumboardDialogComponent implements OnInit {
 
   form = this.fb.group({
-    title:null,
+    title: null,
     client: null,
-    department:null,
+    department: null,
     role: null,
-    shiftDate:null,
-    startTime:null,
-    endTime:null,
-    locationShift:null,
+    shiftDate: null,
+    startTime: null,
+    endTime: null,
+    locationShift: null,
     purchaseOrderNo: null,
-    additionalInformation:null,
-    statusStr:null,
-    fulfilled:0,
-    total:0,
-    totalStaff:null,
-    clientId:null,
-    timesheetId:[],
+    additionalInformation: null,
+    statusStr: null,
+    fulfilled: 0,
+    total: 0,
+    totalStaff: null,
+    clientId: null,
+    timesheetId: [],
     // cover: null,
     // attachments: this.fb.array([]),
     // comments: this.fb.array([]),
@@ -52,8 +52,9 @@ export class ScrumboardDialogComponent implements OnInit {
     // labels: []
   });
 
+  roles: any;
   commentCtrl = new FormControl();
-  originalTimesheets:any[] = [];
+  originalTimesheets: any[] = [];
   icAssignment = icAssignment;
   icDescription = icDescription;
   icClose = icClose;
@@ -67,151 +68,281 @@ export class ScrumboardDialogComponent implements OnInit {
   jobId;
   // users = scrumboardUsers;
   labels = scrumboardLabels;
-  workerId:any;
-  list: ScrumboardList;
-  board: Scrumboard;
+  workerId: any;
+  list: any;
+  // list: ScrumboardList;
+  // board: Scrumboard;
   fulfilled;
-  newWorkerId:any;
-  oldWorkerId:any;
-  wokersSelect:any = [];
+  newWorkerId: any;
+  oldWorkerId: any;
+  wokersSelect: any = [];
+  totalworkers: [];
   constructor(private dialogRef: MatDialogRef<ScrumboardDialogComponent>,
               @Inject(MAT_DIALOG_DATA) private data: {
-                card: any;
-                list: ScrumboardList;
-                board: Scrumboard;
               },
               private fb: FormBuilder,
-              private authService:AuthService) { }
+              private authService: AuthService) { }
 
   async ngOnInit() {
-    if(!this.authService.AllUser){
-      await this.authService.getAllJobAuth();
+    if (!this.authService.AllUser){
+      await this.authService.getAllUserAuth();
     }
-    console.log('<><><><><><><><><><><<><><><><><><><><>')
-    console.log(this.authService.AllUser)
-    var tempArr = this.authService.AllUser;
+    const tempArr = this.authService.AllUser;
     this.workerId = [];
-    tempArr.forEach(obj =>{
-      if(obj.accountType == 'Worker')
-        this.workerId.push({profilePhoto:obj.profilePhoto, name:`${obj.forename} ${obj.surename}`,workerId:obj.workerId,emailAddress:obj.emailAddress, id:obj._id});
-    });
-    console.log(this.workerId)
-    console.log(this.data.card)
-    // tempArr.filter(obj => if(obj.accountType == 'Worker'){ return {profilePhoto:obj.profilePhoto, };});
-    this.list = this.data.list;
-    this.board = this.data.board;
-    const card = this.data.card;
-    this.fulfilled = card.timesheetId.length;
-    this.originalTimesheets = card.timesheetId;
-    // this.workerId = card.workerId;
-    this.newWorkerId = [];
-    this.oldWorkerId = [];
-    card.timesheetId.forEach(element => {
-      this.newWorkerId.push({profilePhoto:element.profilePhoto, workerId:element.workerId, id:element.id});
-      this.oldWorkerId.push({profilePhoto:element.profilePhoto, workerId:element.workerId, id:element.id});
-    });
-    var shiftDateStr = formatDate(new Date(card.shiftDate), 'yyyy-MM-dd','en').toString();
-    console.log(card)
-    console.log(this.workerId)
-    this.form.valueChanges.subscribe(console.log);
+    tempArr.forEach(obj => {
+        if (obj.accountType === 'Worker') {
+          this.workerId.push({profilePhoto: obj.profilePhoto, name: `${obj.forename} ${obj.surename}`, workerId: obj.workerId, emailAddress: obj.emailAddress, id: obj._id});
+        }
+      });
+    console.log('this.workerId', this.workerId);
 
-    this.form.patchValue({
-      title:card.title || null,
-      client:card.client ||  null,
-      department:card.department || null,
-      role: card.role || null,
-      shiftDate: shiftDateStr || null,
-      startTime:card.startTime || null,
-      endTime:card.endTime || null,
-      locationShift:card.locationShift || null,
-      purchaseOrderNo: card.purchaseOrderNo || null,
-      additionalInformation:card.additionalInformation || null,
-      statusStr:card.statusStr || null,
-      fulfilled:card.fulfilled || 0,
-      total:card.total || 0,
-      totalStaff:card.totalStaff || null,
-      clientId:card.clientId || null,
-      timesheetId:this.newWorkerId|| [],
-      users: card.users || [],
-      // labels: card.labels || []
-    });
+    console.log('this.data', this.data);
+    // tempArr.filter(obj => if(obj.accountType == 'Worker'){ return {profilePhoto:obj.profilePhoto, };});
+    this.list = this.data;
+    // this.totalworkers = Array(this.list.client[0].total).fill(0).map((x, i) => i);
+    // this.fulfilled = card.timesheetId.length;
+    // this.originalTimesheets = card.timesheetId;
+    // // this.workerId = card.workerId;
+    // this.newWorkerId = [];
+    // this.oldWorkerId = [];
+    // card.timesheetId.forEach(element => {
+    //   this.newWorkerId.push({profilePhoto: element.profilePhoto, workerId: element.workerId, id: element.id});
+    //   this.oldWorkerId.push({profilePhoto: element.profilePhoto, workerId: element.workerId, id: element.id});
+    // });
+    // const shiftDateStr = formatDate(new Date(card.shiftDate), 'yyyy-MM-dd', 'en').toString();
+    // console.log(card);
+    // console.log(this.workerId);
+    // this.form.valueChanges.subscribe(console.log);
+
+    // this.form.patchValue({
+    //   title: card.title || null,
+    //   client: card.client ||  null,
+    //   department: card.department || null,
+    //   role: card.role || null,
+    //   shiftDate: shiftDateStr || null,
+    //   startTime: card.startTime || null,
+    //   endTime: card.endTime || null,
+    //   locationShift: card.locationShift || null,
+    //   purchaseOrderNo: card.purchaseOrderNo || null,
+    //   additionalInformation: card.additionalInformation || null,
+    //   statusStr: card.statusStr || null,
+    //   fulfilled: card.fulfilled || 0,
+    //   total: card.total || 0,
+    //   totalStaff: card.totalStaff || null,
+    //   clientId: card.clientId || null,
+    //   timesheetId: this.newWorkerId || [],
+    //   users: card.users || [],
+    //   // labels: card.labels || []
+    // });
 
     // this.form.setControl('attachments', this.fb.array(card.attachments || []));
     // this.form.setControl('comments', this.fb.array(card.comments || []));
-  }
-
-  save() {
-    console.log('.........../.././././')
-    // console.log(this.data.card.timesheetId[0].JobId)
-    console.log(this.newWorkerId)
-    if(this.originalTimesheets.length > 0){
-    this.authService.removeTimesheetsJob(this.originalTimesheets).subscribe((res)=>{
-      console.log(this.data.card.timesheetId)
-      console.log(this.data.card.id)
-                this.authService.setJobWorkers(this.newWorkerId,this.data.card.id).subscribe((res)=>{
-            // this.authService.setJobWorkers(JSON.stringify(this.newWorkerId)).subscribe((res)=>{
-            console.log('setJobWOrker')
-            console.log(res)
-          })
-          this.dialogRef.close(this.form.value);
-        })
+    if (this.list.department === 'Housekeeping'){
+      this.roles = [
+        {
+          value: 'Linen Porter',
+          label: 'Linen Porter'
+        },
+        {
+          value: 'Floor Porter',
+          label: 'Floor Porter'
+        },
+        {
+          value: 'Floor Supervisor',
+          label: 'Floor Supervisor'
+        },
+        {
+          value: 'Room Supervisor',
+          label: 'Room Supervisor'
+        },
+        {
+          value: 'Evening Room Attendant',
+          label: 'Evening Room Attendant'
+        },
+        {
+          value: 'Public Area Attendant',
+          label: 'Public Area Attendant'
+        },
+        {
+          value: 'Spa Attendant',
+          label: 'Spa Attendant'
+        },
+        {
+          value: 'Valet',
+          label: 'Valet'
+        },
+        {
+          value: 'Housekeeper',
+          label: 'Housekeeper'
+        }
+      ];
+    }
+    else if (this.list.department === 'Food and Beverage') {
+      this.roles = [
+        {
+          value: 'Waiters',
+          label: 'Waiters'
+        },
+        {
+          value: 'Night Waiters',
+          label: 'Night Waiters'
+        },
+        {
+          value: 'Night Room Service',
+          label: 'Night Room Service'
+        },
+        {
+          value: 'Supervisor Banqueting',
+          label: 'Supervisor Banqueting'
+        },
+        {
+          value: 'Team Leader',
+          label: 'Team Leader'
+        },
+        {
+          value: 'Silver Service Waiters',
+          label: 'Silver Service Waiters'
+        },
+        {
+          value: 'Bar Staff',
+          label: 'Bar Staff'
+        },
+        {
+          value: 'Cloakroom',
+          label: 'Cloakroom'
+        },
+        {
+          value: 'Concierge',
+          label: 'Concierge'
+        },
+        {
+          value: 'Hostess',
+          label: 'Hostess'
+        }
+      ];
     }
     else{
-      console.log('./.././././')
-      console.log(this.newWorkerId)
-      console.log(this.data.card.id)
-        this.authService.setJobWorkers(this.newWorkerId,this.data.card.id).subscribe((res)=>{
-      // this.authService.setJobWorkers(JSON.stringify(this.newWorkerId)).subscribe((res)=>{
-      console.log('setJobWOrker')
-      console.log(res)
-      this.authService.openSnackbar('updated Successfully')
-    })
-    this.dialogRef.close(this.form.value);
+      this.roles = [
+        {
+          value: 'Kitchen Porter',
+          label: 'Kitchen Porter'
+        },
+        {
+          value: 'Night Kitchen Porter',
+          label: 'Night Kitchen Porter'
+        },
+        {
+          value: 'Night Cleaners',
+          label: 'Night Cleaners'
+        },
+        {
+          value: 'Supervisor BOH (Back of House)',
+          label: 'Supervisor BOH (Back of House)'
+        },
+        {
+          value: 'Food Runners',
+          label: 'Food Runners'
+        },
+        {
+          value: 'Breakfast Runners',
+          label: 'Breakfast Runners'
+        },
+        {
+          value: 'Commis Chef',
+          label: 'Commis Chef'
+        },
+        {
+          value: 'Breakfast Chef',
+          label: 'Breakfast Chef'
+        },
+        {
+          value: 'Chef De Partie',
+          label: 'Chef De Partie'
+        },
+        {
+          value: 'Pastry Chef',
+          label: 'Pastry Chef'
+        },
+        {
+          value: 'Banqueting Porter',
+          label: 'Banqueting Porter'
+        }
+      ];
     }
-    this.authService.openSnackbar('updated Successfully')
-    const controls = this.form.controls;
-    const resultArr = this.oldWorkerId.filter(({ id: id1 }) => !this.newWorkerId.some(({ id: id2 }) => id2 === id1));
-    if(resultArr.length > 0){
-      resultArr.forEach(elementR => {
-        var obj = {
-        subject : "Your shift has been cancelled  " + this.data.card.timesheetId[0].JobId,
-        name : elementR.workerId.forename + ' ' + elementR.workerId.surename,
-        email: elementR.workerId.emailAddress,
-        content1: `Your shift with ${this.data.card.clientId.firstName} ${this.data.card.clientId.lastName} has been cancelled.`,
-        content2: `We are sorry for any inconvenience this may have caused.`,
-        content3:`If you have any questions, please feel free to contact us.`,
-        btn:'LOGIN TO PORTAL',
-        btn_link:'http://imperial-recruitment.herokuapp.com/#/login',
-        link:''
-      };
-      console.log('obj');
-      console.log(obj)
-      this.authService.sendEmail(obj).subscribe((sendemail_res)=>{
-        console.log('crate job email')
-    })
-});  
-    }
-    this.newWorkerId.forEach(element => {
-            var obj = {
-            subject : "You have been assigned a new shift " + this.data.card.timesheetId[0].JobId,
-            name : element.name,
-            email: element.emailAddress,
-            content1: `You have been assigned a shift with ${this.data.card.clientId.firstName} ${this.data.card.clientId.lastName} `,
-            content2: `Please read the shift details carefully below. If you have any questions relating to the shift, or if you’re unable to attend this shift, please contact Imperial Recruitment as soon as possible on 020 7436 7424.`,
-            content3:`<span>Shift Date: ${controls.shiftDate.value} </span><br/>
-            <span>Shift start time: ${controls.startTime.value} – ${controls.endTime.value}</span><br/>
-            <span>Role: ${controls.role.value}</span><br/>`,
-            btn:'LOGIN TO PORTAL',
-            btn_link:'http://imperial-recruitment.herokuapp.com/#/login',
-            link:''
-          };
-          console.log('obj');
-          console.log(obj)
-          this.authService.sendEmail(obj).subscribe((sendemail_res)=>{
-            console.log('crate job email')
-        })
-    });  
   }
+  save() {}
+//   save() {
+//     console.log('.........../.././././');
+//     // console.log(this.data.card.timesheetId[0].JobId)
+//     console.log(this.newWorkerId);
+//     if (this.originalTimesheets.length > 0){
+//     this.authService.removeTimesheetsJob(this.originalTimesheets).subscribe((res) => {
+//       console.log(this.data.card.timesheetId);
+//       console.log(this.data.card.id);
+//       this.authService.setJobWorkers(this.newWorkerId, this.data.card.id).subscribe((res) => {
+//             // this.authService.setJobWorkers(JSON.stringify(this.newWorkerId)).subscribe((res)=>{
+//             console.log('setJobWOrker');
+//             console.log(res);
+//           });
+//       this.dialogRef.close(this.form.value);
+//         });
+//     }
+//     else{
+//       console.log('./.././././');
+//       console.log(this.newWorkerId);
+//       console.log(this.data.card.id);
+//       this.authService.setJobWorkers(this.newWorkerId, this.data.card.id).subscribe((res) => {
+//       // this.authService.setJobWorkers(JSON.stringify(this.newWorkerId)).subscribe((res)=>{
+//       console.log('setJobWOrker');
+//       console.log(res);
+//       this.authService.openSnackbar('updated Successfully');
+//     });
+//       this.dialogRef.close(this.form.value);
+//     }
+//     this.authService.openSnackbar('updated Successfully');
+//     const controls = this.form.controls;
+//     const resultArr = this.oldWorkerId.filter(({ id: id1 }) => !this.newWorkerId.some(({ id: id2 }) => id2 === id1));
+//     if (resultArr.length > 0){
+//       resultArr.forEach(elementR => {
+//         const obj = {
+//         subject : 'Your shift has been cancelled  ' + this.data.card.timesheetId[0].JobId,
+//         name : elementR.workerId.forename + ' ' + elementR.workerId.surename,
+//         email: elementR.workerId.emailAddress,
+//         content1: `Your shift with ${this.data.card.clientId.firstName} ${this.data.card.clientId.lastName} has been cancelled.`,
+//         content2: `We are sorry for any inconvenience this may have caused.`,
+//         content3: `If you have any questions, please feel free to contact us.`,
+//         btn: 'LOGIN TO PORTAL',
+//         btn_link: 'http://imperial-recruitment.herokuapp.com/#/login',
+//         link: ''
+//       };
+//         console.log('obj');
+//         console.log(obj);
+//         this.authService.sendEmail(obj).subscribe((sendemail_res) => {
+//         console.log('crate job email');
+//     });
+// });
+//     }
+//     this.newWorkerId.forEach(element => {
+//             const obj = {
+//             subject : 'You have been assigned a new shift ' + this.data.card.timesheetId[0].JobId,
+//             name : element.name,
+//             email: element.emailAddress,
+//             content1: `You have been assigned a shift with ${this.data.card.clientId.firstName} ${this.data.card.clientId.lastName} `,
+//             content2: `Please read the shift details carefully below. If you have any questions relating to the shift, or if you’re unable to attend this shift, please contact Imperial Recruitment as soon as possible on 020 7436 7424.`,
+//             content3: `<span>Shift Date: ${controls.shiftDate.value} </span><br/>
+//             <span>Shift start time: ${controls.startTime.value} – ${controls.endTime.value}</span><br/>
+//             <span>Role: ${controls.role.value}</span><br/>`,
+//             btn: 'LOGIN TO PORTAL',
+//             btn_link: 'http://imperial-recruitment.herokuapp.com/#/login',
+//             link: ''
+//           };
+//             console.log('obj');
+//             console.log(obj);
+//             this.authService.sendEmail(obj).subscribe((sendemail_res) => {
+//             console.log('crate job email');
+//         });
+//     });
+//   }
 
   isImageExtension(extension: string) {
     return extension === 'jpg' || extension === 'png';

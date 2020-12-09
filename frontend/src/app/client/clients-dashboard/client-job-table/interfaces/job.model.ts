@@ -5,35 +5,45 @@ export class Job {
   id: number;
   JobId:string;
   client: string;
-  department: string;
-  role: string;
+  // department: string;
+  // role: string;
   shiftDate: Date;
   shiftDateStr:string;
-  startTime: number;
-  endTime: number;
+  // startTime: number;
+  // endTime: number;
   locationShift: string;
   purchaseOrderNo: string; //optional
   additionalInformation:string;
   status:any;
   statusStr:string;
   fulfilled: number;
-  total:number;
+  // total:number;
   totalStaff:string;
   clientId:any;
   timesheetId:any;
   timesheetIdStr:string;
+  shifts: [
+    {
+      department: {type: String},
+      role: {type: String},
+      startTime: {type: Number},
+      endTime: {type: Number},
+      total: {type: Number, default: 1}
+    }
+  ];
   // workerId:any;
   constructor(job) {
     this._id = job._id;
     this.id = job.id;
     this.JobId = job.JobId;
     this.client = job.client;
-    this.department = job.department;
-    this.role = job.role;
+    // this.department = job.department;
+    // this.role = job.role;
+    this.shifts = job.shifts;
     this.shiftDate = job.shiftDate;
-    this.shiftDateStr = formatDate(job.shiftDate, 'yyyy-MM-dd','en').toString();
-    this.startTime = job.startTime;
-    this.endTime = job.endTime;
+    // this.shiftDateStr = formatDate(job.shiftDate, 'yyyy-MM-dd','en').toString();
+    // this.startTime = job.startTime;
+    // this.endTime = job.endTime;
     this.locationShift = job.locationShift;
     this.purchaseOrderNo = job.purchaseOrderNo;
     this.additionalInformation = job.additionalInformation;
@@ -50,15 +60,15 @@ export class Job {
       this.status = statusTableLabels[1];
     else  if(job.statusStr == 'Cancelled')
       this.status = statusTableLabels[3];
-    else 
+    else
        this.status = statusTableLabels[2];
     }else{
       this.status = statusTableLabels[1];
-      
-    }
-    
 
-       this.total = job.total;
+    }
+
+
+      //  this.total = job.total;
        if(job.fulfilled)
          this.fulfilled = job.fulfilled;
       else
@@ -67,7 +77,7 @@ export class Job {
        this.setTotalStaff();
   }
   setTotalStaff(){
-    this.totalStaff = this.fulfilled + ' / ' + this.total;
+    // this.totalStaff = this.fulfilled + ' / ' + this.total;
   }
   setStatus(status){
     this.statusStr = status;
@@ -79,7 +89,7 @@ export class Job {
       this.status = statusTableLabels[1];
     else  if(this.statusStr == 'Cancelled')
       this.status = statusTableLabels[3];
-    else 
+    else
        this.status = statusTableLabels[2];
   }
 }

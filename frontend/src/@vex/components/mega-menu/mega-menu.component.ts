@@ -132,7 +132,7 @@ export class MegaMenuComponent implements OnInit {
     },
     {
       label: 'Pay History',
-      route: 'worker/payhistory'
+      route: 'worker/payslips'
     },
     {
       label: 'FAQ',
@@ -239,9 +239,9 @@ export class MegaMenuComponent implements OnInit {
       else if(this.accountRole == 'Worker')
         this.pages = this.pageWorker;
       else
-        this.pages = this.pageAdmin; 
-    } 
-    
+        this.pages = this.pageAdmin;
+    }
+
   }
 
   close() {

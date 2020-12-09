@@ -50,7 +50,7 @@ export class CalendarEditComponent implements OnInit {
     this.authService.currentJob = this.event;
     const arrLabel = ['In Progress', 'Submitted', 'Completed'];
     console.log('&&&&');
-    console.log(this.event.client);
+    console.log('this.event.client', this.event.client);
     console.log('&&&&');
     arrLabel.forEach((ele, index) => {
       if (ele === this.event.client.statusStr) {

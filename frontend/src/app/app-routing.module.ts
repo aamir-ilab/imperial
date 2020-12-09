@@ -181,23 +181,23 @@ const routes: VexRoutes = [
         path: 'worker',
         canActivate: [RoleGuard],
         children: [
-          {
-            path: 'jobs',
-           loadChildren: () => import('./worker/jobnew/jobnew.module').then(m => m.JobnewModule),
-            // children:[
-            //   {
-            //     path:'',
-            //     loadChildren: () => import('./worker/worker-calendar/worker-calendar.module').then(m => m.WorkerCalendarModule),
-            //   },
-            //   {
-            //     path:'scrumboard',
-            //     loadChildren: () => import('./worker/worker-calendar/worker-job/worker-job.module').then(m => m.WorkerJobModule),
+          // {
+          //   path: 'jobs',
+          //  loadChildren: () => import('./worker/jobnew/jobnew.module').then(m => m.JobnewModule),
+          //   // children:[
+          //   //   {
+          //   //     path:'',
+          //   //     loadChildren: () => import('./worker/worker-calendar/worker-calendar.module').then(m => m.WorkerCalendarModule),
+          //   //   },
+          //   //   {
+          //   //     path:'scrumboard',
+          //   //     loadChildren: () => import('./worker/worker-calendar/worker-job/worker-job.module').then(m => m.WorkerJobModule),
 
-            //   }
-            // ]
-          },
+          //   //   }
+          //   // ]
+          // },
           {
-            path: 'payhistory',
+            path: 'payslips',
             loadChildren: () => import('./worker/payhistory/payhistory.module').then(m => m.PayhistoryModule),
           }
         ],

@@ -7,44 +7,78 @@ const Invoice = mongoose.model('Invoice');
 const Payroll=  mongoose.model('Payroll');
 const Payslip=  mongoose.model('Payslip');
 exports.register = (req, res) => {
-    console.log('aaaa');
-    Job.findOne({}).then(client => {
-        // if (client) {
-            // return res.status(400).json({ fullname: "Job already exists" });
-        // } else {
+  let job_id, timesheet_id;
+  console.log('aaaa');
+  Job.findOne({}).then(client => {
+    delete req.body._id;
+    console.log('create job req', req.body);
+    const newClient = new Job(req.body);
+    const timesheet = new Timesheet(req.body);
+    newClient.statusStr = 'In Progress';
+    Job.countDocuments({}, function(err, c) {
+      console.log(req.body)
+      console.log(newClient)
+      console.log('location count document')
+      newClient.id = c + 1;
+      if(newClient.id < 10)
+      newClient.JobId = 'JOB000' + newClient.id;
+      else if(this.id < 100)
+      newClient.JobId = 'JOB00' + newClient.id;
+      else if(this.id < 1000)
+      newClient.JobId = 'JOB0'+newClient.id;
+      else
+        newClient.JobId = 'JOB'+ newClient.id.toString();
+      newClient.timesheetId = timesheet._id;
+      newClient.save((err) => {
+        if (err) {
+          console.log(err)
+          res.status(500).json(err);
+        } else {
+          console.log('newJob', newClient);
+          job_id = newClient._id;
+          console.log('job_id', job_id);
+          //  create timesheet for given job
+          Timesheet.findOne({}).then(client => {
             delete req.body._id;
-            console.log('cccc');
-            const newClient = new Job(req.body);
-            newClient.statusStr = 'Pending';
-            Job.countDocuments({}, function(err, c) {
-                console.log(req.body)
-                console.log(newClient)
-                console.log('location count document')
-                newClient.id = c + 1;
-                if(newClient.id < 10)
-                newClient.JobId = 'JOB000' + newClient.id;
-                else if(this.id < 100)
-                newClient.JobId = 'JOB00' + newClient.id;
-                else if(this.id < 1000)
-                newClient.JobId = 'JOB0'+newClient.id;
-                else
-                     newClient.JobId = 'JOB'+ newClient.id.toString();
-                newClient.timesheetId = [];
-                newClient.save((err) => {
-                    if (err) {
-                        console.log(err)
-                        res.status(500).json(err);
-                    } else {
-                        console.log(newClient);
-                        // const token = client.generateJwt();
-                        res.status(200).json(newClient)
-                            // res.status(200).json("Registered successfully");
-                    }
-                });
+            console.log('create job req', req.body);
+            // const timesheet = new Timesheet(req.body);
+            timesheet.statusStr = 'In Progress';
+            Timesheet.countDocuments({}, function(err, c) {
+              console.log(req.body)
+              console.log(timesheet)
+              console.log('location count document')
+              timesheet.id = c + 1;
+              if(timesheet.id < 10)
+              timesheet.timesheetId = 'TS000' + timesheet.id;
+              else if(this.id < 100)
+              timesheet.timesheetId = 'TS00' + timesheet.id;
+              else if(this.id < 1000)
+              timesheet.timesheetId = 'TS0'+timesheet.id;
+              else
+              timesheet.timesheetId = 'TS'+ timesheet.id.toString();
+              timesheet.JobId_Id = job_id;
+              timesheet.totalStaff = 0;
+              newClient.shifts.forEach(element => {
+                timesheet.totalStaff += element.total;
+              });
+              timesheet.save((err) => {
+                if (err) {
+                  console.log(err)
+                } else {
+                  console.log('timesheet',timesheet);
+                  timesheet_id = timesheet._id;
+                  console.log('timesheet_id', timesheet_id);
+                }
+              });
             })
+          });
 
-        // }
-    });
+          res.status(200).json(newClient);
+        }
+      });
+    })
+  });
+
 };
 exports.invoiceregister = (req, res) => {
     console.log('aaaa');
@@ -471,92 +505,93 @@ exports.findById = (req, res) => {
         });
     }
 }
-    exports.getAll = (req, res) => {
-        console.log('--req--', req.body.id)
-        Job.find({clientId:req.body.id}).sort({ 'createdAt': -1 }).populate(['clientId','timesheetId']).exec(function(err, client) {
-            if (err) {
-                console.log(err);
-            } else {
-                res.json(client);
-            }
-        })
-    }
-    exports.getAllJob = (req, res) => {
-      console.log('---req---', req.user)
-        // Job.find({}).sort({ 'shiftDate': -1 }).populate(['clientId','timesheetId']).exec(function(err, client) {
-        Job.find({}).sort({ 'createdAt': -1 }).populate({
-            path: 'clientId',
+exports.getAll = (req, res) => {
+    console.log('--req--', req.body.id)
+    Job.find({clientId:req.body.id}).sort({ 'createdAt': -1 }).populate(['clientId','timesheetId']).exec(function(err, client) {
+        if (err) {
+            console.log(err);
+        } else {
+            res.json(client);
+        }
+    })
+}
+exports.getAllJob = (req, res) => {
+  console.log('---req---', req.user)
+    // Job.find({}).sort({ 'shiftDate': -1 }).populate(['clientId','timesheetId']).exec(function(err, client) {
+    Job.find({}).sort({ 'createdAt': -1 }).populate({
+        path: 'clientId',
+        model: 'User'
+    }).
+    populate({
+        path: 'timesheetId',
+        model: 'Timesheet',
+        populate: {
+            path: 'workerId',
             model: 'User'
-        }).
-        populate({
-            path: 'timesheetId',
-            model: 'Timesheet',
-            populate: {
-                path: 'workerId',
-                model: 'User'
-            }
-        }).exec(function(err, client) {
-            if (err) {
-                console.log(err);
-            } else {
-                res.json(client);
-            }
-        })
-    }
-    exports.getAllInvoices = (req, res) => {
-        Invoice.find({}).sort({ 'invoiceDate': -1 }).populate({
-            path:'timesheetId_id',
-            populate:{
-                path:'JobId_Id',
-                model:'Job'
-            }}).exec(function(err, client) {
-            if (err) {
-                console.log(err);
-            } else {
-                res.json(client);
-            }
-        })
-    }
-    exports.getFindTimesheets = (req, res) => {
-        Timesheet.find({statusStr:req.body.status}).exec(function(err, client) {
-            if (err) {
-                console.log(err);
-            } else {
-                res.json(client);
-            }
-        })
-    }
+        }
+    }).exec(function(err, client) {
+        if (err) {
+            console.log(err);
+        } else {
+            res.json(client);
+        }
+    })
+}
+exports.getAllInvoices = (req, res) => {
+    Invoice.find({}).sort({ 'invoiceDate': -1 }).populate({
+        path:'timesheetId_id',
+        populate:{
+            path:'JobId_Id',
+            model:'Job'
+        }}).exec(function(err, client) {
+        if (err) {
+            console.log(err);
+        } else {
+            res.json(client);
+        }
+    })
+}
+exports.getFindTimesheets = (req, res) => {
+    Timesheet.find({statusStr:req.body.status}).exec(function(err, client) {
+        if (err) {
+            console.log(err);
+        } else {
+            res.json(client);
+        }
+    })
+}
 
-    exports.getAllType = (req, res) => {
-        // Job.find({$or:[{statusStr: "In Progress"},{statusStr:"Completed"}]}).sort({ 'shiftDate': -1 }).exec(function(err, client) {
+exports.getAllType = (req, res) => {
+    // Job.find({$or:[{statusStr: "In Progress"},{statusStr:"Completed"}]}).sort({ 'shiftDate': -1 }).exec(function(err, client) {
 
-        Job.find({}).sort({ 'createdAt': -1 }).populate(['clientId','timesheetId']).exec(function(err, client) {
-            if (err) {
-                console.log(err);
-            } else {
-                res.json(client);
-            }
-        });
-    }
-    exports.getWorkerJob = async(req, res) =>{
-        console.log('===  workedId ====')
-        console.log(req.body._id)
-        var timesheets = await Timesheet.find({}, '_id');
-        var timesheetsArr = [];
-        timesheets.forEach(ele => timesheetsArr.push(ele._id))
-        console.log(timesheets);
-        Job.find({timesheetId:{
-            $in:timesheetsArr
-        }})
-  .populate('timesheetId').exec( function(err, client){
-            if (!client)
-                    res.status(404).send("data is not found");
-            else {
-                console.log(client)
-                res.status(200).json(client);
-            }
-        })
-        // Job.find({'timesheetId.workerId._id':req.body._id}).populate(['timesheetId']).exec( function(err, client){
+    Job.find({}).sort({ 'createdAt': -1 }).populate(['clientId','timesheetId']).exec(function(err, client) {
+        if (err) {
+            console.log('err',err);
+        } else {
+          console.log('All jobs',client);
+          res.json(client);
+        }
+    });
+}
+exports.getWorkerJob = async(req, res) =>{
+    console.log('===  workedId ====')
+    console.log(req.body._id)
+    var timesheets = await Timesheet.find({}, '_id');
+    var timesheetsArr = [];
+    timesheets.forEach(ele => timesheetsArr.push(ele._id))
+    console.log(timesheets);
+    Job.find({timesheetId:{
+        $in:timesheetsArr
+    }})
+.populate('timesheetId').exec( function(err, client){
+        if (!client)
+                res.status(404).send("data is not found");
+        else {
+            console.log(client)
+            res.status(200).json(client);
+        }
+    })
+    // Job.find({'timesheetId.workerId._id':req.body._id}).populate(['timesheetId']).exec( function(err, client){
 //             Job.  find()
 //   .populate('timesheetId')
 //   .where({'timesheetId': {$eq: {$in 'workId': 'online'}}})
@@ -567,17 +602,17 @@ exports.findById = (req, res) => {
 //                 res.status(200).json(client);
 //             }
 //         })
-    }
-    exports.getClientJob= (req, res) =>{
-        Job.find({'clientId':req.body._id}, function(err, client){
-            if (!client)
-                    res.status(404).send("data is not found");
-            else {
-                res.status(200).json(client);
-            }
-        })
-    }
-    // exports.updateClientVendor = (req, res) => {
+}
+exports.getClientJob= (req, res) =>{
+    Job.find({'clientId':req.body._id}, function(err, client){
+        if (!client)
+                res.status(404).send("data is not found");
+        else {
+            res.status(200).json(client);
+        }
+    })
+}
+// exports.updateClientVendor = (req, res) => {
     //     // var role = req.type;
     //     // var clientId = req.clientId;
     //     // if (role == 0){

@@ -2,7 +2,7 @@ import { Component, OnInit, TemplateRef } from '@angular/core';
 import { ScrumboardList } from './interfaces/scrumboard-list.interface';
 import { CdkDragDrop, moveItemInArray, transferArrayItem } from '@angular/cdk/drag-drop';
 import { ScrumboardCard } from './interfaces/scrumboard-card.interface';
-import { trackById } from '../../../../@vex/utils/track-by';
+// import { trackById } from '../../../../@vex/utils/track-by';
 import { scrumboards, scrumboardUsers } from '../../../../static-data/scrumboard';
 import icNotifications from '@iconify/icons-ic/twotone-notifications';
 import icInsertComment from '@iconify/icons-ic/twotone-insert-comment';
@@ -33,13 +33,14 @@ import { AuthService } from 'src/app/services/auth.service';
 export class AdminJobComponent implements OnInit {
 
   static nextId = 100;
-  currentScrum = this.authService.currentJob;
-  board$: any;
+  currentJob = this.authService.currentJob;
+  currentScrum: any;
+  board: any;
 
   addCardCtrl = new FormControl();
   // addListCtrl = new FormControl();
 
-  trackById = trackById;
+  // trackById = trackById;
   icNotifications = icNotifications;
   icInsertComment = icInsertComment;
   icAttachFile = icAttachFile;
@@ -59,34 +60,43 @@ export class AdminJobComponent implements OnInit {
 
   ngOnInit() {
     console.log('admin job scrumboard ng on int');
-    if (!this.authService.currentScrumboard){
-      this.authService.setCurrentScrumboard();
-      this.currentScrum = this.authService.currentScrumboard;
-    }
+    // if (!this.authService.currentScrumboard){
+    this.authService.setCurrentScrumboard();
+    this.currentScrum = this.authService.currentScrumboard;
+    // }
     console.log('scrumboard', this.currentScrum);
-    this.board$ =  this.route.paramMap.pipe(
-      map(paramMap => +paramMap.get('scrumboardId')),
-      map(scrumboardId => this.authService.currentScrumboard.find(board => board.id === scrumboardId))
-    );
+    this.currentScrum.forEach(element => {
+      if (element.title === this.currentJob.department){
+        this.board = element;
+      }
+    });
+    // this.board$ =  this.route.paramMap.pipe(
+    //   map(paramMap => +paramMap.get('scrumboardId')),
+    //   map(scrumboardId => this.authService.currentScrumboard.find(board => board.id === scrumboardId))
+    // );
+
+    console.log('board', this.board);
   }
 
-  open(board: Scrumboard, list: ScrumboardList, card: ScrumboardCard) {
+  open() {
+    console.log('card cliked');
     this.addCardCtrl.setValue(null);
 
     this.dialog.open(ScrumboardDialogComponent, {
-      data: { card, list, board },
+      data: this.currentJob ,
       width: '700px',
       maxWidth: '100%',
       disableClose: true
-    }).beforeClosed().pipe(
-      filter<ScrumboardCard>(Boolean)
-    ).subscribe(value => {
-      console.log(value);
-      const index = list.children.findIndex(child => child.id === card.id);
-      if (index > -1) {
-        list.children[index] = value;
-      }
     });
+    // .beforeClosed().pipe(
+    //   filter<ScrumboardCard>(Boolean)
+    // ).subscribe(value => {
+    //   console.log(value);
+    //   const index = list.children.findIndex(child => child.id === card.id);
+    //   if (index > -1) {
+    //     list.children[index] = value;
+    //   }
+    // });
   }
 
   drop(event: CdkDragDrop<any[]>) {
@@ -197,7 +207,5 @@ export class AdminJobComponent implements OnInit {
   //   this.addListCtrl.setValue(null);
   // }
 
-  toggleStar(board: Scrumboard) {
-    board.starred = !board.starred;
-  }
+
 }

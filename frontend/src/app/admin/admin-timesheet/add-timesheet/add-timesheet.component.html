@@ -8,7 +8,7 @@
     <!-- <h2 *ngIf="!form.get('firstName').value && !form.get('lastName').value" -->
     <h2
         class="headline m-0"
-        fxFlex="auto">Edit Timesheet: #</h2>
+        fxFlex="auto">Edit Timesheet: #{{defaults.timesheetIdStr}}</h2>
 
     <button class="text-secondary" mat-dialog-close mat-icon-button type="button">
       <mat-icon [icIcon]="icClose"></mat-icon>
@@ -18,107 +18,9 @@
   <mat-divider class="-mx-6 text-border"></mat-divider>
 
   <mat-dialog-content fxLayout="column">
-   <!--  <div class="flex flex-col sm:flex-row">
-      <div fxLayout="row" fxLayoutAlign="start center">
-       <img
-              *ngIf="user"
-              [matTooltip]="user.workerId"
-             [src]="user.profilePhoto"
-             class="avatar"
-             fxFlex="none">
-         <div (click)="memberSelect.open()"
-        <div
-             class="avatar text-secondary bg-app-bar cursor-pointer"
-             fxFlex="none"
-             fxLayout="row"
-             fxLayoutAlign="center center">
-          <ic-icon [icon]="icAdd" size="24px"></ic-icon>
-        </div>
-        <mat-select #memberSelect="matSelect"
-                    class="invisible w-0 h-0 text-sm"
-                    formControlName="workerId"
-                    fxFlex="0 1 0px"
-                    [(ngModel)]="user"
-        >
-          <mat-option *ngFor="let userA of workerId" [value]="user">
-            <img [src]="userA.profilePhoto" class="avatar h-6 w-6 align-middle inline-block ltr:mr-2 rtl:ml-2">
-            <span>{{ user.workerId }}</span>
-          </mat-option>
-        </mat-select>
-      </div> -->
+    <!-- <div *ngFor="let shift of shifts.controls; let i = index" class="list-group list-group-flush">
 
-      <!-- <mat-form-field class="sm:mt-6 sm:ml-6 flex-auto">
-        <mat-label>Last Name</mat-label>
-        <input cdkFocusInitial formControlName="lastName" matInput>
-
-        <mat-icon [icIcon]="icPerson" class="mr-3" matPrefix></mat-icon>
-      </mat-form-field>
     </div> -->
-
-    <!-- <mat-form-field class="flex-auto">
-      <mat-label>Street</mat-label>
-      <input formControlName="street" matInput>
-
-      <mat-icon [icIcon]="icEditLocation" class="mr-3" matPrefix></mat-icon>
-    </mat-form-field> -->
-    <div class="flex flex-col sm:flex-row"*ngFor="let item of timesheets" >
-      <mat-form-field appearance="standard"class="flex-auto">
-        <mat-label>Time</mat-label>
-        <input  [value]="defaults.startTime + 'h ~ '+ defaults.endTime +'h '" matInput readonly>
-      </mat-form-field>
-      <!-- <mat-form-field class="sm:ml-3 flex-auto">
-          <mat-select
-            >
-            <mat-option *ngFor="let userA of workerId" [value]="user">
-            <img [src]="userA.profilePhoto" class="avatar h-6 w-6 align-middle inline-block ltr:mr-2 rtl:ml-2">
-            <span>{{ user.workerId }}</span>
-            </mat-option>
-            </mat-select>
-      </mat-form-field> -->
-      <mat-form-field appearance="standard" class="sm:ml-3 flex-auto">
-        <mat-label>Timesheet ID</mat-label>
-        <input  [value]="item.timesheetId"matInput readonly>
-      </mat-form-field>
-      <mat-form-field appearance="standard" class="sm:ml-3 flex-auto">
-        <mat-label>Department</mat-label>
-        <input  [value]="defaults.department"matInput readonly>
-      </mat-form-field>
-      <mat-form-field appearance="standard"class="sm:ml-3 flex-auto">
-        <mat-label>Role</mat-label>
-        <input  [value]="defaults.role" matInput readonly>
-      </mat-form-field>
-      <div class="sm:ml-3 flex-auto"style="margin-top:21px" >
-        <img [src]="item.profilePhoto" class="avatar h-6 w-6 align-middle inline-block ltr:mr-2 rtl:ml-2">
-        <span>{{ item.workerIdName }}</span>
-      </div>
-    </div>
-    <!-- <div class="flex flex-col sm:flex-row">
-      <mat-form-field class="flex-auto">
-        <mat-label>Zipcode</mat-label>
-        <input formControlName="zipcode" matInput>
-
-        <mat-icon [icIcon]="icMyLocation" class="mr-3" matPrefix></mat-icon>
-      </mat-form-field>
-
-      <mat-form-field class="sm:ml-6 flex-auto">
-        <mat-label>City</mat-label>
-        <input formControlName="city" matInput>
-
-        <mat-icon [icIcon]="icLocationCity" class="mr-3" matPrefix></mat-icon>
-      </mat-form-field>
-    </div> -->
-
-    <!-- <mat-form-field class="flex-auto">
-      <mat-label>Phone Number</mat-label>
-      <input formControlName="phoneNumber" matInput>
-
-      <mat-icon [icIcon]="icPhone" class="mr-3" matPrefix></mat-icon>
-    </mat-form-field> -->
-
-    <!-- <mat-form-field class="flex-auto">
-      <mat-label>Notes</mat-label>
-      <textarea formControlName="notes" matInput></textarea>
-    </mat-form-field> -->
   </mat-dialog-content>
 
   <mat-dialog-actions align="end">

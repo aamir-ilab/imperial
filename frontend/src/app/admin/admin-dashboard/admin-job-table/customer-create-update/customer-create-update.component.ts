@@ -158,10 +158,29 @@ export class CustomerCreateUpdateComponent implements OnInit {
     //   }
     // });
     // customer.clientId  = tempUser[0]._id;
+    const customer =  {
+      id: 1,
+      client: 'Arne Sorenson',
+      shiftDate: '2020-12-11T00:00:00.000Z',
+      locationShift: 'LA',
+      purchaseOrderNo: '',
+      additionalInformation: '',
+      status: {
+        text: 'In Progress',
+        textClass: 'text-cyan',
+        bgClass: 'bg-cyan-light',
+        previewClass: 'bg-cyan'
+      },
+      stateCtrl: '',
+      shifts: [
+        {department: 'Back of House', role: 'Food Runners', startTime: 10, endTime: 14, total: 3 },
+        {department: 'Food and Beverage', role: 'Team Leader', startTime: 8, endTime: 12, total: 2}
+      ],
+      clientId: '5f3685c10232e9097dad2b00'
+    };
+    this.dialogRef.close(customer);
 
-    // this.dialogRef.close(customer);
-
-    console.log('SUCCESS!!' + JSON.stringify(this.form.value, null, 4));
+    // console.log('SUCCESS!!' + JSON.stringify(this.form.value, null, 4));
   }
 
   updateCustomer() {
@@ -224,7 +243,7 @@ export class CustomerCreateUpdateComponent implements OnInit {
       if (ele === event.statusStr) {
         this.authService.currentScrumboard[0].children[index].children.push({
             id: event.id,
-            title: event.client,
+            title: event.department,
             client: event.client,
             department: event.department,
             role: event.role,

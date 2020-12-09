@@ -68,8 +68,8 @@ export class AdminTimesheetComponent implements OnInit, AfterViewInit {
     { label: 'Client', property: 'clientId', type: 'text', visible: true },
     // { label: 'Department', property: 'department', type: 'text', visible: false },
     // { label: 'Role', property: 'role', type: 'text', visible: false },
-    { label: 'Shift Date', property: 'shiftDateStr', type: 'text', visible: true, cssClasses: ['text-secondary', 'font-medium'] },
-    { label: 'Total Staff', property: 'totalStaff', type: 'text', visible: true, cssClasses: ['text-secondary', 'font-medium'] },
+    { label: 'Shift Date', property: 'shiftDate', type: 'text', visible: true, cssClasses: ['text-secondary', 'font-medium'] },
+    { label: 'Total Staff', property: 'timesheetId', type: 'text', visible: true, cssClasses: ['text-secondary', 'font-medium'] },
     { label: 'Status', property: 'status', type: 'button', visible: true },
     { label: 'Actions', property: 'actions', type: 'button', visible: true }
   ];

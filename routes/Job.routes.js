@@ -2,12 +2,12 @@ var client = require("../controllers/Job.Controller");
 var {VerifyToken, authRole} = require('./middleware.js');
 const {ROLE} = require("../config/roles");
 module.exports = (app) => {
-    app.post("/job/register", client.register);
-    app.post("/invoiceregister", client.invoiceregister);
-    app.post("/removeJob", client.removeJob);
-    app.post("/job/profile", client.updateProfile);
-    app.post("/updatejob",client.updateJob);
-    app.post('/delinvoice',client.delInvoice);
+    app.post("/job/register", VerifyToken, client.register);
+    app.post("/invoiceregister", VerifyToken, client.invoiceregister);
+    app.post("/removeJob", VerifyToken, client.removeJob);
+    app.post("/job/profile", VerifyToken, client.updateProfile);
+    app.post("/updatejob", VerifyToken, client.updateJob);
+    app.post('/delinvoice',VerifyToken, client.delInvoice);
     app.post("/invoice/profile", client.invoiceupdate);
     app.post("/client/hash", client.updateHash);
     app.delete("/auth/client/:id", client.delete);

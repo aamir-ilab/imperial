@@ -167,7 +167,7 @@ export class ClientJobTableComponent implements OnInit {
             subject : 'New job request from ' + this.currentUser.firstName + ' ' + this.currentUser.lastName,
             name : this.currentUser.firstName + ' ' + this.currentUser.lastName,
             email: 'fujingforward@gmail.com',
-            content1: `${this.currentUser.firstName} ${this.currentUser.lastName} has posted a new job on the portal for ${tempJob.shiftDateStr} looking for ${tempJob.total}workers.`,
+            content1: `${this.currentUser.firstName} ${this.currentUser.lastName} has posted a new job on the portal for ${tempJob.shiftDateStr} looking for ${tempJob.shifts[0].total}workers.`,
             content2: `You can review the applications by logging into the Portal.`,
             btn: 'LOGIN TO PORTAL',
             btn_link: 'http://imperial-recruitment.herokuapp.com/#/login',

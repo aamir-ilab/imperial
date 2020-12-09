@@ -38,10 +38,11 @@ export class CalendarEditComponent implements OnInit {
     });
   }
   goToJob(){
+    console.log('this.event', this.event);
     this.authService.currentScrumboard = [
       {
       id: this.event.client.id,
-      title: this.event.client.client,
+      title: this.event.client.department,
       children: [
         // { id:1, label:'Unassigned Shifts', children:[] },
         // { id:2, label:'Assigned', children:[] },
@@ -53,13 +54,13 @@ export class CalendarEditComponent implements OnInit {
     this.authService.currentJob = this.event;
     const arrLabel = ['In Progress', 'Submitted', 'Completed'];
     console.log('&&&&');
-    console.log(this.event.client);
+    console.log(' this.event.client', this.event.client);
     console.log('&&&&');
     arrLabel.forEach((ele, index) => {
       if (ele === this.event.client.statusStr) {
         this.authService.currentScrumboard[0].children[index].children.push({
           id: this.event.client.id,
-          title: this.event.client.client,
+          title: this.event.client.department,
           client: this.event.client.client,
           department: this.event.client.department,
           role: this.event.client.role,

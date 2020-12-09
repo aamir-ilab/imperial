@@ -65,7 +65,7 @@ export class AdminJobTableComponent implements OnInit {
     { label: 'Client Name', property: 'clientId', type: 'text', visible: true, cssClasses: ['font-medium'] },
     { label: 'Department', property: 'department', type: 'text', visible: false },
     { label: 'Role', property: 'role', type: 'text', visible: false },
-    { label: 'Shift Date', property: 'shiftDateStr', type: 'text', visible: true },
+    { label: 'Shift Date', property: 'shiftDate', type: 'text', visible: true },
     { label: 'Start Time', property: 'startTime', type: 'text', visible: false },
     { label: 'End Time', property: 'endTime', type: 'text', visible: false },
     { label: 'Worker Allocation', property: 'totalStaff', type: 'text', visible: true },

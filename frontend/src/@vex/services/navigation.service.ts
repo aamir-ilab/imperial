@@ -39,13 +39,6 @@ export class NavigationService {
    },
    {
      type: 'link',
-     label: 'Jobs',
-     route: '/worker/jobs',
-     icon: icAssessment,
-     routerLinkActiveOptions: { exact: true }
-   },
-   {
-     type: 'link',
      label: 'Profile',
      route: '/profile',
      icon: icPersonOutline,
@@ -54,7 +47,7 @@ export class NavigationService {
    {
      type: 'link',
      label: 'Pay History',
-     route: 'worker/payhistory',
+     route: 'worker/payslips',
      icon: icAssigment,
      routerLinkActiveOptions: { exact: true }
    },

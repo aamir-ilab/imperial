@@ -50,8 +50,7 @@ export class AddTimesheetComponent implements OnInit {
   }
 
   ngOnInit() {
-    console.log('000000');
-    console.log(this.defaults);
+    console.log('timesheet', this.defaults);
     this.timesheets = this.defaults.timesheetId;
 
     if (!this.authService.AllUser) {
