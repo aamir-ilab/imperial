@@ -54,6 +54,8 @@ export class CustomerCreateUpdateComponent implements OnInit {
   AllClients: any[];
   selectedClient = '';
 
+  fields: any;
+
   stateCtrl: FormControl;
   filteredStates$: Observable<CountryState[]>;
   states: CountryState[] = [
@@ -136,10 +138,24 @@ export class CustomerCreateUpdateComponent implements OnInit {
       additionalInformation: [this.defaults.additionalInformation || ''],
       status: [this.defaults.status || statusTableLabels[2]],
       stateCtrl: [this.stateCtrl.value || ''],
-      shifts: new FormArray([])
+      shifts: this.fb.array([
+        this.initShifts(),
+    ])
+
     });
     this.selectedClient = this.defaults.client;
   }
+
+  initShifts() {
+    return this.fb.group({
+      department: [''],
+      role: [''],
+      startTime: [''],
+      endTime: [''],
+      total: [''],
+    });
+}
+
 
   save() {
     if (this.mode === 'create') {
@@ -158,29 +174,9 @@ export class CustomerCreateUpdateComponent implements OnInit {
     //   }
     // });
     // customer.clientId  = tempUser[0]._id;
-    const customer =  {
-      id: 1,
-      client: 'Arne Sorenson',
-      shiftDate: '2020-12-11T00:00:00.000Z',
-      locationShift: 'LA',
-      purchaseOrderNo: '',
-      additionalInformation: '',
-      status: {
-        text: 'In Progress',
-        textClass: 'text-cyan',
-        bgClass: 'bg-cyan-light',
-        previewClass: 'bg-cyan'
-      },
-      stateCtrl: '',
-      shifts: [
-        {department: 'Back of House', role: 'Food Runners', startTime: 10, endTime: 14, total: 3 },
-        {department: 'Food and Beverage', role: 'Team Leader', startTime: 8, endTime: 12, total: 2}
-      ],
-      clientId: '5f3685c10232e9097dad2b00'
-    };
-    this.dialogRef.close(customer);
+    // this.dialogRef.close(customer);
 
-    // console.log('SUCCESS!!' + JSON.stringify(this.form.value, null, 4));
+    console.log('SUCCESS!!' + JSON.stringify(this.form.value));
   }
 
   updateCustomer() {
@@ -267,24 +263,16 @@ export class CustomerCreateUpdateComponent implements OnInit {
     this.dialogRef.close();
   }
 
-  // get f() { return this.form.controls; }
-  get shifts() { return this.form.get('shifts') as FormArray; }
+  // tslint:disable-next-line: no-string-literal
+  get shifts() { return this.form.controls.shifts as FormArray; }
 
 
   addShift(){
     console.log('addShift');
-    // this.headers.splice(index, 0, item);
-    this.shifts.push(this.fb.group({
-      department: [''],
-      role: [''],
-      startTime: [''],
-      endTime: [''],
-      total: [''],
-
-    }));
+    this.shifts.push(this.initShifts());
   }
   removeShift(index){
-    console.log('removeShift');
+    console.log('removeShift', index);
     this.shifts.removeAt(index);
   }
 }

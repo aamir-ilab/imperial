@@ -46,135 +46,71 @@
       </mat-form-field>
     </div>
     <h4>Shift Details</h4>
-    <!-- <div class="flex flex-wrap sm:flex-row" >
-      <mat-form-field class="lg:w-3/12">
-          <mat-label>Department</mat-label>
-          <mat-select formControlName="department" (selectionChange)="changeAccountType($event , 1)" [(ngModel)]="selectedType">
-            <mat-option value="Housekeeping">Housekeeping</mat-option>
-            <mat-option value="Food and Beverage">Food and Beverage</mat-option>
-            <mat-option value="Back of House">Back of House</mat-option>
-        </mat-select>
-      </mat-form-field>
-      <mat-form-field class="sm:ml-3 lg:w-3/12">
-        <mat-label>Role</mat-label>
-        <mat-select formControlName="role" (selectionChange)="changeAccountType($event , 2)" [(ngModel)]="selectedRole">
-          <mat-option *ngIf="selectedType == 'Housekeeping'" value="Linen Porter">Linen Porter</mat-option>
-          <mat-option *ngIf="selectedType == 'Housekeeping'" value="Floor Porter">Floor Porter</mat-option>
-          <mat-option *ngIf="selectedType == 'Housekeeping'" value="Floor Supervisor">Floor Supervisor</mat-option>
-          <mat-option *ngIf="selectedType == 'Housekeeping'" value="Room Supervisor">Room Supervisor</mat-option>
-          <mat-option *ngIf="selectedType == 'Housekeeping'" value="Evening Room Attendant">Evening Room Attendant</mat-option>
-          <mat-option *ngIf="selectedType == 'Housekeeping'" value="Public Area Attendant">Public Area Attendant</mat-option>
-          <mat-option *ngIf="selectedType == 'Housekeeping'" value="Spa Attendant">Spa Attendant</mat-option>
-          <mat-option *ngIf="selectedType == 'Housekeeping'" value="Valet">Valet</mat-option>
-          <mat-option *ngIf="selectedType == 'Housekeeping'" value="Housekeeper">Housekeeper</mat-option>
+    <div formArrayName="shifts">
+      <div *ngFor="let shift of form.get('shifts')['controls']; let i=index" class="list-group list-group-flush">
 
-          <mat-option *ngIf="selectedType == 'Food and Beverage'" value="Waiters">Waiters</mat-option>
-          <mat-option *ngIf="selectedType == 'Food and Beverage'" value="Night Waiters">Night Waiters</mat-option>
-          <mat-option *ngIf="selectedType == 'Food and Beverage'" value="Night Room Service">Night Room Service</mat-option>
-          <mat-option *ngIf="selectedType == 'Food and Beverage'" value="Supervisor Banqueting">Supervisor Banqueting</mat-option>
-          <mat-option *ngIf="selectedType == 'Food and Beverage'" value="Team Leader">Team Leader</mat-option>
-          <mat-option *ngIf="selectedType == 'Food and Beverage'" value="Silver Service Waiters">Silver Service Waiters</mat-option>
-          <mat-option *ngIf="selectedType == 'Food and Beverage'" value="Bar Staff">Bar Staff</mat-option>
-          <mat-option *ngIf="selectedType == 'Food and Beverage'" value="Cloakroom">Cloakroom</mat-option>
-          <mat-option *ngIf="selectedType == 'Food and Beverage'" value="Concierge">Concierge</mat-option>
-          <mat-option *ngIf="selectedType == 'Food and Beverage'" value="Hostess">Hostess</mat-option>
+        <div [formGroupName]="i">
+          <mat-form-field class="lg:w-3/12">
+            <mat-label>Department</mat-label>
+            <mat-select formControlName="department" (selectionChange)="changeAccountType($event , 1)" [(ngModel)]="selectedType">
+              <mat-option value="Housekeeping">Housekeeping</mat-option>
+              <mat-option value="Food and Beverage">Food and Beverage</mat-option>
+              <mat-option value="Back of House">Back of House</mat-option>
+            </mat-select>
+          </mat-form-field>
+          <mat-form-field class="sm:ml-3 lg:w-3/12">
+            <mat-label>Role</mat-label>
+            <mat-select formControlName="role" (selectionChange)="changeAccountType($event , 2)" [(ngModel)]="selectedRole">
+              <mat-option *ngIf="selectedType == 'Housekeeping'" value="Linen Porter">Linen Porter</mat-option>
+              <mat-option *ngIf="selectedType == 'Housekeeping'" value="Floor Porter">Floor Porter</mat-option>
+              <mat-option *ngIf="selectedType == 'Housekeeping'" value="Floor Supervisor">Floor Supervisor</mat-option>
+              <mat-option *ngIf="selectedType == 'Housekeeping'" value="Room Supervisor">Room Supervisor</mat-option>
+              <mat-option *ngIf="selectedType == 'Housekeeping'" value="Evening Room Attendant">Evening Room Attendant</mat-option>
+              <mat-option *ngIf="selectedType == 'Housekeeping'" value="Public Area Attendant">Public Area Attendant</mat-option>
+              <mat-option *ngIf="selectedType == 'Housekeeping'" value="Spa Attendant">Spa Attendant</mat-option>
+              <mat-option *ngIf="selectedType == 'Housekeeping'" value="Valet">Valet</mat-option>
+              <mat-option *ngIf="selectedType == 'Housekeeping'" value="Housekeeper">Housekeeper</mat-option>
 
-          <mat-option *ngIf="selectedType == 'Back of House'" value="Kitchen Porter">Kitchen Porter</mat-option>
-          <mat-option *ngIf="selectedType == 'Back of House'" value="Night Kitchen Porter">Night Kitchen Porter</mat-option>
-          <mat-option *ngIf="selectedType == 'Back of House'" value="Night Cleaners">Night Cleaners</mat-option>
-          <mat-option *ngIf="selectedType == 'Back of House'" value="Supervisor BOH (Back of House)">Supervisor BOH (Back of House)</mat-option>
-          <mat-option *ngIf="selectedType == 'Back of House'" value="Food Runners">Food Runners</mat-option>
-          <mat-option *ngIf="selectedType == 'Back of House'" value="Breakfast Runners">Breakfast Runners</mat-option>
-          <mat-option *ngIf="selectedType == 'Back of House'" value="Commis Chef">Commis Chef</mat-option>
-          <mat-option *ngIf="selectedType == 'Back of House'" value="Breakfast Chef">Breakfast Chef</mat-option>
-          <mat-option *ngIf="selectedType == 'Back of House'" value="Chef De Partie">Chef De Partie</mat-option>
-          <mat-option *ngIf="selectedType == 'Back of House'" value="Pastry Chef">Pastry Chef</mat-option>
-          <mat-option *ngIf="selectedType == 'Back of House'" value="Banqueting Porter">Banqueting Porter</mat-option>
-      </mat-select>
-      </mat-form-field>
-      <mat-form-field class="sm:ml-3 lg:w-2/12">
-        <mat-label>Start Time</mat-label>
-        <input type="number" formControlName="startTime" matInput [(ngModel)]="minStart" min="0" max="23">
-      </mat-form-field>
-      <mat-form-field class="sm:ml-3 lg:w-2/12">
-        <mat-label>End Time</mat-label>
-        <input  type="number" formControlName="endTime" matInput [min]="minStart + 4" [value]="minStart + 4" max="24">
-      </mat-form-field>
-      <mat-form-field class="sm:ml-3 lg:w-1/12">
-        <mat-label>Staff</mat-label>
-        <input type="number" formControlName="total" matInput min="1">
+              <mat-option *ngIf="selectedType == 'Food and Beverage'" value="Waiters">Waiters</mat-option>
+              <mat-option *ngIf="selectedType == 'Food and Beverage'" value="Night Waiters">Night Waiters</mat-option>
+              <mat-option *ngIf="selectedType == 'Food and Beverage'" value="Night Room Service">Night Room Service</mat-option>
+              <mat-option *ngIf="selectedType == 'Food and Beverage'" value="Supervisor Banqueting">Supervisor Banqueting</mat-option>
+              <mat-option *ngIf="selectedType == 'Food and Beverage'" value="Team Leader">Team Leader</mat-option>
+              <mat-option *ngIf="selectedType == 'Food and Beverage'" value="Silver Service Waiters">Silver Service Waiters</mat-option>
+              <mat-option *ngIf="selectedType == 'Food and Beverage'" value="Bar Staff">Bar Staff</mat-option>
+              <mat-option *ngIf="selectedType == 'Food and Beverage'" value="Cloakroom">Cloakroom</mat-option>
+              <mat-option *ngIf="selectedType == 'Food and Beverage'" value="Concierge">Concierge</mat-option>
+              <mat-option *ngIf="selectedType == 'Food and Beverage'" value="Hostess">Hostess</mat-option>
 
-      </mat-form-field>
-      <mat-icon class="sm:ml-3 text-green-500 mt-3" [icIcon]="icAdd" (click)="addShift()" ></mat-icon>
-    </div> -->
-    <mat-icon class="sm:ml-3 text-green-500 mt-3" [icIcon]="icAdd" (click)="addShift()" ></mat-icon>
-    <div formArrayName="shifts"></div>
-    <div *ngFor="let shift of shifts.controls; let i = index" class="list-group list-group-flush">
-					
-					<div [formGroup]="shift">
-					
-					<mat-form-field class="lg:w-3/12">
-          <mat-label>Department</mat-label>
-          <mat-select formControlName="department" (selectionChange)="changeAccountType($event , 1)" [(ngModel)]="selectedType">
-            <mat-option value="Housekeeping">Housekeeping</mat-option>
-            <mat-option value="Food and Beverage">Food and Beverage</mat-option>
-            <mat-option value="Back of House">Back of House</mat-option>
-        </mat-select>
-      </mat-form-field>
-      <mat-form-field class="sm:ml-3 lg:w-3/12">
-        <mat-label>Role</mat-label>
-        <mat-select formControlName="role" (selectionChange)="changeAccountType($event , 2)" [(ngModel)]="selectedRole">
-          <mat-option *ngIf="selectedType == 'Housekeeping'" value="Linen Porter">Linen Porter</mat-option>
-          <mat-option *ngIf="selectedType == 'Housekeeping'" value="Floor Porter">Floor Porter</mat-option>
-          <mat-option *ngIf="selectedType == 'Housekeeping'" value="Floor Supervisor">Floor Supervisor</mat-option>
-          <mat-option *ngIf="selectedType == 'Housekeeping'" value="Room Supervisor">Room Supervisor</mat-option>
-          <mat-option *ngIf="selectedType == 'Housekeeping'" value="Evening Room Attendant">Evening Room Attendant</mat-option>
-          <mat-option *ngIf="selectedType == 'Housekeeping'" value="Public Area Attendant">Public Area Attendant</mat-option>
-          <mat-option *ngIf="selectedType == 'Housekeeping'" value="Spa Attendant">Spa Attendant</mat-option>
-          <mat-option *ngIf="selectedType == 'Housekeeping'" value="Valet">Valet</mat-option>
-          <mat-option *ngIf="selectedType == 'Housekeeping'" value="Housekeeper">Housekeeper</mat-option>
-
-          <mat-option *ngIf="selectedType == 'Food and Beverage'" value="Waiters">Waiters</mat-option>
-          <mat-option *ngIf="selectedType == 'Food and Beverage'" value="Night Waiters">Night Waiters</mat-option>
-          <mat-option *ngIf="selectedType == 'Food and Beverage'" value="Night Room Service">Night Room Service</mat-option>
-          <mat-option *ngIf="selectedType == 'Food and Beverage'" value="Supervisor Banqueting">Supervisor Banqueting</mat-option>
-          <mat-option *ngIf="selectedType == 'Food and Beverage'" value="Team Leader">Team Leader</mat-option>
-          <mat-option *ngIf="selectedType == 'Food and Beverage'" value="Silver Service Waiters">Silver Service Waiters</mat-option>
-          <mat-option *ngIf="selectedType == 'Food and Beverage'" value="Bar Staff">Bar Staff</mat-option>
-          <mat-option *ngIf="selectedType == 'Food and Beverage'" value="Cloakroom">Cloakroom</mat-option>
-          <mat-option *ngIf="selectedType == 'Food and Beverage'" value="Concierge">Concierge</mat-option>
-          <mat-option *ngIf="selectedType == 'Food and Beverage'" value="Hostess">Hostess</mat-option>
-
-          <mat-option *ngIf="selectedType == 'Back of House'" value="Kitchen Porter">Kitchen Porter</mat-option>
-          <mat-option *ngIf="selectedType == 'Back of House'" value="Night Kitchen Porter">Night Kitchen Porter</mat-option>
-          <mat-option *ngIf="selectedType == 'Back of House'" value="Night Cleaners">Night Cleaners</mat-option>
-          <mat-option *ngIf="selectedType == 'Back of House'" value="Supervisor BOH (Back of House)">Supervisor BOH (Back of House)</mat-option>
-          <mat-option *ngIf="selectedType == 'Back of House'" value="Food Runners">Food Runners</mat-option>
-          <mat-option *ngIf="selectedType == 'Back of House'" value="Breakfast Runners">Breakfast Runners</mat-option>
-          <mat-option *ngIf="selectedType == 'Back of House'" value="Commis Chef">Commis Chef</mat-option>
-          <mat-option *ngIf="selectedType == 'Back of House'" value="Breakfast Chef">Breakfast Chef</mat-option>
-          <mat-option *ngIf="selectedType == 'Back of House'" value="Chef De Partie">Chef De Partie</mat-option>
-          <mat-option *ngIf="selectedType == 'Back of House'" value="Pastry Chef">Pastry Chef</mat-option>
-          <mat-option *ngIf="selectedType == 'Back of House'" value="Banqueting Porter">Banqueting Porter</mat-option>
-      </mat-select>
-      </mat-form-field>
-      <mat-form-field class="sm:ml-3 lg:w-2/12">
-        <mat-label>Start Time</mat-label>
-        <input type="number" formControlName="startTime" matInput [(ngModel)]="minStart" min="0" max="23">
-      </mat-form-field>
-      <mat-form-field class="sm:ml-3 lg:w-2/12">
-        <mat-label>End Time</mat-label>
-        <input  type="number" formControlName="endTime" matInput [min]="minStart + 4" [value]="minStart + 4" max="24">
-      </mat-form-field>
-      <mat-form-field class="sm:ml-3 lg:w-1/12">
-        <mat-label>Staff</mat-label>
-        <input type="number" formControlName="total" matInput min="1">
-
-						</mat-form-field>
-						
-					</div>
-      <mat-icon class="sm:ml-3 text-green-500 mt-3" [icIcon]="icAdd" (click)="addShift()" ></mat-icon>
-      <mat-icon class="sm:ml-3 text-red-500 mt-3" [icIcon]="icMinus" (click)="removeShift(i)" ></mat-icon>
+              <mat-option *ngIf="selectedType == 'Back of House'" value="Kitchen Porter">Kitchen Porter</mat-option>
+              <mat-option *ngIf="selectedType == 'Back of House'" value="Night Kitchen Porter">Night Kitchen Porter</mat-option>
+              <mat-option *ngIf="selectedType == 'Back of House'" value="Night Cleaners">Night Cleaners</mat-option>
+              <mat-option *ngIf="selectedType == 'Back of House'" value="Supervisor BOH (Back of House)">Supervisor BOH (Back of House)</mat-option>
+              <mat-option *ngIf="selectedType == 'Back of House'" value="Food Runners">Food Runners</mat-option>
+              <mat-option *ngIf="selectedType == 'Back of House'" value="Breakfast Runners">Breakfast Runners</mat-option>
+              <mat-option *ngIf="selectedType == 'Back of House'" value="Commis Chef">Commis Chef</mat-option>
+              <mat-option *ngIf="selectedType == 'Back of House'" value="Breakfast Chef">Breakfast Chef</mat-option>
+              <mat-option *ngIf="selectedType == 'Back of House'" value="Chef De Partie">Chef De Partie</mat-option>
+              <mat-option *ngIf="selectedType == 'Back of House'" value="Pastry Chef">Pastry Chef</mat-option>
+              <mat-option *ngIf="selectedType == 'Back of House'" value="Banqueting Porter">Banqueting Porter</mat-option>
+          </mat-select>
+          </mat-form-field>
+          <mat-form-field class="sm:ml-3 lg:w-2/12">
+            <mat-label>Start Time</mat-label>
+            <input type="number" formControlName="startTime" matInput [(ngModel)]="minStart" min="0" max="23">
+          </mat-form-field>
+          <mat-form-field class="sm:ml-3 lg:w-2/12">
+            <mat-label>End Time</mat-label>
+            <input  type="number" formControlName="endTime" matInput [min]="minStart + 4" [value]="minStart + 4" max="24">
+          </mat-form-field>
+          <mat-form-field class="sm:ml-3 lg:w-1/12">
+            <mat-label>Staff</mat-label>
+            <input type="number" formControlName="total" matInput min="1">
+          </mat-form-field>
+        </div>
+        <mat-icon class="sm:ml-3 text-green-500 mt-3" [icIcon]="icAdd" (click)="addShift()" ></mat-icon>
+        <mat-icon *ngIf="i !== 0" class="sm:ml-3 text-red-500 mt-3" [icIcon]="icMinus" (click)="removeShift(i)" ></mat-icon>
+      </div>
     </div>
 
     <h4>Additional Information</h4>
