@@ -78,7 +78,7 @@ export class AdminJobTableComponent implements OnInit {
   selection = new SelectionModel<Job>(true, []);
   // searchCtrl = new FormControl();
 
-  statuss = statusTableLabels;
+  // statuss = statusTableLabels;
 
   icPhone = icPhone;
   icMail = icMail;
@@ -157,17 +157,17 @@ export class AdminJobTableComponent implements OnInit {
          * You would probably make an HTTP request here.
          */
         this.authService.addJob(customer, customer.clientId).subscribe((res) => {
-          console.log('1');
+          customer[''];
+          this.customers.unshift(new Job(res));
+          this.subject$.next(this.customers);
           this.authService.openSnackbar('New Job Added!');
         });
-        customer[''];
-        this.customers.unshift(new Job(customer));
-        this.subject$.next(this.customers);
       }
     });
   }
 
-  updateCustomer(customer: Customer) {
+  updateCustomer(customer: Job) {
+    console.log('current job', customer);
     this.dialog.open(CustomerCreateUpdateComponent, {
       data: customer
     }).afterClosed().subscribe(updatedCustomer => {
@@ -179,12 +179,14 @@ export class AdminJobTableComponent implements OnInit {
          * Here we are updating our local array.
          * You would probably make an HTTP request here.
          */
+        console.log('updatedCustomer', updatedCustomer)
         this.authService.updateJob(updatedCustomer).subscribe((res) => {
+          console.log('res', res);
+          const index = this.customers.findIndex((existingCustomer) => existingCustomer.id === updatedCustomer.id);
+          this.customers[index] = new Job(res);
+          this.subject$.next(this.customers);
           this.authService.openSnackbar('Updated Job Successfully');
         });
-        const index = this.customers.findIndex((existingCustomer) => existingCustomer.id === updatedCustomer.id);
-        this.customers[index] = new Job(updatedCustomer);
-        this.subject$.next(this.customers);
       }
     });
   }

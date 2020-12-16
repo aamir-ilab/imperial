@@ -1,30 +1,39 @@
-<h2 class="title m-0 inline-block">{{list.department}} — Job Card</h2>
-<span class="float-right">Shift Date: {{list.client.shiftDate | date:'dd MMMM yyyy'}}</span>
+<h2 class="title m-0 inline-block">{{list.shift.department}} — Job Card</h2>
+<span class="float-right">Shift Date: {{list.shiftDate | date:'dd MMMM yyyy'}}</span>
 <mat-divider class="-mx-3 text-border"></mat-divider>
-<form (ngSubmit)="save()" [formGroup]="form" class="mt-2">
+<form (ngSubmit)="save()" [formGroup]="form" class="mt-6">
   <mat-dialog-content class="pb-6 content">
-    <div *ngFor="let shift of [].constructor(list.total); let i = index" class="list-group list-group-flush">
-      <span class="ml-2">#{{i+1}}</span>
-      <mat-form-field class="lg:w-3/12">
-        <mat-label>Role</mat-label>
-        <mat-select formControlName="role">
-          <mat-option *ngFor="let role of roles" value="{{role.value}}">{{role.label}}</mat-option>
-        </mat-select>
-      </mat-form-field>
-      <mat-form-field class="sm:ml-3 lg:w-2/12">
-        <mat-label>Start Time</mat-label>
-        <input type="number" formControlName="startTime" matInput max="23" value="list.startTime">
-      </mat-form-field>
-      <mat-form-field class="sm:ml-3 lg:w-2/12">
-        <mat-label>End Time</mat-label>
-        <input  type="number" formControlName="endTime" matInput max="24" value="list.endTime">
-      </mat-form-field>
-      <mat-form-field class="sm:ml-3 lg:w-3/12">
-        <mat-label>Choose a worker</mat-label>
-        <mat-select formControlName="users">
-          <mat-option *ngFor="let worker of workerId" value="{{worker.id}}">{{worker.name}}</mat-option>
-        </mat-select>
-      </mat-form-field>
+    <div formArrayName="workers">
+      <div *ngFor="let shift of form.get('workers')['controls']; let i=index" class="list-group list-group-flush">
+        <div [formGroupName]="i">
+          <span class="mr-2">#{{i+1}}</span>
+          <mat-form-field class="lg:w-3/12">
+            <mat-label>Role</mat-label>
+            <mat-select formControlName="role">
+              <mat-option *ngFor="let role of roles" value="{{role.value}}">{{role.label}}</mat-option>
+            </mat-select>
+          </mat-form-field>
+          <mat-form-field class="sm:ml-3 lg:w-2/12">
+            <mat-label>Start Time</mat-label>
+            <input type="number" formControlName="startTime" matInput max="23" value="list.startTime">
+          </mat-form-field>
+          <mat-form-field class="sm:ml-3 lg:w-2/12">
+            <mat-label>End Time</mat-label>
+            <input  type="number" formControlName="endTime" matInput max="24" value="list.endTime">
+          </mat-form-field>
+          <mat-form-field class="sm:ml-3 lg:w-3/12">
+            <mat-label>Choose a worker</mat-label>
+            <mat-select formControlName="workerId">
+              <mat-option *ngFor="let worker of _workers" value="{{worker.id}}">{{worker.name}}</mat-option>
+            </mat-select>
+          </mat-form-field>
+          <mat-icon *ngIf="i == 0" class="sm:ml-3 text-green-500 mt-3" [icIcon]="icAdd" (click)="addShift()" ></mat-icon>
+          <mat-icon *ngIf="i !== 0" class="sm:ml-3 text-red-500 mt-3" [icIcon]="icMinus" (click)="removeShift(i)" ></mat-icon>
+        </div>
+      </div>
+    </div>
+    <div>
+      <mat-checkbox (change)="sendEmail(checked)" class="example-margin" [(ngModel)]="checked" [ngModelOptions]="{standalone: true}" color="primary">Send shift information notification email to assigned workers.</mat-checkbox>
     </div>
   </mat-dialog-content>
   <mat-dialog-actions align="end">

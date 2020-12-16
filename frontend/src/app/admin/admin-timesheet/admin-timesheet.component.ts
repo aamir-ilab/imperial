@@ -30,6 +30,7 @@ import { Timesheet } from 'src/app/models/timesheet.model';
 import { Job } from 'src/app/client/clients-dashboard/client-job-table/interfaces/job.model';
 import { AuthService } from 'src/app/services/auth.service';
 import { AddTimesheetComponent } from './add-timesheet/add-timesheet.component';
+import { statusTableLabels } from 'src/static-data/status-table-data';
 
 
 @UntilDestroy()
@@ -58,27 +59,27 @@ export class AdminTimesheetComponent implements OnInit, AfterViewInit {
    * Simulating a service with HTTP that returns Observables
    * You probably want to remove this and do all requests in a service with HTTP
    */
-  subject$: ReplaySubject<Job[]> = new ReplaySubject<Job[]>(1);
-  data$: Observable<Job[]> = this.subject$.asObservable();
-  customers: Job[];
+  subject$: ReplaySubject<Timesheet[]> = new ReplaySubject<Timesheet[]>(1);
+  data$: Observable<Timesheet[]> = this.subject$.asObservable();
+  customers: Timesheet[];
 
   @Input()
-  columns: TableColumn<Job>[] = [
-    { label: 'Job ID', property: 'JobId', type: 'text', visible: true },
+  columns: TableColumn<Timesheet>[] = [
+    { label: 'Job ID', property: 'JobId_Id', type: 'text', visible: true },
     { label: 'Client', property: 'clientId', type: 'text', visible: true },
     // { label: 'Department', property: 'department', type: 'text', visible: false },
     // { label: 'Role', property: 'role', type: 'text', visible: false },
     { label: 'Shift Date', property: 'shiftDate', type: 'text', visible: true, cssClasses: ['text-secondary', 'font-medium'] },
-    { label: 'Total Staff', property: 'timesheetId', type: 'text', visible: true, cssClasses: ['text-secondary', 'font-medium'] },
+    { label: 'Total Staff', property: 'totalStaff', type: 'text', visible: true, cssClasses: ['text-secondary', 'font-medium'] },
     { label: 'Status', property: 'status', type: 'button', visible: true },
     { label: 'Actions', property: 'actions', type: 'button', visible: true }
   ];
   pageSize = 10;
   pageSizeOptions: number[] = [5, 10, 20, 50];
-  dataSource: MatTableDataSource<Job> | null;
-  selection = new SelectionModel<Job>(true, []);
+  dataSource: MatTableDataSource<Timesheet> | null;
+  selection = new SelectionModel<Timesheet>(true, []);
   searchCtrl = new FormControl();
-
+  statuss = statusTableLabels;
   labels = aioTableLabels;
 
   icPhone = icPhone;
@@ -108,11 +109,10 @@ export class AdminTimesheetComponent implements OnInit, AfterViewInit {
    * We are simulating this request here.
    */
   getData() {
-    this.authService.getTypeJobs().subscribe((clients) => {
-      of(clients.map(client => new Job(client))).subscribe(clientes => {
-        console.log('123213123');
-        console.log(clientes);
-        this.subject$.next(clientes);
+    this.authService.getAllTimesheets().subscribe((clients) => {
+      of(clients.map(client => new Timesheet(client))).subscribe(timesheets => {
+        console.log('timesheets',timesheets);
+        this.subject$.next(timesheets);
       });
     });
   }
@@ -127,7 +127,7 @@ export class AdminTimesheetComponent implements OnInit, AfterViewInit {
     this.dataSource = new MatTableDataSource();
 
     this.data$.pipe(
-      filter<Job[]>(Boolean)
+      filter<Timesheet[]>(Boolean)
     ).subscribe(customers => {
       this.customers = customers;
       this.dataSource.data = customers;
@@ -153,13 +153,13 @@ export class AdminTimesheetComponent implements OnInit, AfterViewInit {
          * Here we are updating our local array.
          * You would probably make an HTTP request here.
          */
-        this.customers.unshift(new Job(customer));
+        this.customers.unshift(new Timesheet(customer));
         this.subject$.next(this.customers);
       }
     });
   }
 
-  updateCustomer(customer: Job) {
+  updateCustomer(customer: Timesheet) {
     this.dialog.open(CustomerCreateUpdateComponent, {
       data: customer
     }).afterClosed().subscribe(updatedCustomer => {
@@ -172,13 +172,13 @@ export class AdminTimesheetComponent implements OnInit, AfterViewInit {
          * You would probably make an HTTP request here.
          */
         const index = this.customers.findIndex((existingCustomer) => existingCustomer.id === updatedCustomer.id);
-        this.customers[index] = new Job(updatedCustomer);
+        this.customers[index] = new Timesheet(updatedCustomer);
         this.subject$.next(this.customers);
       }
     });
   }
 
-  deleteCustomer(customer: Job) {
+  deleteCustomer(customer: Timesheet) {
     /**
      * Here we are updating our local array.
      * You would probably make an HTTP request here.
@@ -188,7 +188,7 @@ export class AdminTimesheetComponent implements OnInit, AfterViewInit {
     this.subject$.next(this.customers);
   }
 
-  deleteCustomers(customers: Job[]) {
+  deleteCustomers(customers: Timesheet[]) {
     /**
      * Here we are updating our local array.
      * You would probably make an HTTP request here.
@@ -229,12 +229,12 @@ export class AdminTimesheetComponent implements OnInit, AfterViewInit {
     return column.property;
   }
 
-  onLabelChange(change: MatSelectChange, row: Job) {
+  onLabelChange(change: MatSelectChange, row: Timesheet) {
     const index = this.customers.findIndex(c => c === row);
     // this.customers[index].labels = change.value;
     this.subject$.next(this.customers);
   }
-  updateStatus(customer: Job , status){
+  updateStatus(customer: Timesheet , status){
     this.authService.setStatusJob(customer.id, status).subscribe((res) => {
       console.log(res);
       this.authService.openSnackbar('status has updated successfully');
@@ -245,11 +245,11 @@ export class AdminTimesheetComponent implements OnInit, AfterViewInit {
     this.subject$.next(this.customers);
 
   }
-  confirmJob(customer: Job){
+  confirmJob(customer: Timesheet){
     console.log('confirmJob', customer);
     this.dialog.open(AddTimesheetComponent, {
       data: customer
-    }).afterClosed().subscribe((customer: Job) => {
+    }).afterClosed().subscribe((customer: Timesheet) => {
       /**
        * Customer is the updated customer (if the user pressed Save - otherwise it's null)
        */

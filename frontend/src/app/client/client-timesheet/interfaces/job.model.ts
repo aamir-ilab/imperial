@@ -5,18 +5,22 @@ export class Job {
   id: number;
   JobId: string;
   client: string;
-  // department: string;
-  // role: string;
   shiftDate: Date;
-  // startTime: number;
-  // endTime: number;
   shifts: [
     {
       department: {type: String},
       role: {type: String},
       startTime: {type: Number},
       endTime: {type: Number},
-      total: {type: Number, default: 1}
+      total: {type: Number, default: 1},
+      workers:[
+        {
+          role: {type:String},
+          startTime: {type:Number},
+          endTime: {type:Number},
+          workerId: {type: any}
+        }
+      ],
     }
   ];
   locationShift: string;
@@ -25,23 +29,17 @@ export class Job {
   status: any;
   statusStr: string;
   fulfilled: number;
-  // total:number;
-  totalStaff: string;
   clientId: any;
   timesheetId: any;
-  // workerId:any;
+  totalStaff: number;
   constructor(job) {
     this._id = job._id;
     this.id = job.id;
     this.JobId = job.JobId;
     this.client = job.client;
     this.shifts = job.shifts;
-    // this.department = job.department;
-    // this.role = job.role;
+    this.totalStaff = job.totalStaff;
     this.shiftDate = job.shiftDate;
-    // this.shiftDateStr = formatDate(job.shiftDate, 'yyyy-MM-dd', 'en').toString();
-    // this.startTime = job.startTime;
-    // this.endTime = job.endTime;
     this.locationShift = job.locationShift;
     this.purchaseOrderNo = job.purchaseOrderNo;
     this.additionalInformation = job.additionalInformation;

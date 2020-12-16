@@ -224,12 +224,12 @@ exports.login = (req, res) => {
             return res.status(200).json(false);
         }
         if (client) {
-            token = jwt.sign({
-              "user": {
-              email: client.emailAddress,
-              // password: client.hash,
-              accountType: client.accountType
-            }}, 'secret');
+          var user = {
+            email: client.emailAddress,
+            accountType: client.accountType
+          }
+            token = jwt.sign(user, 'secret',
+            {expiresIn: 120});
             client.accessToken = token;
             res.status(200).json(client);
         } else {

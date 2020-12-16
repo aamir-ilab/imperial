@@ -24,7 +24,15 @@ export class Job {
       role: {type: String},
       startTime: {type: Number},
       endTime: {type: Number},
-      total: {type: Number, default: 1}
+      total: {type: Number, default: 1},
+      workers:[
+        {
+          role: {type:String},
+          startTime: {type:Number},
+          endTime: {type:Number},
+          workerId: {type: any}
+        }
+      ]
     }
   ];
   constructor(job) {

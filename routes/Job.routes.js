@@ -12,13 +12,14 @@ module.exports = (app) => {
     app.post("/client/hash", client.updateHash);
     app.delete("/auth/client/:id", client.delete);
     app.post("/job/getAll", VerifyToken, client.getAll);
-    app.post("/job/getAllType",VerifyToken, authRole(ROLE.ADMIN), client.getAllType);
+    app.post("/job/getAllType",VerifyToken, authRole(ROLE.ADMIN), client.getAllJobs);
+    app.post("/getAllTimesheets",VerifyToken, authRole(ROLE.ADMIN), client.getAllTimesheets);
     app.post("/getWorkerJob", client.getWorkerJob);
-    app.post("/getClientJob", client.getClientJob);
+    app.post("/getClientJob", VerifyToken, client.getClientJob);
     app.post("/job/getAllJob",VerifyToken, authRole(ROLE.ADMIN), client.getAllJob);
     app.post("/getAllInvoices",VerifyToken, client.getAllInvoices);
     app.post("/getFindTimesheets",VerifyToken, client.getFindTimesheets);
-    app.post("/client/verify/email", client.emailverify);
+    app.post("/client/shiftDetail/email",VerifyToken, client.emailshiftDetail);
     app.post("/client/verify/setEmail", client.setEmail);
     app.post("/addWorkerJob",VerifyToken, client.addWorkerJob);
     app.post('/setStatusJob',VerifyToken,client.setStatusJob);

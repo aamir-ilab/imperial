@@ -53,13 +53,14 @@ export class AdminDashboardComponent implements OnInit {
       await this.authService.getAllUserAuth();
       await this.authService.getAllJobAuth();
       this.authService.getTimesheets('Completed').subscribe((res) => {
-      this.reviewTimesheets = res.length;
-    });
+        this.reviewTimesheets = res.length;
+      });
     // if(!this.authService.AllJob)
     //   this.authService.setAllJob();
     // if(!this.authService.AllUser)
     //   this.authService.setAllUser();
       this.AllJob = this.authService.AllJob;
+      console.log('--admin AllJob--', this.AllJob);
       this.AllUsers = this.authService.AllUser;
       const temp = this.AllUsers;
       this.totalStaff = temp.filter((obj) => obj.accountType === 'Worker').length;
@@ -77,17 +78,7 @@ export class AdminDashboardComponent implements OnInit {
     // console.log(this.totalJobs)
     // this.clientJob.filter((obj) => {this.requestTime += parseInt(obj.endTime) - parseInt(obj.startTime)}).length;
     // this.clientJob = this.authService.clientJob;
-      setTimeout(() => {
-      const temp = [
-        {
-          name: 'Subscribers',
-          data: [55, 213, 55, 0, 213, 55, 33, 55]
-        },
-        {
-          name: ''
-        }
-      ];
-    }, 3000);
+
   }
 
 }

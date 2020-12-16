@@ -1,4 +1,4 @@
-import { Component, Inject, OnInit } from '@angular/core';
+import { Component, Inject, OnInit, ViewChild } from '@angular/core';
 import { FormBuilder, FormGroup } from '@angular/forms';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { Customer } from '../interfaces/customer.model';
@@ -15,6 +15,8 @@ import { Job } from 'src/app/client/clients-dashboard/client-job-table/interface
 import icEditLocation from '@iconify/icons-ic/twotone-edit-location';
 import { Timesheet } from 'src/app/models/timesheet.model';
 import { AuthService } from 'src/app/services/auth.service';
+import { MatTableDataSource, MatTable } from '@angular/material/table';
+import { MatSelectChange } from '@angular/material/select';
 
 @Component({
   selector: 'vex-add-timesheet',
@@ -22,6 +24,24 @@ import { AuthService } from 'src/app/services/auth.service';
   styleUrls: ['./add-timesheet.component.scss']
 })
 export class AddTimesheetComponent implements OnInit {
+
+  workers = [];
+  break_times  = [
+    {value: '0', viewValue: '0m'},
+    {value: '10', viewValue: '10m'},
+    {value: '15', viewValue: '15m'},
+    {value: '20', viewValue: '20m'},
+    {value: '25', viewValue: '25m'},
+    {value: '30', viewValue: '30m'},
+    {value: '40', viewValue: '40m'},
+    {value: '45', viewValue: '45m'},
+    {value: '50', viewValue: '50m'},
+    {value: '55', viewValue: '55m'},
+    {value: '60', viewValue: '60m'},
+  ];
+
+  @ViewChild(MatTable, {static: true}) table: MatTable<any>;
+  displayedColumns: string[] = ['workerId.workerId','workerId.forename','role', 'startTime', 'break', 'endTime', 'noShow','hours','status'];
 
   static id = 100;
 
@@ -44,27 +64,22 @@ export class AddTimesheetComponent implements OnInit {
   user: any;
   workerId: any;
   constructor(@Inject(MAT_DIALOG_DATA) public defaults: any,
-              private dialogRef: MatDialogRef<AddTimesheetComponent>,
-              private fb: FormBuilder,
-              private authService: AuthService) {
+    private dialogRef: MatDialogRef<AddTimesheetComponent>,
+    private fb: FormBuilder,
+    private authService: AuthService) {
   }
 
   ngOnInit() {
-    console.log('timesheet', this.defaults);
-    this.timesheets = this.defaults.timesheetId;
-
-    if (!this.authService.AllUser) {
-      this.authService.setAllUser();
-    }
-    console.log('<><><><><><><><><><><<><><><><><><><><>');
-    console.log(this.authService.AllUser);
-    const tempArr = this.authService.AllUser;
-    this.workerId = [];
-    tempArr.forEach(obj => {
-      if (obj.accountType === 'Worker') {
-        this.workerId.push({profilePhoto: obj.profilePhoto, workerId: obj.workerId, id: obj._id});
-      }
+    this.timesheets = this.defaults;
+    console.log('timesheet', this.timesheets['shifts']);
+    this.timesheets['shifts'].forEach(element => {
+      element['workers'].forEach(ele => {
+        console.log('ele', ele);
+        this.workers.push(ele)
+      });
     });
+    console.log('workers', this.workers);
+
     if (this.defaults) {
       this.mode = 'update';
     } else {
@@ -108,6 +123,19 @@ export class AddTimesheetComponent implements OnInit {
     customer.id = this.defaults.id;
 
     this.dialogRef.close(customer);
+  }
+
+  break(event: MatSelectChange, element) {
+    console.log(' break event ', event);
+    console.log(' break element ', element);
+  }
+
+  amend(element){
+    console.log(' amend element ', element);
+  }
+
+  confirm(element){
+    console.log(' confirm element ', element);
   }
 
   isCreateMode() {

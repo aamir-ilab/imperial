@@ -1,31 +1,83 @@
-<form (ngSubmit)="save()" [formGroup]="form">
+<!-- <form (ngSubmit)="save()" [formGroup]="form"> -->
   <div fxLayout="row" fxLayoutAlign="start center" mat-dialog-title>
-    <!-- <img *ngIf="form.get('imageSrc').value" [src]="form.get('imageSrc').value" class="avatar mr-5"> -->
-
-    <!-- <h2 *ngIf="form.get('firstName').value || form.get('lastName').value"
-        class="headline m-0"
-        fxFlex="auto">{{ form.get('firstName').value + ' ' + form.get('lastName').value }}</h2> -->
-    <!-- <h2 *ngIf="!form.get('firstName').value && !form.get('lastName').value" -->
-    <h2
-        class="headline m-0"
-        fxFlex="auto">Edit Timesheet: #{{defaults.timesheetIdStr}}</h2>
-
-    <button class="text-secondary" mat-dialog-close mat-icon-button type="button">
-      <mat-icon [icIcon]="icClose"></mat-icon>
-    </button>
+    <h2 class="headline m-0" fxFlex="auto">Edit Timesheet: #{{defaults.timesheetId}}</h2>
   </div>
 
-  <mat-divider class="-mx-6 text-border"></mat-divider>
+  <mat-divider class="-mx-3 text-border"></mat-divider>
 
-  <mat-dialog-content fxLayout="column">
-    <!-- <div *ngFor="let shift of shifts.controls; let i = index" class="list-group list-group-flush">
+  <table mat-table [dataSource]="workers" class="">
 
-    </div> -->
-  </mat-dialog-content>
+    <ng-container matColumnDef="workerId.workerId">
+      <th mat-header-cell *matHeaderCellDef>Worker ID</th>
+      <td mat-cell *matCellDef="let element">{{element.workerId.workerId}} </td>
+    </ng-container>
+
+    <ng-container matColumnDef="workerId.forename">
+      <th mat-header-cell *matHeaderCellDef>Worker Name</th>
+      <td mat-cell *matCellDef="let element">{{element.workerId.forename}} {{element.workerId.surename}}</td>
+    </ng-container>
+
+    <ng-container matColumnDef="role">
+      <th mat-header-cell *matHeaderCellDef>Role</th>
+      <td mat-cell *matCellDef="let element"> {{element.role}} </td>
+    </ng-container>
+
+
+     <ng-container matColumnDef="startTime">
+      <th mat-header-cell *matHeaderCellDef>Start Time</th>
+      <td mat-cell *matCellDef="let element"> {{element.startTime}} </td>
+    </ng-container>
+
+    <ng-container matColumnDef="break">
+      <th mat-header-cell *matHeaderCellDef>Break</th>
+      <td mat-cell *matCellDef="let element">
+        <mat-select (selectionChange)="break($event,element)" [value]="element.status"
+          [placeholder]="element.status_label_text">
+          <mat-option *ngFor="let status of break_times" [value]="status.value">
+            {{status.viewValue}}
+          </mat-option>
+        </mat-select>
+
+      </td>
+    </ng-container>
+
+    <ng-container matColumnDef="endTime">
+      <th mat-header-cell *matHeaderCellDef>End Time</th>
+      <td mat-cell *matCellDef="let element">{{element.endTime}} </td>
+    </ng-container>
+
+    <ng-container matColumnDef="noShow">
+      <th mat-header-cell *matHeaderCellDef>No Show</th>
+      <td mat-cell *matCellDef="let element">
+        <mat-checkbox class="example-margin" color="primary"></mat-checkbox>
+      </td>
+    </ng-container>
+
+    <ng-container matColumnDef="hours">
+      <th mat-header-cell *matHeaderCellDef>Hours</th>
+      <td mat-cell *matCellDef="let element">{{element.endTime}} </td>
+    </ng-container>
+
+    <ng-container matColumnDef="status">
+      <th mat-header-cell *matHeaderCellDef class="delete_invoice_cell">Actions</th>
+      <td mat-cell *matCellDef="let element" class="receipt_cell">
+        <div *ngIf="element.status === 'confirm'">
+          <button mat-raised-button color="primary" (click)="amend(element)">Amend</button>
+        </div>
+
+        <div *ngIf="element.status !== 'confirm'">
+          <button mat-raised-button  (click)="confirm(element)">Confirm</button>
+        </div>
+
+      </td>
+    </ng-container>
+
+    <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+    <tr mat-row *matRowDef="let row; columns: displayedColumns;" class="mat-row  {{row.status_label}}" ></tr>
+  </table>
 
   <mat-dialog-actions align="end">
     <button mat-button mat-dialog-close type="button">CANCEL</button>
-    <!-- <button *ngIf="isUpdateMode()" color="primary" mat-button type="submit">UPDATE CUSTOMER</button> -->
-    <button color="primary" [disabled]="defaults.statusStr != 'Pending'"(click)="setSubmit()"mat-button type="button">SUBMIT</button>
+    <button color="primary" (click)="setSubmit()"mat-button type="button">SUBMIT TIMESHEET</button>
   </mat-dialog-actions>
-</form>
+<!-- </form> -->

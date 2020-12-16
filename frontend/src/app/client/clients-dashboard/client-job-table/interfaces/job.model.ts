@@ -1,34 +1,38 @@
 import { statusTableData, statusTableLabels } from 'src/static-data/status-table-data';
 import { formatDate } from '@angular/common';
 export class Job {
-  _id:string;
+  _id: string;
   id: number;
-  JobId:string;
+  JobId: string;
   client: string;
-  // department: string;
-  // role: string;
   shiftDate: Date;
-  shiftDateStr:string;
-  // startTime: number;
-  // endTime: number;
+  shiftDateStr: string;
   locationShift: string;
-  purchaseOrderNo: string; //optional
-  additionalInformation:string;
-  status:any;
-  statusStr:string;
+  purchaseOrderNo: string; // optional
+  additionalInformation: string;
+  status: any;
+  statusStr: string;
   fulfilled: number;
   // total:number;
-  totalStaff:string;
-  clientId:any;
-  timesheetId:any;
-  timesheetIdStr:string;
+  totalStaff: number;
+  clientId: any;
+  timesheetId: any;
+  timesheetIdStr: string;
   shifts: [
     {
-      department: {type: String},
-      role: {type: String},
-      startTime: {type: Number},
-      endTime: {type: Number},
-      total: {type: Number, default: 1}
+      department: {type: string},
+      role: {type: string},
+      startTime: {type: number},
+      endTime: {type: number},
+      total: {type: number, default: 1},
+      workers:[
+        {
+          role: {type:String},
+          startTime: {type:Number},
+          endTime: {type:Number},
+          workerId: {type: any}
+        }
+      ]
     }
   ];
   // workerId:any;
@@ -41,6 +45,7 @@ export class Job {
     // this.role = job.role;
     this.shifts = job.shifts;
     this.shiftDate = job.shiftDate;
+    this.totalStaff = job.totalStaff;
     // this.shiftDateStr = formatDate(job.shiftDate, 'yyyy-MM-dd','en').toString();
     // this.startTime = job.startTime;
     // this.endTime = job.endTime;
@@ -51,45 +56,56 @@ export class Job {
     this.clientId = job.clientId;
     this.timesheetId = job.timesheetId;
     this.timesheetIdStr = this.timesheetId.timesheetId;
-    if(job.statusStr){
-      if(job.statusStr == 'Completed')
+    if (job.statusStr){
+      if (job.statusStr === 'Completed') {
       this.status = statusTableLabels[4];
-    else  if(job.statusStr == 'Submitted')
-      this.status = statusTableLabels[0];
-    else  if(job.statusStr == 'Pending')
-      this.status = statusTableLabels[1];
-    else  if(job.statusStr == 'Cancelled')
-      this.status = statusTableLabels[3];
-    else
-       this.status = statusTableLabels[2];
+      }
+      else  if (job.statusStr === 'Submitted') {
+        this.status = statusTableLabels[0];
+      }
+      else  if (job.statusStr === 'Pending') {
+        this.status = statusTableLabels[1];
+      }
+      else  if (job.statusStr === 'Cancelled') {
+        this.status = statusTableLabels[3];
+      }
+      else {
+        this.status = statusTableLabels[2];
+      }
     }else{
       this.status = statusTableLabels[1];
-
     }
 
 
       //  this.total = job.total;
-       if(job.fulfilled)
+    if (job.fulfilled) {
          this.fulfilled = job.fulfilled;
-      else
+       }
+      else {
         this.fulfilled = 0;
-       this.statusStr = job.statusStr;
-       this.setTotalStaff();
+       }
+    this.statusStr = job.statusStr;
+    this.setTotalStaff();
   }
   setTotalStaff(){
     // this.totalStaff = this.fulfilled + ' / ' + this.total;
   }
   setStatus(status){
     this.statusStr = status;
-      if(this.statusStr == 'Completed')
+    if (this.statusStr === 'Completed') {
       this.status = statusTableLabels[4];
-    else  if(this.statusStr == 'Submitted')
+      }
+    else  if (this.statusStr === 'Submitted') {
       this.status = statusTableLabels[0];
-    else  if(this.statusStr == 'Pending')
+    }
+    else  if (this.statusStr === 'Pending') {
       this.status = statusTableLabels[1];
-    else  if(this.statusStr == 'Cancelled')
+    }
+    else  if (this.statusStr === 'Cancelled') {
       this.status = statusTableLabels[3];
-    else
+    }
+    else {
        this.status = statusTableLabels[2];
+    }
   }
 }

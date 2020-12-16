@@ -60,13 +60,12 @@ export class ClientJobTableComponent implements OnInit {
 
   @Input()
   columns: TableColumn<Job>[] = [
-    // { label: 'Checkbox', property: 'checkbox', type: 'checkbox', visible: true },
-    { label: 'Client', property: 'client', type: 'text', visible: true, cssClasses: ['font-medium'] },
-    { label: 'Department', property: 'department', type: 'text', visible: true },
+    { label: 'Job ID', property: 'JobId', type: 'text', visible: true },
+    { label: 'Department', property: 'department', type: 'text', visible: false },
     { label: 'Role', property: 'role', type: 'text', visible: false },
-    { label: 'Shift Date', property: 'shiftDateStr', type: 'text', visible: true },
-    { label: 'Start Time', property: 'startTime', type: 'text', visible: true },
-    { label: 'End Time', property: 'endTime', type: 'text', visible: true },
+    { label: 'Shift Date', property: 'shiftDate', type: 'text', visible: true },
+    { label: 'Start Time', property: 'startTime', type: 'text', visible: false },
+    { label: 'End Time', property: 'endTime', type: 'text', visible: false },
     { label: 'Total Staff', property: 'totalStaff', type: 'text', visible: true},
     { label: 'Status', property: 'status', type: 'button', visible: true },
     { label: 'ID', property: '_id', type: 'text', visible: false },
@@ -113,10 +112,9 @@ export class ClientJobTableComponent implements OnInit {
   getData() {
     const current = JSON.parse(localStorage.getItem('userInfo'));
     console.log('--current client--', current);
-    this.authService.getClientJob(current).subscribe((clients) => {
+    this.authService.getClientJobSync(current).subscribe((clients) => {
       of(clients.map(client => new Job(client))).subscribe(clientes => {
-        console.log('123213123');
-        console.log(clientes);
+        console.log('job', clientes);
         this.subject$.next(clientes);
       });
     });

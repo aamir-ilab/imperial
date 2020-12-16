@@ -13,6 +13,8 @@ import { MatMenuModule } from '@angular/material/menu';
 import { IconModule } from '@visurel/iconify-angular';
 import { MatDividerModule } from '@angular/material/divider';
 import { MatAutocompleteModule } from '@angular/material/autocomplete';
+import { MatTableModule } from '@angular/material/table'
+import { MatCheckboxModule } from '@angular/material/checkbox';
 
 @NgModule({
   imports: [
@@ -28,7 +30,9 @@ import { MatAutocompleteModule } from '@angular/material/autocomplete';
     MatSelectModule,
     MatMenuModule,
     IconModule,
-    MatDividerModule
+    MatDividerModule,
+    MatTableModule,
+    MatCheckboxModule
   ],
   declarations: [AddTimesheetComponent],
   entryComponents: [AddTimesheetComponent],

@@ -2,7 +2,7 @@ import { Component, OnInit, TemplateRef } from '@angular/core';
 import { ScrumboardList } from './interfaces/scrumboard-list.interface';
 import { CdkDragDrop, moveItemInArray, transferArrayItem } from '@angular/cdk/drag-drop';
 import { ScrumboardCard } from './interfaces/scrumboard-card.interface';
-// import { trackById } from '../../../../@vex/utils/track-by';
+import { trackById } from '../../../../@vex/utils/track-by';
 import { scrumboards, scrumboardUsers } from '../../../../static-data/scrumboard';
 import icNotifications from '@iconify/icons-ic/twotone-notifications';
 import icInsertComment from '@iconify/icons-ic/twotone-insert-comment';
@@ -20,6 +20,9 @@ import icEdit from '@iconify/icons-ic/twotone-edit';
 import { stagger80ms } from '../../../../@vex/animations/stagger.animation';
 import { fadeInUp400ms } from '../../../../@vex/animations/fade-in-up.animation';
 import { AuthService } from 'src/app/services/auth.service';
+import { Customer } from 'src/app/pages/apps/aio-table/interfaces/customer.model';
+import { CustomerCreateUpdateComponent } from '../../admin-dashboard/admin-job-table/customer-create-update/customer-create-update.component';
+import data from '@iconify/icons-ic/twotone-visibility';
 
 @Component({
   selector: 'vex-admin-job',
@@ -40,7 +43,7 @@ export class AdminJobComponent implements OnInit {
   addCardCtrl = new FormControl();
   // addListCtrl = new FormControl();
 
-  // trackById = trackById;
+  trackById = trackById;
   icNotifications = icNotifications;
   icInsertComment = icInsertComment;
   icAttachFile = icAttachFile;
@@ -60,51 +63,61 @@ export class AdminJobComponent implements OnInit {
 
   ngOnInit() {
     console.log('admin job scrumboard ng on int');
-    // if (!this.authService.currentScrumboard){
-    this.authService.setCurrentScrumboard();
-    this.currentScrum = this.authService.currentScrumboard;
-    // }
+    if (this.authService.currentScrumboard){
+      console.log('authService scrumboard', this.authService.currentScrumboard);
+      this.authService.setCurrentScrumboard();
+      this.currentScrum = this.authService.currentScrumboard;
+    }
     console.log('scrumboard', this.currentScrum);
-    this.currentScrum.forEach(element => {
-      if (element.title === this.currentJob.department){
-        this.board = element;
-      }
-    });
-    // this.board$ =  this.route.paramMap.pipe(
-    //   map(paramMap => +paramMap.get('scrumboardId')),
-    //   map(scrumboardId => this.authService.currentScrumboard.find(board => board.id === scrumboardId))
-    // );
-
-    console.log('board', this.board);
+    // this.board = this.currentScrum;
+    // this.currentScrum.forEach(element => {
+    //   if (element.title === this.currentJob.department){
+    //     this.board = element;
+    //   }
+    // });
+    // console.log('board$', this.board);
   }
 
-  open() {
-    console.log('card cliked');
+  open(board) {
+    console.log('card cliked', board);
     this.addCardCtrl.setValue(null);
-
+    this.currentJob.shiftId = board.shiftId;
     this.dialog.open(ScrumboardDialogComponent, {
-      data: this.currentJob ,
+      data: board ,
       width: '700px',
       maxWidth: '100%',
       disableClose: true
     });
-    // .beforeClosed().pipe(
-    //   filter<ScrumboardCard>(Boolean)
-    // ).subscribe(value => {
-    //   console.log(value);
-    //   const index = list.children.findIndex(child => child.id === card.id);
-    //   if (index > -1) {
-    //     list.children[index] = value;
-    //   }
-    // });
+  }
+
+  editJob(customer: Customer) {
+    console.log('current job', customer);
+    this.dialog.open(CustomerCreateUpdateComponent, {
+      data: customer
+    }).afterClosed().subscribe(updatedCustomer => {
+      /**
+       * Customer is the updated customer (if the user pressed Save - otherwise it's null)
+       */
+      if (updatedCustomer) {
+        /**
+         * Here we are updating our local array.
+         * You would probably make an HTTP request here.
+         */
+        this.authService.updateJob(updatedCustomer).subscribe((res) => {
+          console.log('res', res);
+          this.authService.openSnackbar('Updated Job Successfully');
+        });
+      }
+    });
   }
 
   drop(event: CdkDragDrop<any[]>) {
+    console.log('event', event);
     if (event.previousContainer === event.container) {
-      // alert('1')
+      console.log('if', event.previousContainer === event.container);
       moveItemInArray(event.container.data, event.previousIndex, event.currentIndex);
     } else {
-      // alert('2')
+      console.log('else', event.previousContainer !== event.container);
       transferArrayItem(event.previousContainer.data,
         event.container.data,
         event.previousIndex,
@@ -114,12 +127,11 @@ export class AdminJobComponent implements OnInit {
           console.log(res);
           this.authService.openSnackbar('status has updated successfully');
         });
-        // console.log('^&^&^&')
-        // console.log(event.container)
       }
   }
 
   dropList(event: CdkDragDrop<ScrumboardList[]>) {
+    console.log('dropList');
     if (event.previousContainer === event.container) {
       moveItemInArray(event.container.data, event.previousIndex, event.currentIndex);
     } else {
@@ -190,22 +202,5 @@ export class AdminJobComponent implements OnInit {
 
     this.addCardCtrl.setValue(null);
   }
-
-  // createList(board: Scrumboard, close: () => void) {
-  //   if (!this.addListCtrl.value) {
-  //     return;
-  //   }
-
-  //   board.children.push({
-  //     id: AdminJobComponent.nextId++,
-  //     label: this.addListCtrl.value,
-  //     children: []
-  //   });
-
-  //   close();
-
-  //   this.addListCtrl.setValue(null);
-  // }
-
 
 }

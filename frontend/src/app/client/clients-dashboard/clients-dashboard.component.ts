@@ -8,6 +8,7 @@ import { Order, tableSalesData } from '../../../static-data/table-sales-data';
 import { TableColumn } from '../../../@vex/interfaces/table-column.interface';
 import icMoreVert from '@iconify/icons-ic/twotone-more-vert';
 import { AuthService } from 'src/app/services/auth.service';
+import moment from 'moment';
 
 @Component({
   selector: 'vex-clients-dashboard',
@@ -16,8 +17,8 @@ import { AuthService } from 'src/app/services/auth.service';
 })
 export class ClientsDashboardComponent implements OnInit {
   clientJob: any;
-  totalJobs: number;
-  requestTime: number;
+  totalJobs = 0;
+  requestTime = 0;
 
   icGroup = icGroup;
   icPageView = icPageView;
@@ -29,34 +30,26 @@ export class ClientsDashboardComponent implements OnInit {
               private authService: AuthService) { }
 
   async ngOnInit() {
-    // if (!this.authService.clientJob) {
-    //   this.authService.setClientJob();
-    // }
-    // this.clientJob = this.authService.clientJob;
     await this.authService.getAuthClientJob();
-    console.log('____________');
-    console.log(this.clientJob);
+    this.clientJob = this.authService.clientJob;
+    console.log('--client AllJob--', this.clientJob);
+    // this.clientJob = this.authService.clientJob;
     // this.totalJobs =  this.clientJob.filter((obj) => obj.statusStr == 'Completed').length;
     this.totalJobs =  this.clientJob.length;
-    this.clientJob = this.authService.clientJob;
     this.requestTime = 0;
-    console.log('____________+++=');
-    console.log(this.clientJob);
-    console.log(this.requestTime);
-    console.log(this.totalJobs);
-    this.clientJob.filter((obj) => {this.requestTime += parseInt(obj.endTime) - parseInt(obj.startTime); }).length;
-    this.clientJob = this.authService.clientJob;
-    setTimeout(() => {
-      const temp = [
-        {
-          name: 'Subscribers',
-          data: [55, 213, 55, 0, 213, 55, 33, 55]
-        },
-        {
-          name: ''
-        }
-      ];
-    }, 3000);
+    // this.clientJob.filter((obj) => {
+    //   this.requestTime += parseInt(obj.endTime) - parseInt(obj.startTime); }).length;
+    this.clientJob.forEach(element => {
+      const now = moment();
+      const input = moment(element.shiftDate);
+      if (now.isoWeek() === input.isoWeek()){
+        element.shifts.forEach(ele => {
+          // tslint:disable-next-line: radix
+          this.requestTime += parseInt(ele.endTime) - parseInt(ele.startTime);
+        });
+      }
+    });
+    console.log('requestTime', this.requestTime);
   }
 
 }

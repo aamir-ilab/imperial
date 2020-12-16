@@ -1,9 +1,10 @@
 import { Component, Inject, OnInit } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { ScrumboardCard } from '../../interfaces/scrumboard-card.interface';
-import { FormArray, FormBuilder, FormControl } from '@angular/forms';
+import { FormArray, FormBuilder, FormControl, Validators } from '@angular/forms';
 import icAssignment from '@iconify/icons-ic/twotone-assignment';
-import icAdd from '@iconify/icons-ic/twotone-add';
+import icAdd from '@iconify/icons-fa-solid/plus-square';
+import icMinus from '@iconify/icons-fa-solid/minus-square';
 import { scrumboardLabels, scrumboardUsers } from '../../../../../../static-data/scrumboard';
 import icDescription from '@iconify/icons-ic/twotone-description';
 import icClose from '@iconify/icons-ic/twotone-close';
@@ -20,6 +21,7 @@ import { ScrumboardComment } from '../../interfaces/scrumboard-comment.interface
 import icStar from '@iconify/icons-ic/twotone-star';
 import { AuthService } from 'src/app/services/auth.service';
 import { formatDate } from '@angular/common';
+import moment from 'moment';
 
 @Component({
   selector: 'vex-scrumboard-dialog',
@@ -45,11 +47,6 @@ export class ScrumboardDialogComponent implements OnInit {
     totalStaff: null,
     clientId: null,
     timesheetId: [],
-    // cover: null,
-    // attachments: this.fb.array([]),
-    // comments: this.fb.array([]),
-    users: [],
-    // labels: []
   });
 
   roles: any;
@@ -59,6 +56,7 @@ export class ScrumboardDialogComponent implements OnInit {
   icDescription = icDescription;
   icClose = icClose;
   icAdd = icAdd;
+  icMinus = icMinus;
   icMoreVert = icMoreVert;
   icDelete = icDelete;
   icImage = icImage;
@@ -68,7 +66,7 @@ export class ScrumboardDialogComponent implements OnInit {
   jobId;
   // users = scrumboardUsers;
   labels = scrumboardLabels;
-  workerId: any;
+  _workers: any;
   list: any;
   // list: ScrumboardList;
   // board: Scrumboard;
@@ -77,6 +75,7 @@ export class ScrumboardDialogComponent implements OnInit {
   oldWorkerId: any;
   wokersSelect: any = [];
   totalworkers: [];
+  checked = false;
   constructor(private dialogRef: MatDialogRef<ScrumboardDialogComponent>,
               @Inject(MAT_DIALOG_DATA) private data: {
               },
@@ -88,56 +87,23 @@ export class ScrumboardDialogComponent implements OnInit {
       await this.authService.getAllUserAuth();
     }
     const tempArr = this.authService.AllUser;
-    this.workerId = [];
+    this._workers = [];
     tempArr.forEach(obj => {
         if (obj.accountType === 'Worker') {
-          this.workerId.push({profilePhoto: obj.profilePhoto, name: `${obj.forename} ${obj.surename}`, workerId: obj.workerId, emailAddress: obj.emailAddress, id: obj._id});
+          this._workers.push({profilePhoto: obj.profilePhoto, name: `${obj.forename} ${obj.surename}`, workerId: obj.workerId, emailAddress: obj.emailAddress, id: obj._id});
         }
       });
-    console.log('this.workerId', this.workerId);
+    console.log('this._workers', this._workers);
 
     console.log('this.data', this.data);
-    // tempArr.filter(obj => if(obj.accountType == 'Worker'){ return {profilePhoto:obj.profilePhoto, };});
     this.list = this.data;
-    // this.totalworkers = Array(this.list.client[0].total).fill(0).map((x, i) => i);
-    // this.fulfilled = card.timesheetId.length;
-    // this.originalTimesheets = card.timesheetId;
-    // // this.workerId = card.workerId;
-    // this.newWorkerId = [];
-    // this.oldWorkerId = [];
-    // card.timesheetId.forEach(element => {
-    //   this.newWorkerId.push({profilePhoto: element.profilePhoto, workerId: element.workerId, id: element.id});
-    //   this.oldWorkerId.push({profilePhoto: element.profilePhoto, workerId: element.workerId, id: element.id});
-    // });
-    // const shiftDateStr = formatDate(new Date(card.shiftDate), 'yyyy-MM-dd', 'en').toString();
-    // console.log(card);
-    // console.log(this.workerId);
-    // this.form.valueChanges.subscribe(console.log);
+    this.form = this.fb.group({
+      workers: this.fb.array([])
+    });
 
-    // this.form.patchValue({
-    //   title: card.title || null,
-    //   client: card.client ||  null,
-    //   department: card.department || null,
-    //   role: card.role || null,
-    //   shiftDate: shiftDateStr || null,
-    //   startTime: card.startTime || null,
-    //   endTime: card.endTime || null,
-    //   locationShift: card.locationShift || null,
-    //   purchaseOrderNo: card.purchaseOrderNo || null,
-    //   additionalInformation: card.additionalInformation || null,
-    //   statusStr: card.statusStr || null,
-    //   fulfilled: card.fulfilled || 0,
-    //   total: card.total || 0,
-    //   totalStaff: card.totalStaff || null,
-    //   clientId: card.clientId || null,
-    //   timesheetId: this.newWorkerId || [],
-    //   users: card.users || [],
-    //   // labels: card.labels || []
-    // });
+    this.assignWorkers();
 
-    // this.form.setControl('attachments', this.fb.array(card.attachments || []));
-    // this.form.setControl('comments', this.fb.array(card.comments || []));
-    if (this.list.department === 'Housekeeping'){
+    if (this.list.title === 'Housekeeping'){
       this.roles = [
         {
           value: 'Linen Porter',
@@ -177,7 +143,7 @@ export class ScrumboardDialogComponent implements OnInit {
         }
       ];
     }
-    else if (this.list.department === 'Food and Beverage') {
+    else if (this.list.title === 'Food and Beverage') {
       this.roles = [
         {
           value: 'Waiters',
@@ -270,7 +236,74 @@ export class ScrumboardDialogComponent implements OnInit {
       ];
     }
   }
-  save() {}
+  get workers() { return this.form.controls.workers as FormArray; }
+
+  assignWorkers() {
+    for (let index = 0; index < this.list.shift.total; index++) {
+      this.workers.push(this.patchValues(this.list.shift.workers[index]));
+    }
+  }
+
+  patchValues(x) {
+    return this.fb.group({
+      role: [x.role],
+      startTime: [x.startTime],
+      endTime: [x.endTime],
+      workerId: [x.workerId]
+    });
+  }
+
+  addShift(){
+    this.workers.push(this.fb.group({
+      role: ['', Validators.required],
+      startTime: ['', Validators.required],
+      endTime: ['', Validators.required],
+      total: ['', [Validators.required, Validators.min(1)]],
+      workerId: ['']
+    }));
+    console.log('addShift', this.workers);
+  }
+  removeShift(index){
+    this.workers.removeAt(index);
+    console.log('removeShift', index, this.workers);
+  }
+
+  save() {
+    const workers = this.form.value.workers;
+    console.log('workers', workers);
+    this.authService.setJobWorkers(this.list.id, this.list.shift._id,workers).subscribe((res) => {
+      if (this.checked === true) {
+        workers.forEach(worker => {
+          if(worker.workerId !== null){
+            const found = this._workers.find(x => x.id === worker.workerId);
+            console.log('worker', worker);
+            console.log('found', found);
+            const shiftDate = moment(moment(this.list.shiftDate)).format('DD-MM-YYYY')
+            const obj = {
+              subject : 'You have been assigned a new shift (ID #' + this.list.id + ')',
+              name : found.name,
+              email: found.emailAddress,
+              content: `You have been assigned a shift with ${this.list.clientId.firstName} ${this.list.clientId.lastName} <br/><br/>`+`Please read the shift details carefully below. If you have any questions relating to the shift, or if you’re unable to attend this shift, please contact Imperial Recruitment as soon as possible on 020 7436 7424.<br/><br/>`+
+              `<span style="font-weight: bold;">Shift Date:</span><span> ${shiftDate} </span><br/>
+              <span style="font-weight: bold;">Shift start time:</span><span> ${worker.startTime} – ${worker.endTime}</span><br/>
+              <span style="font-weight: bold;">Role: </span><span>${worker.role}</span><br/>`
+              +'LOGIN TO PORTAL'+ `\n http://imperial-recruitment.herokuapp.com/#/login`
+            };
+            console.log('email obj', obj);
+            this.authService.sendEmail(obj).subscribe((sendemail_res) => {
+              this.authService.openSnackbar('Shift Detail Sent to workers');
+            });
+          }
+
+        });
+      }
+
+      this.dialogRef.close(res);
+    })
+  }
+  sendEmail(sendEmail){
+    console.log('send email', sendEmail);
+  }
 //   save() {
 //     console.log('.........../.././././');
 //     // console.log(this.data.card.timesheetId[0].JobId)

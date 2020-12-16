@@ -1,5 +1,5 @@
 import { Component, Inject, OnInit } from '@angular/core';
-import { FormBuilder, FormGroup, FormControl, FormArray } from '@angular/forms';
+import { FormBuilder, FormGroup, FormControl, FormArray, Validators } from '@angular/forms';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { Job } from '../interfaces/job.model';
 import icMoreVert from '@iconify/icons-ic/twotone-more-vert';
@@ -22,6 +22,7 @@ import icArrowDropDown from '@iconify/icons-ic/twotone-arrow-drop-down';
 import { Router } from '@angular/router';
 import icAdd from '@iconify/icons-fa-solid/plus-square';
 import icMinus from '@iconify/icons-fa-solid/minus-square';
+import moment from 'moment';
 
 @Component({
   selector: 'vex-customer-create-update',
@@ -98,7 +99,6 @@ export class CustomerCreateUpdateComponent implements OnInit {
   }
   async ngOnInit() {
     console.log('customer create update');
-    console.log('1');
     if (!this.authService.AllUser) {
       await this.authService.getAllUserAuth();
     }
@@ -107,55 +107,64 @@ export class CustomerCreateUpdateComponent implements OnInit {
         startWith(''),
         map(state => state ? this.filterStates(state) : this.states.slice())
       );
-    console.log('2');
     this.AllClients = this.authService.AllUser;
-    console.log('3');
     this.AllClients = this.AllClients.filter((obj) => obj.accountType === 'Client');
-    console.log(this.AllClients);
-    // this.minDate = '2020-08-15';
+    console.log('this.AllClients', this.AllClients);
     this.minDate = formatDate(new Date(), 'yyyy-MM-dd', 'en');
-    console.log('1213123');
-    console.log(this.minDate);
-    // this.minDate = formatDate(new Date(), 'YYYY-MM-DD').toString();
+    console.log('minDate', this.minDate);
     if (this.defaults) {
+      console.log('this.defaults', this.defaults)
       this.mode = 'update';
+      this.defaults.shiftDate = moment(moment(this.defaults.shiftDate)).format('YYYY-MM-DD');
+      console.log('shiftDtae', this.defaults.shiftDate);
     } else {
+      this.mode = 'create';
       this.defaults = {} as Job;
     }
-
     this.form = this.fb.group({
       id: [CustomerCreateUpdateComponent.id++],
       _id: [this.defaults._id || ''],
       client: [this.defaults.client || ''],
-      shiftDate: [this.defaults.shiftDate || new Date()],
-      // department: [this.defaults.department || ''],
-      // role: [this.defaults.role || this.selectedRole],
-      // startTime: [this.defaults.startTime || ''],
-      // endTime: [this.defaults.endTime || ''],
-      // total: [this.defaults.total || ''],
+      shiftDate: [this.defaults.shiftDate || formatDate(new Date(), 'yyyy-MM-dd', 'en')],
       locationShift: [this.defaults.locationShift || ''],
       purchaseOrderNo: [this.defaults.purchaseOrderNo || ''],
       additionalInformation: [this.defaults.additionalInformation || ''],
       status: [this.defaults.status || statusTableLabels[2]],
       stateCtrl: [this.stateCtrl.value || ''],
-      shifts: this.fb.array([
-        this.initShifts(),
-    ])
-
+      shifts: this.fb.array([])
     });
+    this.assignShifts();
     this.selectedClient = this.defaults.client;
   }
 
-  initShifts() {
-    return this.fb.group({
-      department: [''],
-      role: [''],
-      startTime: [''],
-      endTime: [''],
-      total: [''],
-    });
-}
+  assignShifts() {
+    if (this.mode === 'update') {
+      this.defaults.shifts.forEach(x => {
+        this.shifts.push(this.patchValues(x));
+      });
+    }
+    else{
+      this.shifts.push(
+        this.fb.group({
+          department: ['', Validators.required],
+          role: ['', Validators.required],
+          startTime: ['', Validators.required],
+          endTime: ['', Validators.required],
+          total: ['', [Validators.required, Validators.min(1)]],
+        })
+      );
+    }
+  }
 
+  patchValues(x) {
+    return this.fb.group({
+      department: [x.department],
+      role: [x.role],
+      startTime: [x.startTime],
+      endTime: [x.endTime],
+      total: [x.total],
+    });
+  }
 
   save() {
     if (this.mode === 'create') {
@@ -166,21 +175,22 @@ export class CustomerCreateUpdateComponent implements OnInit {
   }
 
   createCustomer() {
-    // const customer = this.form.value;
-    // const tempUser = this.AllClients.filter(obj => {
-    //   const tempName = obj.firstName + ' ' + obj.lastName;
-    //   if (tempName === customer.client) {
-    //     return obj;
-    //   }
-    // });
-    // customer.clientId  = tempUser[0]._id;
-    // this.dialogRef.close(customer);
+    const customer = this.form.value;
+    const tempUser = this.AllClients.filter(obj => {
+      const tempName = obj.firstName + ' ' + obj.lastName;
+      if (tempName === customer.client) {
+        return obj;
+      }
+    });
+    customer.clientId  = tempUser[0]._id;
+    this.dialogRef.close(customer);
 
     console.log('SUCCESS!!' + JSON.stringify(this.form.value));
   }
 
   updateCustomer() {
     const customer = this.form.value;
+    console.log('customer', customer.shifts)
     customer.id = this.defaults.id;
     const tempUser = this.AllClients.filter(obj => {
       const tempName = obj.firstName + ' ' + obj.lastName;
@@ -199,80 +209,120 @@ export class CustomerCreateUpdateComponent implements OnInit {
   isUpdateMode() {
     return this.mode === 'update';
   }
-  changeAccountType(ev, i){
-    if (i === 1) {
-    this.selectedType = ev.value();
-    }
-    else {
-    this.selectedRole = ev.value();
-    }
-  }
-  changeClient(ev){
-    this.selectedClient = ev.value();
-  }
+
   openJobs(){
     console.log('-----openjobs--------');
-    console.log(this.defaults.client);
-    console.log('------------------');
+    console.log('---this.defaults----', this.defaults);
     const event: any = this.defaults;
-    event.title = event.client;
-    this.authService.currentScrumboard = [{
-      id: event.id,
-      title: event.client,
-      children: [
-        // { id:1, label:'Unassigned Shifts', children:[] },
-        // { id:2, label:'Assigned', children:[] },
-        { id: 1, label: 'In Progress', children: [] },
-        { id: 2, label: 'Submitted', children: [] },
-        { id: 3, label: 'Completed', children: [] },
-      ]
-    }];
-    this.authService.currentJob = event;
-    console.log('///////////////');
-    console.log(this.authService.currentJob);
-    console.log('///////////////');
-    const arrLabel = ['In Progress', 'Submitted', 'Completed'];
-    console.log('&&&&');
-    console.log(event);
-    console.log('&&&&');
-    arrLabel.forEach((ele, index) => {
-      if (ele === event.statusStr) {
-        this.authService.currentScrumboard[0].children[index].children.push({
+
+    this.authService.currentScrumboard = [];
+    event.shifts.forEach((element, i) => {
+      this.authService.currentScrumboard.push({
+        id: event.id,
+        title: event.shifts[i].department,
+        shiftId: event.shifts[i]._id,
+        children: [
+          // { id:1, label:'Unassigned Shifts', children:[] },
+          // { id:2, label:'Assigned', children:[] },
+          { id: 1, label: 'In Progress', children: [] },
+          { id: 2, label: 'Submitted', children: [] },
+          { id: 3, label: 'Completed', children: [] },
+        ]
+      });
+      this.authService.currentJob = event;
+      console.log('currentJob', this.authService.currentJob);
+      const arrLabel = ['In Progress', 'Submitted', 'Completed'];
+      console.log('&&&&', event.client);
+      arrLabel.forEach((ele, index) => {
+        if (ele === event.statusStr) {
+          this.authService.currentScrumboard[i].children[index].children.push({
             id: event.id,
-            title: event.department,
-            client: event.client,
-            department: event.department,
-            role: event.role,
+            title: event.shifts[i].department,
+            client: event.clientId,
             shiftDate: event.shiftDate,
-            startTime: event.startTime,
-            endTime: event.endTime,
             locationShift: event.locationShift,
             purchaseOrderNo: event.purchaseOrderNo,
             additionalInformation: event.additionalInformation,
             statusStr: event.statusStr,
             fulfilled: event.fulfilled,
-            total: event.total,
+            shift: event.shifts[i],
             totalStaff: event.totalStaff,
             clientId: event.clientId,
             timesheetId: event.timesheetId
           });
-      }
+        }
+      });
     });
     this.authService.setCurrentScrumboardLocal(this.authService.currentScrumboard);
     this.route.navigate(['/admin/jobs/scrumboard', event.id]);
+
+
+    // event.title = event.client;
+    // this.authService.currentScrumboard = [{
+    //   id: event.id,
+    //   title: event.client,
+    //   children: [
+    //     // { id:1, label:'Unassigned Shifts', children:[] },
+    //     // { id:2, label:'Assigned', children:[] },
+    //     { id: 1, label: 'In Progress', children: [] },
+    //     { id: 2, label: 'Submitted', children: [] },
+    //     { id: 3, label: 'Completed', children: [] },
+    //   ]
+    // }];
+    // this.authService.currentJob = event;
+    // console.log('///////////////');
+    // console.log(this.authService.currentJob);
+    // console.log('///////////////');
+    // const arrLabel = ['In Progress', 'Submitted', 'Completed'];
+    // console.log('&&&&');
+    // console.log(event);
+    // console.log('&&&&');
+    // arrLabel.forEach((ele, index) => {
+    //   if (ele === event.statusStr) {
+    //     this.authService.currentScrumboard[0].children[index].children.push({
+    //         id: event.id,
+    //         title: event.department,
+    //         client: event.client,
+    //         department: event.department,
+    //         role: event.role,
+    //         shiftDate: event.shiftDate,
+    //         startTime: event.startTime,
+    //         endTime: event.endTime,
+    //         locationShift: event.locationShift,
+    //         purchaseOrderNo: event.purchaseOrderNo,
+    //         additionalInformation: event.additionalInformation,
+    //         statusStr: event.statusStr,
+    //         fulfilled: event.fulfilled,
+    //         total: event.total,
+    //         totalStaff: event.totalStaff,
+    //         clientId: event.clientId,
+    //         timesheetId: event.timesheetId
+    //       });
+    //   }
+    // });
+    // this.authService.setCurrentScrumboardLocal(this.authService.currentScrumboard);
+    // this.route.navigate(['/admin/jobs/scrumboard', event.id]);
     this.dialogRef.close();
   }
+
+
 
   // tslint:disable-next-line: no-string-literal
   get shifts() { return this.form.controls.shifts as FormArray; }
 
 
   addShift(){
-    console.log('addShift');
-    this.shifts.push(this.initShifts());
+    this.shifts.push(this.fb.group({
+      department: ['', Validators.required],
+      role: ['', Validators.required],
+      startTime: ['', Validators.required],
+      endTime: ['', Validators.required],
+      total: ['', [Validators.required, Validators.min(1)]],
+    }));
+    console.log('addShift', this.shifts);
   }
   removeShift(index){
-    console.log('removeShift', index);
     this.shifts.removeAt(index);
+    console.log('removeShift', index, this.shifts);
   }
 }
