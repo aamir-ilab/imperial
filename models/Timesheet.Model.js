@@ -10,23 +10,16 @@ var TimesheetSchema = new mongoose.Schema({
     JobId_Id: { type: mongoose.Schema.Types.ObjectId, ref: 'Job' },
     invoiceId_Id: { type: mongoose.Schema.Types.ObjectId, ref: 'Invoice' },
     shiftDate: {type:Date},
-    shifts: [
+    workers:[
       {
-        department: {type:String},
         role: {type:String},
-        startTime: {type:Number},
-        endTime: {type:Number},
-        total:{type:Number, default: 1},
-        workers:[
-          {
-            role: {type:String},
-            startTime: {type:Number},
-            endTime: {type:Number},
-            break: {type:Number},
-            status: {type:String, default: 'amend'},
-            workerId: {type: mongoose.Schema.Types.ObjectId, ref: 'User'},
-          }
-        ],
+        startTime: {type:String},
+        endTime: {type:String},
+        hours: {type:Number},
+        break: {type:Number, default: 0},
+        status: {type:String, default: 'amend'},
+        workerId: {type: mongoose.Schema.Types.ObjectId, ref: 'User'},
+        show: {type:Boolean, default: true}
       }
     ],
     statusStr:{type:String, default:'In Progress'},

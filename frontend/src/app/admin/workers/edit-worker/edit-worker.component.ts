@@ -39,7 +39,7 @@ export class EditWorkerComponent implements OnInit {
 fileName: string = "No file selected";
   static id = 100;
 
-  mode: 'create' | 'update' = 'create';
+  mode: 'update';
 
   icMoreVert = icMoreVert;
   icClose = icClose;
@@ -71,6 +71,7 @@ fileName: string = "No file selected";
   acceptCheckVal = false;
   qualification;
   selectedDepartment;
+  selectedStatus;
   defaults;
   constructor(
     private cd: ChangeDetectorRef,
@@ -78,11 +79,12 @@ fileName: string = "No file selected";
     private router:Router,
     public auth:AuthService,
       private fb: FormBuilder) {}
-  ngOnInit() { 
+  ngOnInit() {
     this.step = 0;
-    
+
     this.editCustomer = JSON.parse(localStorage.getItem('editCustomer'));
     this.selectedDepartment = this.editCustomer.department;
+    this.selectedStatus = this.editCustomer.clientStatus;
     this.selectedType = 'Worker';
     this.defaults = this.editCustomer as Worker;
     this.workerForm = this.fb.group({
@@ -90,6 +92,7 @@ fileName: string = "No file selected";
       _id:[this.defaults._id],
       createdDate:[this.defaults.createdDate ||  new Date()],
       department:[this.defaults.department || ''],
+      clientStatus:[this.defaults.clientStatus || ''],
       forename: [this.defaults.forename || ''],
       title: [this.defaults.title || ''],
       emailAddress: [this.defaults.emailAddress || ''],
@@ -168,38 +171,25 @@ fileName: string = "No file selected";
     });
   }
   save() {
-    console.log('========  save   ===')
-    console.log(this.workerForm.value)
-    if (this.mode === 'create') {
-      this.createCustomer();
-    } else if (this.mode === 'update') {
-      this.updateCustomer();
-    }
-  }
-
-  createCustomer() {
-    const customer = this.workerForm.value;
-
-    // if (!customer.profilePhoto) {
-    //   customer.profilePhoto = 'assets/img/0.jpg';
-    // }
-  }
-
-  updateCustomer() {
+    console.log('save', this.workerForm.value)
     const customer = this.workerForm.value;
     customer.id = this.defaults.id;
-
+    this.auth.updateUser(this.workerForm.value).subscribe((res =>{
+      if(res){
+        this.auth.openSnackbar('Updated Successfully!')
+        this.router.navigate(['/admin/workers']);
+      }
+      else{
+        console.log('res', res)
+      }
+    }));
   }
 
-  isCreateMode() {
-    return this.mode === 'create';
-  }
-
-  isUpdateMode() {
-    return this.mode === 'update';
-  }
   changeDepartment(ev){
     this.selectedDepartment = ev.value;
+  }
+  changeStatus(ev){
+    this.selectedStatus = ev.value;
   }
   send() {
     const controls = this.workerForm.controls;
@@ -265,11 +255,11 @@ fileName: string = "No file selected";
               return;
             }
         }else if(this.step == 6){
-        
+
         }else if(this.step == 7){
-          
+
         }else if(this.step == 8){
-         
+
         }else if (this.step == 9){
           if(controls.criminalRecords.value == ''){
             alert('Please complete all the required fields');
@@ -328,7 +318,7 @@ fileName: string = "No file selected";
     }
     if(i == 2){
       this.Postgraduate2 = !this.Postgraduate2;
-    } 
+    }
   }
   addQualifacation(){
     // this.qualificationNames.push(new FormControl(''));
@@ -383,19 +373,19 @@ fileName: string = "No file selected";
   checkAccept(ev){
     if(this.acceptCheckVal == false)
       this.acceptCheckVal = true;
-    else  
+    else
       this.acceptCheckVal = false;
   }
-   isControlHasError(controlName: string, validationType: string): boolean
-    {	
-        const control = this.workerForm.controls[controlName];
-        if (!control) {
-          return false;
-        }
-        const result = control.hasError(validationType) && (control.dirty || control.touched);
-        return result;
-    }
-    cancelBtn(){
-  this.router.navigate(['/admin/workers'])
-    }
+  isControlHasError(controlName: string, validationType: string): boolean
+  {
+      const control = this.workerForm.controls[controlName];
+      if (!control) {
+        return false;
+      }
+      const result = control.hasError(validationType) && (control.dirty || control.touched);
+      return result;
+  }
+  cancelBtn(){
+    this.router.navigate(['/admin/workers'])
+  }
 }

@@ -209,8 +209,8 @@
       <mat-icon [icIcon]="icStop"></mat-icon>
       <span>Unsuspend Worker</span>
     </button>
-    <button (click)="statusUpdate(customer, 'Dismissed')" mat-menu-item>
-      <mat-icon *ngIf="customer.clientStatus !== 'Dismissed'" [icIcon]="icTimes"></mat-icon>
+    <button *ngIf="customer.clientStatus != 'Dismissed'" (click)="statusUpdate(customer, 'Dismissed')" mat-menu-item>
+      <mat-icon [icIcon]="icTimes"></mat-icon>
       <span>Dismiss Worker</span>
     </button>
     <button (click)="updateCustomer(customer)" mat-menu-item>

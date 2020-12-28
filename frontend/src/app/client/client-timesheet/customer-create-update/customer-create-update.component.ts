@@ -113,20 +113,20 @@ export class CustomerCreateUpdateComponent implements OnInit {
   return items;
   }
   setSubmit(){
-    this.timesheets.forEach((ele, index, arr) => {
-      this.authService.setStatusTimesheet(ele._id, ele.statusStr).subscribe((res) => {
-        console.log(res);
-        if (index === (arr.length - 1)){
-          this.authService.setStatusJob(this.defaults.id, 'Completed').subscribe((res1) => {
-            console.log(res1);
-            this.authService.openSnackbar('Confirmed Successfully!');
-            this.defaults.statusStr = 'Completed';
-            this.dialogRef.close(this.defaults);
-            });
-        }
-      });
+    // this.timesheets.forEach((ele, index, arr) => {
+    //   this.authService.setStatusTimesheet(ele._id, ele.statusStr).subscribe((res) => {
+    //     console.log(res);
+    //     if (index === (arr.length - 1)){
+    //       this.authService.setStatusJob(this.defaults.id, 'Completed').subscribe((res1) => {
+    //         console.log(res1);
+    //         this.authService.openSnackbar('Confirmed Successfully!');
+    //         this.defaults.statusStr = 'Completed';
+    //         this.dialogRef.close(this.defaults);
+    //         });
+    //     }
+    //   });
 
-    });
+    // });
   }
   changeStatus(item, i){
     if (item.statusStr === 'Pending') {

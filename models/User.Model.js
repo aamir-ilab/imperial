@@ -103,6 +103,7 @@ var UserSchema = new mongoose.Schema({
     salt: { type: String },
     createdDate:{type:Date},
     accessToken:{ type: String },
+    refreshToken:{ type: String },
     companyLogo:{type:String},
     clientType:{type:String, default:'Master Admin'},
     parentId:{type:String, default:''},

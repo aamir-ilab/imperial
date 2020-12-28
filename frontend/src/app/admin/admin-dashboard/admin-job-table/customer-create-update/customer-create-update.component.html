@@ -94,11 +94,13 @@
           </mat-form-field>
           <mat-form-field class="sm:ml-3 lg:w-2/12">
             <mat-label>Start Time</mat-label>
-            <input type="number" formControlName="startTime" matInput min="0" max="23">
+            <input [ngxTimepicker]="fullTime" [format]="24" formControlName="startTime" matInput >
+            <ngx-material-timepicker #fullTime></ngx-material-timepicker>
           </mat-form-field>
           <mat-form-field class="sm:ml-3 lg:w-2/12">
             <mat-label>End Time</mat-label>
-            <input  type="number" formControlName="endTime" matInput [min]="shift.value.startTime + 4" max="24">
+            <input [ngxTimepicker]="min" [format]="24" formControlName="endTime" matInput [min]="shift.value.startTime">
+            <ngx-material-timepicker #min></ngx-material-timepicker>
           </mat-form-field>
           <mat-form-field class="sm:ml-3 lg:w-1/12">
             <mat-label>Staff</mat-label>

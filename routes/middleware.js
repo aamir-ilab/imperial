@@ -11,11 +11,14 @@ function VerifyToken(req, res, next) {
   // verify token
 
   try {
-    const decoded = jwt.verify(token, 'secret');
 
-    // @ts-ignore
-    req.user = decoded.user;
-    next();
+    jwt.verify(token, 'secret', function(err, decoded) {
+      if (err) {
+          return res.status(401).json({"error": true, "message": 'Your session has been expired.' });
+      }
+      req.user = decoded;
+      next();
+    });
   } catch (err) {
     // res.status(401).json({ msg: 'Invalid Token' });
     res.status(401).json({ msg: err });
@@ -25,7 +28,6 @@ function VerifyToken(req, res, next) {
 function authRole(role){
   return (req, res, next) => {
     if(req.user.accountType !== role){
-      console.log('---Role---',role)
       res.status(401);
       return res.send('Not Allowed')
     }

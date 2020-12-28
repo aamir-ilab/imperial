@@ -15,11 +15,13 @@
           </mat-form-field>
           <mat-form-field class="sm:ml-3 lg:w-2/12">
             <mat-label>Start Time</mat-label>
-            <input type="number" formControlName="startTime" matInput max="23" value="list.startTime">
+            <input [ngxTimepicker]="min" [format]="24" formControlName="startTime" matInput >
+            <ngx-material-timepicker #min ></ngx-material-timepicker>
           </mat-form-field>
           <mat-form-field class="sm:ml-3 lg:w-2/12">
             <mat-label>End Time</mat-label>
-            <input  type="number" formControlName="endTime" matInput max="24" value="list.endTime">
+            <input [ngxTimepicker]="default" [format]="24" formControlName="endTime" matInput >
+            <ngx-material-timepicker #default></ngx-material-timepicker>
           </mat-form-field>
           <mat-form-field class="sm:ml-3 lg:w-3/12">
             <mat-label>Choose a worker</mat-label>

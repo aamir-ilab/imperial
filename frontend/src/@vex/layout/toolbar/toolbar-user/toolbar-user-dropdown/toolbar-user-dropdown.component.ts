@@ -19,7 +19,6 @@ import icLock from '@iconify/icons-ic/twotone-lock';
 import icNotificationsOff from '@iconify/icons-ic/twotone-notifications-off';
 import { Icon } from '@visurel/iconify-angular';
 import { PopoverRef } from '../../../../components/popover/popover-ref';
-
 export interface OnlineStatus {
   id: 'online' | 'away' | 'dnd' | 'offline';
   label: string;
@@ -34,7 +33,7 @@ export interface OnlineStatus {
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class ToolbarUserDropdownComponent implements OnInit {
-
+  userType = localStorage.getItem('loggedIn');
   items: MenuItem[] = [
     {
       id: '1',
@@ -42,32 +41,8 @@ export class ToolbarUserDropdownComponent implements OnInit {
       label: 'My Profile',
       description: 'Personal Information',
       colorClass: 'text-teal',
-      route: '/profile'
+      route: this.userType.toLowerCase()+'/profile'
     },
-    // {
-    //   id: '2',
-    //   icon: icMoveToInbox,
-    //   label: 'My Inbox',
-    //   description: 'Messages & Latest News',
-    //   colorClass: 'text-primary',
-    //   route: '/apps/chat'
-    // },
-    // {
-    //   id: '3',
-    //   icon: icListAlt,
-    //   label: 'My Projects',
-    //   description: 'Tasks & Active Projects',
-    //   colorClass: 'text-amber',
-    //   route: '/apps/scrumboard'
-    // },
-    // {
-    //   id: '4',
-    //   icon: icTableChart,
-    //   label: 'Billing Information',
-    //   description: 'Pricing & Current Plan',
-    //   colorClass: 'text-purple',
-    //   route: '/pages/pricing'
-    // }
   ];
 
   statuses: OnlineStatus[] = [
@@ -116,10 +91,10 @@ export class ToolbarUserDropdownComponent implements OnInit {
 
               ngOnInit() {
                 var userInfo =  JSON.parse(localStorage.getItem('userInfo'));
-                var userType = localStorage.getItem('loggedIn');
-                if(userType == 'Client'){
+
+                if(this.userType == 'Client'){
                   this.personName = userInfo['firstName'] + userInfo['lastName'];
-                }else if(userType == 'Worker'){
+                }else if(this.userType == 'Worker'){
                   this.personName = userInfo['forename'] + userInfo['surename'];
                   this.photo = userInfo['profilePhoto'];
                 }
@@ -131,6 +106,10 @@ export class ToolbarUserDropdownComponent implements OnInit {
   }
 
   close() {
+    this.popoverRef.close();
+  }
+
+  logout() {
     localStorage.removeItem('loggedIn');
     localStorage.clear();
     this.popoverRef.close();

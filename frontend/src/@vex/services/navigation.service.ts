@@ -33,14 +33,14 @@ export class NavigationService {
    {
      type: 'link',
      label: 'Dashboard',
-     route: '/',
+     route: '/worker',
      icon: icLayers,
      routerLinkActiveOptions: { exact: true }
    },
    {
      type: 'link',
      label: 'Profile',
-     route: '/profile',
+     route: '/worker/profile',
      icon: icPersonOutline,
      routerLinkActiveOptions: { exact: true }
    },
@@ -54,14 +54,14 @@ export class NavigationService {
    {
      type: 'link',
      label: 'FAQs',
-     route: '/faqs',
+     route: '/worker/faqs',
      icon: icHelp,
      routerLinkActiveOptions: { exact: true }
    },
    {
      type: 'link',
      label: 'Support',
-     route: '/support',
+     route: '/worker/support',
      icon: icContactSupport,
      routerLinkActiveOptions: { exact: true }
    }
@@ -91,14 +91,14 @@ export class NavigationService {
    {
      type: 'link',
      label: 'FAQs',
-     route: '/faqs',
+     route: '/client/faqs',
      icon: icHelp,
      routerLinkActiveOptions: { exact: true }
    },
    {
      type: 'link',
      label: 'Support',
-     route: '/support',
+     route: '/client/support',
      icon: icContactSupport,
      routerLinkActiveOptions: { exact: true }
    },

@@ -3,14 +3,14 @@ var mongoose = require('mongoose'),
 const User = mongoose.model('User');
 const Message = mongoose.model('Message');
 var jwt = require('jsonwebtoken');
-
+var randtoken = require('rand-token')
 // const Bank = mongoose.model('Bank');
 // const Requests = mongoose.model('Requests');
 // const Addfiles = mongoose.model('Addfiles');
 var nodemailer = require('nodemailer');
 const { mongo } = require('mongoose');
 // const Nexmo = require('nexmo');
-
+const refreshTokens = {};
 let transporter = nodemailer.createTransport({
     service: 'gmail',
     secure: false,
@@ -229,8 +229,11 @@ exports.login = (req, res) => {
             accountType: client.accountType
           }
             token = jwt.sign(user, 'secret',
-            {expiresIn: 120});
+            {expiresIn: '4h'});
+            const refreshToken = randtoken.uid(256);
+            refreshTokens[refreshToken] = client.emailAddress;
             client.accessToken = token;
+            client.refreshToken = refreshToken;
             res.status(200).json(client);
         } else {
             console.log('login3');
@@ -491,7 +494,6 @@ exports.getAll = (req, res) => {
   })
 }
 exports.getAllType = (req, res) => {
-  console.log('---getAllType req---', req)
     User.find({accountType: req.body.accountType})
     // .populate({
     //   path: 'parentId',

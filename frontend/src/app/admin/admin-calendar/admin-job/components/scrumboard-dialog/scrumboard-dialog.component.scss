@@ -53,3 +53,17 @@
     max-height: 50vh;
   }
 }
+
+::ng-deep{
+  .timepicker{
+    z-index: 9999999 !important;
+  }
+  .timepicker-backdrop-overlay{
+    z-index: 9999999 !important;
+  }
+  .timepicker-overlay{
+    z-index: 9999999 !important;
+  }
+
+}
+

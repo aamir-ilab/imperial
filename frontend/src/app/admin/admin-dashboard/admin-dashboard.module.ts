@@ -49,7 +49,7 @@ import { MatSnackBarModule } from '@angular/material/snack-bar';
     WidgetAssistantModule,
     WidgetLargeChartModule,
     WidgetTableModule,
-    SecondaryToolbarModule, 
+    SecondaryToolbarModule,
     BreadcrumbsModule,
     MatButtonModule,
     PageLayoutModule,

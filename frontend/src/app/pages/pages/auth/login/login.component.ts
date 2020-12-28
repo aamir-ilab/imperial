@@ -92,7 +92,7 @@ export class LoginComponent implements OnInit {
             //   }
             // });
             this.snackbar.open('Logged in Successfully', 'Cancel', {
-              duration: 10000
+              duration: 2000
             });
             this.router.navigate(['/client']);
           }
@@ -103,27 +103,28 @@ export class LoginComponent implements OnInit {
                 console.log(res2);
                 console.log(this.authService.workerJobInfo);
                 this.snackbar.open('Logged in Successfully', 'Cancel', {
-                  duration: 10000
+                  duration: 2000
                 });
-                this.router.navigate(['/']);
+                this.router.navigate(['/worker']);
               });
           }
           else {
             this.snackbar.open('Logged in Successfully', 'Cancel', {
-              duration: 10000
+              duration: 2000
             });
             this.router.navigate(['/admin']);
           }
         }else{
+          this.loading = false;
           this.snackbar.open('You have to Input Email & Password correctly ', 'Cancel', {
-            duration: 10000
+            duration: 3000
           });
           this.form.reset();
         }
       }, (err) => {
         this.loading = false;
         this.snackbar.open('You have to Input Email & Password correctly ', 'Cancel', {
-          duration: 10000
+          duration: 3000
         });
         this.form.reset();
       });

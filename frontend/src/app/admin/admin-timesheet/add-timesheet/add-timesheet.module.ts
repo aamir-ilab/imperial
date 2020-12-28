@@ -15,6 +15,7 @@ import { MatDividerModule } from '@angular/material/divider';
 import { MatAutocompleteModule } from '@angular/material/autocomplete';
 import { MatTableModule } from '@angular/material/table'
 import { MatCheckboxModule } from '@angular/material/checkbox';
+import { FormsModule } from '@angular/forms';
 
 @NgModule({
   imports: [
@@ -32,7 +33,8 @@ import { MatCheckboxModule } from '@angular/material/checkbox';
     IconModule,
     MatDividerModule,
     MatTableModule,
-    MatCheckboxModule
+    MatCheckboxModule,
+    FormsModule
   ],
   declarations: [AddTimesheetComponent],
   entryComponents: [AddTimesheetComponent],

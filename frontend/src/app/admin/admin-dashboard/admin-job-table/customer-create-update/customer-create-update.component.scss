@@ -4,3 +4,15 @@
 .text-red-500{
   color: #fb5246;
 }
+::ng-deep{
+  .timepicker{
+    z-index: 9999999 !important;
+  }
+  .timepicker-backdrop-overlay{
+    z-index: 9999999 !important;
+  }
+  .timepicker-overlay{
+    z-index: 9999999 !important;
+  }
+
+}

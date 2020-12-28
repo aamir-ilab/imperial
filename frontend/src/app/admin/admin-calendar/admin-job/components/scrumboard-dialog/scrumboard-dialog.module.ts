@@ -14,6 +14,7 @@ import { MatMenuModule } from '@angular/material/menu';
 import { MatDividerModule } from '@angular/material/divider';
 import { RelativeDateTimeModule } from '../../../../../../@vex/pipes/relative-date-time/relative-date-time.module';
 import {MatCheckboxModule} from '@angular/material/checkbox';
+import { NgxMaterialTimepickerModule } from 'ngx-material-timepicker';
 
 @NgModule({
   declarations: [ScrumboardDialogComponent],
@@ -32,7 +33,8 @@ import {MatCheckboxModule} from '@angular/material/checkbox';
     MatMenuModule,
     MatDividerModule,
     RelativeDateTimeModule,
-    MatCheckboxModule
+    MatCheckboxModule,
+    NgxMaterialTimepickerModule
   ],
   exports: [ScrumboardDialogComponent],
   entryComponents: [ScrumboardDialogComponent]

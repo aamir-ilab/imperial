@@ -4,6 +4,10 @@ import { CustomLayoutComponent } from './custom-layout/custom-layout.component';
 import { VexRoutes } from '../@vex/interfaces/vex-route.interface';
 import { AuthGuard } from './guards/auth.guard';
 import { RoleGuard } from './guards/role.guard';
+let loggedIn = localStorage.getItem('loggedIn');
+if(loggedIn){
+  loggedIn = loggedIn.toLowerCase();
+}
 const routes: VexRoutes = [
   {
     path: 'login',
@@ -40,31 +44,19 @@ const routes: VexRoutes = [
     loadChildren: () => import('./pages/pages/coming-soon/coming-soon.module').then(m => m.ComingSoonModule),
   },
   {
+    path: '404',
+    loadChildren: () => import('./pages/pages/errors/error-404/error-404.module').then(m => m.Error404Module)
+  },
+  {
     path: '',
     canActivate: [AuthGuard],
     component: CustomLayoutComponent,
     children: [
-
-      {
-        path: 'faqs',
-        loadChildren: () => import('./pages/pages/faq/faq.module').then(m => m.FaqModule)
-      },
-      {
-        path: 'support',
-        loadChildren: () => import('./support/support.module').then(m => m.SupportModule)
-      },
-      {
-        path: 'profile',
-        loadChildren: () => import('./pages/apps/social/social.module').then(m => m.SocialModule)
-      },
-      {
-        path: 'dashboards/analytics',
-        redirectTo: '/'
-      },
-      {
-        path: '',
-        loadChildren: () => import('./pages/dashboards/dashboard-analytics/dashboard-analytics.module').then(m => m.DashboardAnalyticsModule),
-      },
+      // {
+      //   path: 'dashboards/analytics',
+      //   redirectTo: '/'
+      // },
+      // admin routes
       {
         path: 'admin',
         canActivate: [RoleGuard],
@@ -142,12 +134,17 @@ const routes: VexRoutes = [
                 loadChildren: () => import('./admin/settings/general-templates/general-templates.module').then(m => m.GeneralTemplatesModule),
               }
             ]
+          },
+          {
+            path: 'profile',
+            loadChildren: () => import('./pages/apps/social/social.module').then(m => m.SocialModule)
           }
         ],
         data: {
           role: 'Admin'
         }
       },
+      // client routes
       {
         path: 'client',
         canActivate: [RoleGuard],
@@ -172,34 +169,48 @@ const routes: VexRoutes = [
               path: 'subaccounts',
               loadChildren: () => import('./client/settings/subaccounts/subaccounts.module').then(m => m.SubaccountsModule),
             },
+            {
+              path: 'faqs',
+              loadChildren: () => import('./pages/pages/faq/faq.module').then(m => m.FaqModule)
+            },
+            {
+              path: 'support',
+              loadChildren: () => import('./support/support.module').then(m => m.SupportModule)
+            },
+            {
+              path: 'profile',
+              loadChildren: () => import('./pages/apps/social/social.module').then(m => m.SocialModule)
+            },
         ],
         data: {
           role: 'Client'
         }
       },
+      // worker routes
       {
         path: 'worker',
         canActivate: [RoleGuard],
         children: [
-          // {
-          //   path: 'jobs',
-          //  loadChildren: () => import('./worker/jobnew/jobnew.module').then(m => m.JobnewModule),
-          //   // children:[
-          //   //   {
-          //   //     path:'',
-          //   //     loadChildren: () => import('./worker/worker-calendar/worker-calendar.module').then(m => m.WorkerCalendarModule),
-          //   //   },
-          //   //   {
-          //   //     path:'scrumboard',
-          //   //     loadChildren: () => import('./worker/worker-calendar/worker-job/worker-job.module').then(m => m.WorkerJobModule),
-
-          //   //   }
-          //   // ]
-          // },
+          {
+            path: '',
+            loadChildren: () => import('./pages/dashboards/dashboard-analytics/dashboard-analytics.module').then(m => m.DashboardAnalyticsModule),
+          },
           {
             path: 'payslips',
             loadChildren: () => import('./worker/payhistory/payhistory.module').then(m => m.PayhistoryModule),
-          }
+          },
+          {
+            path: 'faqs',
+            loadChildren: () => import('./pages/pages/faq/faq.module').then(m => m.FaqModule)
+          },
+          {
+            path: 'support',
+            loadChildren: () => import('./support/support.module').then(m => m.SupportModule)
+          },
+          {
+            path: 'profile',
+            loadChildren: () => import('./pages/apps/social/social.module').then(m => m.SocialModule)
+          },
         ],
         data: {
           role: 'Worker'
@@ -316,10 +327,7 @@ const routes: VexRoutes = [
         path: 'documentation',
         loadChildren: () => import('./pages/documentation/documentation.module').then(m => m.DocumentationModule),
       },
-      {
-        path: '**',
-        loadChildren: () => import('./pages/pages/errors/error-404/error-404.module').then(m => m.Error404Module)
-      }
+      { path: '**', redirectTo: '/'+loggedIn },
     ]
   }
 ];

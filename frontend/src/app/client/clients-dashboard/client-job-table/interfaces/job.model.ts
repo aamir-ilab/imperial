@@ -22,14 +22,14 @@ export class Job {
     {
       department: {type: string},
       role: {type: string},
-      startTime: {type: number},
-      endTime: {type: number},
+      startTime: {type: String},
+      endTime: {type: String},
       total: {type: number, default: 1},
       workers:[
         {
           role: {type:String},
-          startTime: {type:Number},
-          endTime: {type:Number},
+          startTime: {type:String},
+          endTime: {type:String},
           workerId: {type: any}
         }
       ]

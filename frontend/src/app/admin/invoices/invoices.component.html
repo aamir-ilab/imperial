@@ -60,16 +60,6 @@
                 type="button">
           <mat-icon [icIcon]="icFilterList"></mat-icon>
         </button>
-
-        <button (click)="createCustomer()"
-                class="ml-4"
-                color="primary"
-                fxFlex="none"
-                mat-mini-fab
-                matTooltip="Add Customer"
-                type="button">
-          <mat-icon [icIcon]="icAdd"></mat-icon>
-        </button>
       </div>
 
       <table @stagger [dataSource]="dataSource" class="w-full" mat-table matSort>

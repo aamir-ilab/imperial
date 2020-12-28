@@ -84,6 +84,7 @@ export class AuthService {
     return this.http.post<User>(`${USERS_URL}login`, {emailAddress: email, hash: password}).pipe(
       map((res: User) => {
         localStorage.setItem('token', res.accessToken);
+        localStorage.setItem('refreshToken', res.refreshToken);
         return res;
       }),
       catchError(err => {
@@ -316,8 +317,11 @@ export class AuthService {
   setStatusJob(id, status): Observable<any>{
     return this.http.post<any>(`${USERS_URL}setStatusJob`, {id, status});
   }
-  setStatusTimesheet(id, status): Observable<any>{
-    return this.http.post<any>(`${USERS_URL}setStatusTimesheet`, {id, status});
+  setTimesheetDraft(id, workers): Observable<any>{
+    return this.http.post<any>(`${USERS_URL}setTimesheetDraft`, {id, workers});
+  }
+  updateTimesheet(id, workers, status): Observable<any>{
+    return this.http.post<any>(`${USERS_URL}updateTimesheet`, {id, workers,status});
   }
   setJobWorkers(job_id, shiftId, workers): Observable<any>{
     console.log('workers', workers)
@@ -354,6 +358,9 @@ export class AuthService {
   }
   sendEmail(obj): Observable<any>{
     return this.http.post<any>(`${USERS_URL}client/shiftDetail/email`, obj);
+  }
+  sendShiftEmail(workers, data): Observable<any>{
+    return this.http.post<any>(`${USERS_URL}client/shiftDetail/email`, {workers:workers, data: data});
   }
   resetPassword(obj): Observable<any>{
     return this.http.post<any>(`${USERS_URL}resetpassword`, obj);

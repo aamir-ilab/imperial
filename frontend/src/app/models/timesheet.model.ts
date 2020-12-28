@@ -12,25 +12,18 @@ export class Timesheet {
     totalStaff:string;
     status: any;
     clientId: any;
-    shifts: [
+    workers:[
       {
-        department: {type: string},
-        role: {type: string},
-        startTime: {type: number},
-        endTime: {type: number},
-        total: {type: number, default: 1},
-        workers:[
-          {
-            role: {type:String},
-            startTime: {type:Number},
-            endTime: {type:Number},
-            workerId: {type: any},
-            break: {type:Number},
-            status: {type:String, default: 'amend'},
-          }
-        ]
+        role: {type:String},
+        startTime: {type:String},
+        endTime: {type:String},
+        workerId: {type: any},
+        break: {type:Number, default: 0},
+        status: {type:String, default: 'amend'},
+        show: {type:Boolean, default: true},
+        hours: {type:Number},
       }
-    ];
+    ]
     clear():void{
 
     }
@@ -42,7 +35,7 @@ export class Timesheet {
       this.clientId = client.clientId;
       this.shiftDate= client.shiftDate;
       this.shiftDateStr= formatDate(client.shiftDate, 'yy-MM-dd','en').toString();
-      this.shifts = client.shifts;
+      this.workers = client.workers;
       this.statusStr= client.statusStr;
       if (client.statusStr){
         if (client.statusStr === 'Completed') {

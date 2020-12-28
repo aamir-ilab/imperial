@@ -131,7 +131,7 @@ export class AdminCalendarComponent {
             });
             this.events.push({
               start: startOfDay(new Date(ele.shiftDate)),
-              title: ele.clientId.companyName + ' — ' + e.department + ' (' + this.assigned + '/'+e.total +' assigned).',
+              title: ele.clientId.companyName + ' — ' + e.department + ' (' + this.assigned + '/'+e.total +' assigned)',
               color: col,
               startTime: e.startTime,
               endTime: e.endTime,

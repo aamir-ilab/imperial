@@ -34,10 +34,10 @@
                 <!-- <mat-checkbox class="caption" color="primary">Remember Me</mat-checkbox> -->
                 <a [routerLink]="['/forgot-password']" class="caption">Forgot Password?</a>
             </div>
-            
+
             <button (click)="send()" color="primary" mat-raised-button type="button">
         SIGN IN
-        <mat-progress-spinner *ngIf="loading"mode="indeterminate" color="warn"diameter="20" style="    position: absolute;
+        <mat-progress-spinner *ngIf="loading" mode="indeterminate" color="warn"diameter="20" style="    position: absolute;
         right: 20%;
         top: 21%;"></mat-progress-spinner>
       </button>

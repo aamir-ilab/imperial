@@ -20,14 +20,13 @@ import { DateTime } from 'luxon';
 import { ScrumboardComment } from '../../interfaces/scrumboard-comment.interface';
 import icStar from '@iconify/icons-ic/twotone-star';
 import { AuthService } from 'src/app/services/auth.service';
-import { formatDate } from '@angular/common';
-import moment from 'moment';
 
 @Component({
   selector: 'vex-scrumboard-dialog',
   templateUrl: './scrumboard-dialog.component.html',
   styleUrls: ['./scrumboard-dialog.component.scss']
 })
+
 export class ScrumboardDialogComponent implements OnInit {
 
   form = this.fb.group({
@@ -273,29 +272,34 @@ export class ScrumboardDialogComponent implements OnInit {
     console.log('workers', workers);
     this.authService.setJobWorkers(this.list.id, this.list.shift._id,workers).subscribe((res) => {
       if (this.checked === true) {
-        workers.forEach(worker => {
-          if(worker.workerId !== null){
-            const found = this._workers.find(x => x.id === worker.workerId);
-            console.log('worker', worker);
-            console.log('found', found);
-            const shiftDate = moment(moment(this.list.shiftDate)).format('DD-MM-YYYY')
-            const obj = {
-              subject : 'You have been assigned a new shift (ID #' + this.list.id + ')',
-              name : found.name,
-              email: found.emailAddress,
-              content: `You have been assigned a shift with ${this.list.clientId.firstName} ${this.list.clientId.lastName} <br/><br/>`+`Please read the shift details carefully below. If you have any questions relating to the shift, or if you’re unable to attend this shift, please contact Imperial Recruitment as soon as possible on 020 7436 7424.<br/><br/>`+
-              `<span style="font-weight: bold;">Shift Date:</span><span> ${shiftDate} </span><br/>
-              <span style="font-weight: bold;">Shift start time:</span><span> ${worker.startTime} – ${worker.endTime}</span><br/>
-              <span style="font-weight: bold;">Role: </span><span>${worker.role}</span><br/>`
-              +'LOGIN TO PORTAL'+ `\n http://imperial-recruitment.herokuapp.com/#/login`
-            };
-            console.log('email obj', obj);
-            this.authService.sendEmail(obj).subscribe((sendemail_res) => {
-              this.authService.openSnackbar('Shift Detail Sent to workers');
-            });
-          }
-
+        this.authService.sendShiftEmail(workers, this.list).subscribe((sendemail_res) => {
+          this.authService.openSnackbar('Shift Detail Sent to workers');
         });
+        // workers.forEach(worker => {
+        //   if(worker.workerId !== null){
+        //     const found = this._workers.find(x => x.id === worker.workerId);
+        //     console.log('worker', worker);
+        //     console.log('found', found);
+        //     const shiftDate = moment(moment(this.list.shiftDate)).format('DD-MM-YYYY');
+
+        //     const obj = {
+        //       content: 'content',
+        //       subject : 'You have been assigned a new shift (ID #' + this.list.id + ')',
+        //       name : found.name,
+        //       email: found.emailAddress,
+        //       // content: `You have been assigned a shift with ${this.list.clientId.firstName} ${this.list.clientId.lastName} <br/><br/>`+`Please read the shift details carefully below. If you have any questions relating to the shift, or if you’re unable to attend this shift, please contact Imperial Recruitment as soon as possible on 020 7436 7424.<br/><br/>`+
+        //       // `<span style="font-weight: bold;">Shift Date:</span><span> ${shiftDate} </span><br/>
+        //       // <span style="font-weight: bold;">Shift start time:</span><span> ${worker.startTime} – ${worker.endTime}</span><br/>
+        //       // <span style="font-weight: bold;">Role: </span><span>${worker.role}</span><br/>`
+        //       // +'LOGIN TO PORTAL'+ `\n http://imperial-recruitment.herokuapp.com/#/login`
+        //     };
+        //     console.log('email obj', obj);
+        //     this.authService.sendEmail(obj).subscribe((sendemail_res) => {
+        //       this.authService.openSnackbar('Shift Detail Sent to workers');
+        //     });
+        //   }
+
+        // });
       }
 
       this.dialogRef.close(res);

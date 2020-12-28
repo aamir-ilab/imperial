@@ -15,6 +15,7 @@ import { MatDividerModule } from '@angular/material/divider';
 import { MatAutocompleteModule } from '@angular/material/autocomplete';
 import { HighlightModule } from 'src/@vex/components/highlight/highlight.module';
 import { MatFormFieldModule } from '@angular/material/form-field';
+import {NgxMaterialTimepickerModule} from 'ngx-material-timepicker';
 
 @NgModule({
   imports: [
@@ -35,6 +36,7 @@ import { MatFormFieldModule } from '@angular/material/form-field';
     MatInputModule,
     MatAutocompleteModule,
     HighlightModule,
+    NgxMaterialTimepickerModule
   ],
   declarations: [CustomerCreateUpdateComponent],
   entryComponents: [CustomerCreateUpdateComponent],

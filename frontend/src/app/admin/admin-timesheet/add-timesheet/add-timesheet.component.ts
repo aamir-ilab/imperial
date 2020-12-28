@@ -1,7 +1,5 @@
 import { Component, Inject, OnInit, ViewChild } from '@angular/core';
-import { FormBuilder, FormGroup } from '@angular/forms';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
-import { Customer } from '../interfaces/customer.model';
 import icMoreVert from '@iconify/icons-ic/twotone-more-vert';
 import icClose from '@iconify/icons-ic/twotone-close';
 import icPrint from '@iconify/icons-ic/twotone-print';
@@ -11,12 +9,11 @@ import icPhone from '@iconify/icons-ic/twotone-phone';
 import icPerson from '@iconify/icons-ic/twotone-person';
 import icMyLocation from '@iconify/icons-ic/twotone-my-location';
 import icLocationCity from '@iconify/icons-ic/twotone-location-city';
-import { Job } from 'src/app/client/clients-dashboard/client-job-table/interfaces/job.model';
 import icEditLocation from '@iconify/icons-ic/twotone-edit-location';
-import { Timesheet } from 'src/app/models/timesheet.model';
 import { AuthService } from 'src/app/services/auth.service';
-import { MatTableDataSource, MatTable } from '@angular/material/table';
+import { MatTable } from '@angular/material/table';
 import { MatSelectChange } from '@angular/material/select';
+import { MatCheckboxChange } from '@angular/material/checkbox';
 
 @Component({
   selector: 'vex-add-timesheet',
@@ -27,27 +24,17 @@ export class AddTimesheetComponent implements OnInit {
 
   workers = [];
   break_times  = [
-    {value: '0', viewValue: '0m'},
-    {value: '10', viewValue: '10m'},
-    {value: '15', viewValue: '15m'},
-    {value: '20', viewValue: '20m'},
-    {value: '25', viewValue: '25m'},
-    {value: '30', viewValue: '30m'},
-    {value: '40', viewValue: '40m'},
-    {value: '45', viewValue: '45m'},
-    {value: '50', viewValue: '50m'},
-    {value: '55', viewValue: '55m'},
-    {value: '60', viewValue: '60m'},
+    {value: 0, viewValue: 'None'},
+    {value: 15, viewValue: '15m'},
+    {value: 30, viewValue: '30m'},
+    {value: 45, viewValue: '45m'},
+    {value: 60, viewValue: '60m'},
   ];
 
   @ViewChild(MatTable, {static: true}) table: MatTable<any>;
-  displayedColumns: string[] = ['workerId.workerId','workerId.forename','role', 'startTime', 'break', 'endTime', 'noShow','hours','status'];
+  displayedColumns: string[] = ['workerId.workerId','workerId.forename','role', 'startTime', 'break', 'endTime', 'show','hours','status'];
 
   static id = 100;
-
-  form: FormGroup;
-  mode: 'create' | 'update' = 'create';
-
   icMoreVert = icMoreVert;
   icClose = icClose;
 
@@ -63,100 +50,101 @@ export class AddTimesheetComponent implements OnInit {
   timesheets: any[];
   user: any;
   workerId: any;
+  editdisabled = false;
   constructor(@Inject(MAT_DIALOG_DATA) public defaults: any,
     private dialogRef: MatDialogRef<AddTimesheetComponent>,
-    private fb: FormBuilder,
     private authService: AuthService) {
   }
 
   ngOnInit() {
     this.timesheets = this.defaults;
-    console.log('timesheet', this.timesheets['shifts']);
-    this.timesheets['shifts'].forEach(element => {
-      element['workers'].forEach(ele => {
-        console.log('ele', ele);
-        this.workers.push(ele)
-      });
+    this.workers = this.timesheets['workers'];
+    this.workers.forEach(element => {
+      console.log('hours', element.hours)
+      if(element.hours === null || element.hours === undefined){
+        var start = new Date("01/01/2021 " + element.startTime).getHours();
+        var end = new Date("01/01/2021 " + element.endTime).getHours();
+        element.hours = end - start;
+      }
     });
     console.log('workers', this.workers);
-
-    if (this.defaults) {
-      this.mode = 'update';
-    } else {
-      this.defaults = {} as Job;
-    }
-
-    this.form = this.fb.group({
-      id: [AddTimesheetComponent.id++],
-      // imageSrc: this.defaults.imageSrc,
-      workerId: '',
-      // firstName: [this.defaults.firstName || ''],
-      // lastName: [this.defaults.lastName || ''],
-      // street: this.defaults.street || '',
-      // city: this.defaults.city || '',
-      // zipcode: this.defaults.zipcode || '',
-      // phoneNumber: this.defaults.phoneNumber || '',
-      // notes: this.defaults.notes || ''
-    });
   }
-
-  save() {
-    if (this.mode === 'create') {
-      this.createCustomer();
-    } else if (this.mode === 'update') {
-      this.updateCustomer();
-    }
-  }
-
-  createCustomer() {
-    const customer = this.form.value;
-
-    if (!customer.imageSrc) {
-      customer.imageSrc = 'assets/img/avatars/1.jpg';
-    }
-
-    this.dialogRef.close(customer);
-  }
-
-  updateCustomer() {
-    const customer = this.form.value;
-    customer.id = this.defaults.id;
-
-    this.dialogRef.close(customer);
-  }
-
   break(event: MatSelectChange, element) {
     console.log(' break event ', event);
     console.log(' break element ', element);
+    element.break = event.value;
+    var start = new Date("01/01/2021 " + element.startTime).getHours();
+    var end = new Date("01/01/2021 " + element.endTime).getHours();
+    if(event.value !== 0){
+      element.hours = end - start;
+      element.hours = (end - start) -
+      ((event.value + 40) / 100);
+    }
+    else
+      element.hours = end - start;
   }
 
   amend(element){
     console.log(' amend element ', element);
+    element.status = 'amend';
   }
 
   confirm(element){
     console.log(' confirm element ', element);
+    element.status = 'confirm';
   }
 
-  isCreateMode() {
-    return this.mode === 'create';
+  noShow(event: MatCheckboxChange, element){
+    console.log('noShow event ', event);
+    console.log('noShow element ', element);
+    if(event.checked !== false ){
+      element.show = false;
+      element.break = 0;
+      element.startTime = '00:00';
+      element.endTime = '00:00';
+      element.hours = 0;
+    }
+    else{
+      element.show = true;
+    }
   }
 
-  isUpdateMode() {
-    return this.mode === 'update';
+  editStartEnd(property: string, event: any, element){
+    element[property] = event.target.textContent;
+    console.log('element[property]', element[property])
+    var start = new Date("01/01/2021 " + element.startTime).getHours();
+    var end = new Date("01/01/2021 " + element.endTime).getHours();
+    console.log('start', start, 'end', end)
+    if(element.break !== 0){
+      element.hours = (end - start) -
+      ((element.break + 40) / 100)
+    }
+    else{
+      element.hours = end - start;
+    }
   }
-  createRange(number){
-  const items: number[] = [];
-  for (let i = 1; i <= number; i++){
-     items.push(i);
-  }
-  return items;
-  }
+
   setSubmit(){
-    this.authService.setStatusJob(this.defaults.id, 'Submitted').subscribe((res) => {
+    this.authService.updateTimesheet(this.defaults._id, this.workers, 'Completed').subscribe((res) => {
       console.log(res);
-      this.authService.openSnackbar('Submitted Successfully!');
+      this.authService.openSnackbar('Timesheet submitted Successfully!');
     });
     this.dialogRef.close(this.defaults);
+  }
+  saveDraft(){
+    this.authService.setTimesheetDraft(this.defaults._id, this.workers).subscribe((res) => {
+      console.log(res);
+      this.authService.openSnackbar('Timesheet draft saved successfully');
+    });
+    console.log('Save draft', this.workers);
+    this.dialogRef.close();
+  }
+
+  close(){
+    console.log('close workers', this.defaults);
+    this.dialogRef.close();
+    this.dialogRef.afterClosed().subscribe(result => {
+      this.workers = [];
+    });
   }
 }

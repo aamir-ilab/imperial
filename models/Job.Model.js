@@ -12,14 +12,14 @@ var JobSchema = new mongoose.Schema({
       {
         department: {type:String},
         role: {type:String},
-        startTime: {type:Number},
-        endTime: {type:Number},
+        startTime: {type:String},
+        endTime: {type:String},
         total:{type:Number, default: 1},
         workers:[
           {
             role: {type:String},
-            startTime: {type:Number},
-            endTime: {type:Number},
+            startTime: {type:String},
+            endTime: {type:String},
             workerId: {type: mongoose.Schema.Types.ObjectId, ref: 'User'}
           }
         ],

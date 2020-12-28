@@ -11,6 +11,7 @@ import { RoleGuard } from './guards/role.guard';
 import { MatSnackBarModule } from '@angular/material/snack-bar';
 import { LocationStrategy, HashLocationStrategy } from '@angular/common';
 import { AppInterceptor } from './app.interceptors';
+
 @NgModule({
   declarations: [AppComponent],
   imports: [
@@ -21,8 +22,8 @@ import { AppInterceptor } from './app.interceptors';
     MatSnackBarModule,
     // Vex
     VexModule,
-    CustomLayoutModule,
-  ],
+    CustomLayoutModule
+    ],
   providers: [{ provide: HTTP_INTERCEPTORS, useClass: AppInterceptor, multi: true }, AuthGuard, RoleGuard, {provide: LocationStrategy, useClass: HashLocationStrategy}],
   bootstrap: [AppComponent]
 })
