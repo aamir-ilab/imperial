@@ -165,7 +165,11 @@ exports.updateJob = (req, res) => {
               });
             }
           })
-          res.status(200).json(client);
+          Job.findOne({id:client.id}).populate('clientId').exec(function (err, client){
+            if (err) return res.json(err, 400);
+            res.status(200).json(client);
+          });
+          // res.status(200).json(client);
         })
         .catch(err => {
           res.status(400).send(err);
@@ -217,7 +221,11 @@ exports.setJobWorkers = (req, res) => {
             });
           }
         })
-        res.status(200).json(client);
+        // res.status(200).json(client);
+        Job.findOne({id:req.body.data.job_id}).populate('clientId').exec(function (err, client){
+          if (err) return res.json(err, 400);
+          res.status(200).json(client);
+        });
       })
       .catch(err => {
           res.status(400).send("Update not possible", err );
@@ -321,7 +329,6 @@ exports.updateTimesheet = (req, res) => {
     }
   });
 };
-
 exports.emailshiftDetail = (req, res) => {
   console.log('--email obj--', req.body.data);
   let job;
@@ -373,6 +380,42 @@ exports.emailshiftDetail = (req, res) => {
     }
   });
 }
+exports.setStatusJob = (req, res) => {
+  // var role = req.type;
+  console.log('setStatusJob')
+  console.log(req.body)
+      // var clientId = req.clientId;
+      // if (role == 0){
+  Job.findOne({id:req.body.id}, function(err, client) {
+      if (!client)
+          res.status(404).send("data is not found");
+      else {
+          // Object.assign(client, req.body);
+          if(req.body.status == 1 || req.body.status == 2 || req.body.status == 3 ){
+              if(req.body.status == 1){
+               client.statusStr = 'In Progress';
+              }else if(req.body.status == 2){
+                  client.statusStr = 'Submitted';
+              }else if(req.body.status == 3){
+                  client.statusStr = 'Completed';
+              }
+          }else{
+              client.statusStr = req.body.status;
+
+          }
+
+          client.save().then(client => {
+              // res.status(200).json(client);
+            Job.findOne({id:client.id}).populate('clientId').exec(function (err, client){
+              if (err) return res.json(err, 400);
+              res.status(200).json(client);
+            });
+          })
+          .catch(err => {
+              res.status(400).send("Update not possible");
+          }); }
+  });
+};
 
 
 exports.getAllInvoices = (req, res) => {
@@ -1395,38 +1438,6 @@ exports.addWorkerJob = (req, res) => {
             }
         }
 
-    });
-};
-exports.setStatusJob = (req, res) => {
-    // var role = req.type;
-    console.log('setStatusJob')
-    console.log(req.body)
-        // var clientId = req.clientId;
-        // if (role == 0){
-    Job.findOne({id:req.body.id}, function(err, client) {
-        if (!client)
-            res.status(404).send("data is not found");
-        else {
-            // Object.assign(client, req.body);
-            if(req.body.status == 1 || req.body.status == 2 || req.body.status == 3 ){
-                if(req.body.status == 1){
-                 client.statusStr = 'In Progress';
-                }else if(req.body.status == 2){
-                    client.statusStr = 'Submitted';
-                }else if(req.body.status == 3){
-                    client.statusStr = 'Completed';
-                }
-            }else{
-                client.statusStr = req.body.status;
-
-            }
-
-        client.save().then(client => {
-                res.status(200).json(client);
-            })
-            .catch(err => {
-                res.status(400).send("Update not possible");
-            }); }
     });
 };
 exports.updateStatus = (req, res) => {

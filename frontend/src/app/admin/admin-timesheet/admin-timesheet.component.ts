@@ -247,26 +247,25 @@ export class AdminTimesheetComponent implements OnInit, AfterViewInit {
   }
   confirmJob(customer: Timesheet){
     console.log('confirmJob', customer);
-    let old_cust = customer;
-    this.dialog.open(AddTimesheetComponent, {
+    let old_cust = { ...customer};
+    this.authService.timeSheetData.next(old_cust);
+
+    let ordersDialog = this.dialog.open(AddTimesheetComponent, {
       data: old_cust
     }).afterClosed().subscribe((customer: Timesheet) => {
       console.log('here in confirmJob', customer);
-
+      ordersDialog = null;
       /**
        * Customer is the updated customer (if the user pressed Save - otherwise it's null)
        */
-      if (customer) {
-        console.log('inside')
-        /**
-         * Here we are updating our local array.
-         * You would probably make an HTTP request here.
-         */
-        const index = this.customers.findIndex((existingCustomer) => existingCustomer.id === customer.id);
-        customer.setStatus('Completed');
-        this.customers[index] = customer;
-        this.subject$.next(this.customers);
-      }
+      // if (customer) {
+      //   console.log('inside')
+
+      //   const index = this.customers.findIndex((existingCustomer) => existingCustomer.id === customer.id);
+      //   customer.setStatus('Completed');
+      //   this.customers[index] = customer;
+      //   this.subject$.next(this.customers);
+      // }
     });
   }
 }

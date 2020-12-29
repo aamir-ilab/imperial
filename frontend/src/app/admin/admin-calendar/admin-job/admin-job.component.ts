@@ -69,13 +69,6 @@ export class AdminJobComponent implements OnInit {
       this.currentScrum = this.authService.currentScrumboard;
     }
     console.log('scrumboard', this.currentScrum);
-    // this.board = this.currentScrum;
-    // this.currentScrum.forEach(element => {
-    //   if (element.title === this.currentJob.department){
-    //     this.board = element;
-    //   }
-    // });
-    // console.log('board$', this.board);
   }
 
   open(board) {
@@ -87,11 +80,70 @@ export class AdminJobComponent implements OnInit {
       width: '700px',
       maxWidth: '100%',
       disableClose: true
+    }).afterClosed().subscribe(updatedCustomer => {
+      if (updatedCustomer) {
+        console.log('updatedCustomer', updatedCustomer)
+        this.currentJob.client = updatedCustomer;
+
+        this.authService.currentScrumboard = [];
+        updatedCustomer.shifts.forEach((element, i) => {
+          this.updateCurrentScrum(element, i, updatedCustomer)
+        });
+
+        this.authService.setCurrentScrumboardLocal(this.authService.currentScrumboard);
+        this.currentScrum = this.authService.currentScrumboard;
+        console.log('this.currentScrum', this.authService.currentScrumboard);
+        this.authService.openSnackbar('Updated Job Successfully');
+      }
+    });
+  }
+
+  updateCurrentScrum(element, i, res){
+    console.log('element', element)
+    let assigned = 0;
+    element.workers.forEach(elem => {
+      console.log('elem', elem.workerId);
+      if(elem.workerId && elem.workerId !== null){
+        assigned = assigned+1;
+      }
+    });
+    this.authService.currentScrumboard.push({
+      id: res.id,
+      title: res.shifts[i].department,
+      shiftId: res.shifts[i]._id,
+      children: [
+        // { id:1, label:'Unassigned Shifts', children:[] },
+        // { id:2, label:'Assigned', children:[] },
+        { id: 1, label: 'In Progress', children: [] },
+        { id: 2, label: 'Submitted', children: [] },
+        { id: 3, label: 'Completed', children: [] },
+      ]
+    });
+    console.log('currentJob', this.authService.currentJob);
+    const arrLabel = ['In Progress', 'Submitted', 'Completed'];
+    arrLabel.forEach((ele, index) => {
+      if (ele === res.statusStr) {
+        this.authService.currentScrumboard[i].children[index].children.push({
+          id: res.id,
+          title: res.shifts[i].department,
+          client: res.client.clientId,
+          shiftDate: res.shiftDate,
+          locationShift: res.locationShift,
+          purchaseOrderNo: res.purchaseOrderNo,
+          additionalInformation: res.additionalInformation,
+          statusStr: res.statusStr,
+          fulfilled: assigned,
+          shift: res.shifts[i],
+          totalStaff: res.totalStaff,
+          clientId: res.clientId,
+          timesheetId: res.timesheetId
+        });
+      }
     });
   }
 
   editJob(customer: Customer) {
-    console.log('current job', customer);
+    console.log('current job', customer, this.currentJob);
     this.dialog.open(CustomerCreateUpdateComponent, {
       data: customer
     }).afterClosed().subscribe(updatedCustomer => {
@@ -105,6 +157,14 @@ export class AdminJobComponent implements OnInit {
          */
         this.authService.updateJob(updatedCustomer).subscribe((res) => {
           console.log('res', res);
+          this.currentJob.client = res;
+          this.authService.currentScrumboard = [];
+          res.shifts.forEach((element, i) => {
+            this.updateCurrentScrum(element, i, res)
+          });
+          this.authService.setCurrentScrumboardLocal(this.authService.currentScrumboard);
+          this.currentScrum = this.authService.currentScrumboard;
+          console.log('this.currentScrum', this.authService.currentScrumboard);
           this.authService.openSnackbar('Updated Job Successfully');
         });
       }
@@ -124,8 +184,10 @@ export class AdminJobComponent implements OnInit {
         event.currentIndex);
         // alert(event.container.id)
       this.authService.setStatusJob(event.container.data[0].id, event.container.id).subscribe((res) => {
-          console.log(res);
-          this.authService.openSnackbar('status has updated successfully');
+          console.log('res', res);
+          this.currentJob.client = res;
+          this.authService.openSnackbar('Job status updated successfully');
+
         });
       }
   }

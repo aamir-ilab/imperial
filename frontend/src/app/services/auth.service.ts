@@ -25,6 +25,10 @@ export class AuthService {
   workerJobInfo: any;
   adminInfo: any;
   clientJob: any;
+
+  public timeSheetData = new BehaviorSubject<any>('');
+
+
    constructor(private http: HttpClient,
                private snackBar: MatSnackBar) {
 

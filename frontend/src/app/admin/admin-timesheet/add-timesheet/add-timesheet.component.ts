@@ -14,13 +14,14 @@ import { AuthService } from 'src/app/services/auth.service';
 import { MatTable } from '@angular/material/table';
 import { MatSelectChange } from '@angular/material/select';
 import { MatCheckboxChange } from '@angular/material/checkbox';
+import { OnDestroy } from '@angular/core';
 
 @Component({
   selector: 'vex-add-timesheet',
   templateUrl: './add-timesheet.component.html',
   styleUrls: ['./add-timesheet.component.scss']
 })
-export class AddTimesheetComponent implements OnInit {
+export class AddTimesheetComponent implements OnInit, OnDestroy  {
 
   workers = [];
   break_times  = [
@@ -51,24 +52,39 @@ export class AddTimesheetComponent implements OnInit {
   user: any;
   workerId: any;
   editdisabled = false;
-  constructor(@Inject(MAT_DIALOG_DATA) public defaults: any,
+  constructor(@Inject(MAT_DIALOG_DATA) public jobData: any,
     private dialogRef: MatDialogRef<AddTimesheetComponent>,
     private authService: AuthService) {
   }
 
   ngOnInit() {
-    this.timesheets = this.defaults;
-    this.workers = this.timesheets['workers'];
-    this.workers.forEach(element => {
-      console.log('hours', element.hours)
-      if(element.hours === null || element.hours === undefined){
-        var start = new Date("01/01/2021 " + element.startTime).getHours();
-        var end = new Date("01/01/2021 " + element.endTime).getHours();
-        element.hours = end - start;
-      }
+    this.timesheets = [];
+    this.workers = [];
+    // this.timesheets = this.jobData;
+    // this.timesheets = {...this.jobData};
+
+    this.authService.timeSheetData.subscribe((res) => {
+      console.log(' authService timeSheetData subscribe = ', res);
+      this.timesheets = res;
+
+        this.workers = this.timesheets['workers'];
+        this.workers.forEach(ele => {
+          console.log('hours', ele.hours)
+          if(ele.hours === null || ele.hours === undefined){
+            var start = new Date("01/01/2021 " + ele.startTime).getHours();
+            var end = new Date("01/01/2021 " + ele.endTime).getHours();
+            ele.hours = end - start;
+          }
+        });
+
     });
-    console.log('workers', this.workers);
+
+    // console.log(' add-timesheet.comp  ngOnInit ', this.timesheets);
+    // console.log(this.jobData);
+
+    // console.log('workers', this.workers);
   }
+
   break(event: MatSelectChange, element) {
     console.log(' break event ', event);
     console.log(' break element ', element);
@@ -125,14 +141,14 @@ export class AddTimesheetComponent implements OnInit {
   }
 
   setSubmit(){
-    this.authService.updateTimesheet(this.defaults._id, this.workers, 'Completed').subscribe((res) => {
+    this.authService.updateTimesheet(this.jobData._id, this.workers, 'Completed').subscribe((res) => {
       console.log(res);
       this.authService.openSnackbar('Timesheet submitted Successfully!');
     });
-    this.dialogRef.close(this.defaults);
+    this.dialogRef.close(this.jobData);
   }
   saveDraft(){
-    this.authService.setTimesheetDraft(this.defaults._id, this.workers).subscribe((res) => {
+    this.authService.setTimesheetDraft(this.jobData._id, this.workers).subscribe((res) => {
       console.log(res);
       this.authService.openSnackbar('Timesheet draft saved successfully');
     });
@@ -141,10 +157,15 @@ export class AddTimesheetComponent implements OnInit {
   }
 
   close(){
-    console.log('close workers', this.defaults);
+    console.log('close workers', this.jobData);
     this.dialogRef.close();
     this.dialogRef.afterClosed().subscribe(result => {
       this.workers = [];
     });
   }
+
+  ngOnDestroy() {
+    console.log(' dialog box ngOnDestroy  ');
+  }
+
 }
