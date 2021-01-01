@@ -8,9 +8,11 @@ module.exports = (app) => {
     app.post("/job/getAll", VerifyToken, client.getAll);
     app.post("/job/getAllJob",VerifyToken, authRole(ROLE.ADMIN), client.getAllJob);
     app.post("/job/getAllType",VerifyToken, authRole(ROLE.ADMIN), client.getAllJobs);
+    app.post("/job/current",VerifyToken, client.getCurrentJob);
     app.post('/setJobWorkers',VerifyToken,client.setJobWorkers);
     app.post('/setTimesheetDraft',VerifyToken,client.setTimesheetDraft);
     app.post('/updateTimesheet',VerifyToken,client.updateTimesheet);
+    app.post("/getClientTimesheets", VerifyToken, client.getClientTimesheets);
 
 
     app.post("/invoiceregister", VerifyToken, client.invoiceregister);
@@ -21,7 +23,7 @@ module.exports = (app) => {
     app.post("/client/hash", client.updateHash);
     app.delete("/auth/client/:id", client.delete);
     app.post("/getWorkerJob", client.getWorkerJob);
-    app.post("/getClientJob", VerifyToken, client.getClientJob);
+    app.post("/getClientJob", VerifyToken, authRole(ROLE.CLIENT), client.getClientJob);
     app.post("/getAllInvoices",VerifyToken, client.getAllInvoices);
     app.post("/getFindTimesheets",VerifyToken, client.getFindTimesheets);
     app.post("/client/shiftDetail/email",VerifyToken, client.emailshiftDetail);

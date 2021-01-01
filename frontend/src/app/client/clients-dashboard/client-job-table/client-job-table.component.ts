@@ -157,27 +157,12 @@ export class ClientJobTableComponent implements OnInit {
          * Here we are updating our local array.
          * You would probably make an HTTP request here.
          */
-        this.authService.addJob(customer, this.authService.currenctUser._id).subscribe((res) => {
-          console.log('1');
+        this.authService.addJob(customer, customer.clientId).subscribe((res) => {
+          customer[''];
+          this.customers.unshift(new Job(res));
+          this.subject$.next(this.customers);
           this.authService.openSnackbar('New Job Added!');
-          const tempJob = new Job(customer);
-          const obj = {
-            subject : 'New job request from ' + this.currentUser.firstName + ' ' + this.currentUser.lastName,
-            name : this.currentUser.firstName + ' ' + this.currentUser.lastName,
-            email: 'fujingforward@gmail.com',
-            content1: `${this.currentUser.firstName} ${this.currentUser.lastName} has posted a new job on the portal for ${tempJob.shiftDateStr} looking for ${tempJob.shifts[0].total}workers.`,
-            content2: `You can review the applications by logging into the Portal.`,
-            btn: 'LOGIN TO PORTAL',
-            btn_link: 'http://imperial-recruitment.herokuapp.com/#/login',
-            link: ''
-          };
-          this.authService.sendEmail(obj).subscribe((sendemail_res) => {
-              console.log('crate job email');
-          });
         });
-        customer[''];
-        this.customers.unshift(new Job(customer));
-        this.subject$.next(this.customers);
       }
     });
   }

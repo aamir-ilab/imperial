@@ -8,7 +8,7 @@ import { MatSort } from '@angular/material/sort';
 import { MatDialog } from '@angular/material/dialog';
 import { TableColumn } from '../../../@vex/interfaces/table-column.interface';
 import { aioTableData, aioTableLabels } from '../../../static-data/aio-table-data';
-import { CustomerCreateUpdateComponent } from './customer-create-update/customer-create-update.component';
+// import { CustomerCreateUpdateComponent } from './customer-create-update/customer-create-update.component';
 import icEdit from '@iconify/icons-ic/twotone-edit';
 import icDelete from '@iconify/icons-ic/twotone-delete';
 import icSearch from '@iconify/icons-ic/twotone-search';
@@ -143,40 +143,40 @@ export class AdminTimesheetComponent implements OnInit, AfterViewInit {
     this.dataSource.sort = this.sort;
   }
 
-  createCustomer() {
-    this.dialog.open(CustomerCreateUpdateComponent).afterClosed().subscribe((customer: Job) => {
-      /**
-       * Customer is the updated customer (if the user pressed Save - otherwise it's null)
-       */
-      if (customer) {
-        /**
-         * Here we are updating our local array.
-         * You would probably make an HTTP request here.
-         */
-        this.customers.unshift(new Timesheet(customer));
-        this.subject$.next(this.customers);
-      }
-    });
-  }
+  // createCustomer() {
+  //   this.dialog.open(CustomerCreateUpdateComponent).afterClosed().subscribe((customer: Job) => {
+  //     /**
+  //      * Customer is the updated customer (if the user pressed Save - otherwise it's null)
+  //      */
+  //     if (customer) {
+  //       /**
+  //        * Here we are updating our local array.
+  //        * You would probably make an HTTP request here.
+  //        */
+  //       this.customers.unshift(new Timesheet(customer));
+  //       this.subject$.next(this.customers);
+  //     }
+  //   });
+  // }
 
-  updateCustomer(customer: Timesheet) {
-    this.dialog.open(CustomerCreateUpdateComponent, {
-      data: customer
-    }).afterClosed().subscribe(updatedCustomer => {
-      /**
-       * Customer is the updated customer (if the user pressed Save - otherwise it's null)
-       */
-      if (updatedCustomer) {
-        /**
-         * Here we are updating our local array.
-         * You would probably make an HTTP request here.
-         */
-        const index = this.customers.findIndex((existingCustomer) => existingCustomer.id === updatedCustomer.id);
-        this.customers[index] = new Timesheet(updatedCustomer);
-        this.subject$.next(this.customers);
-      }
-    });
-  }
+  // updateCustomer(customer: Timesheet) {
+  //   this.dialog.open(CustomerCreateUpdateComponent, {
+  //     data: customer
+  //   }).afterClosed().subscribe(updatedCustomer => {
+  //     /**
+  //      * Customer is the updated customer (if the user pressed Save - otherwise it's null)
+  //      */
+  //     if (updatedCustomer) {
+  //       /**
+  //        * Here we are updating our local array.
+  //        * You would probably make an HTTP request here.
+  //        */
+  //       const index = this.customers.findIndex((existingCustomer) => existingCustomer.id === updatedCustomer.id);
+  //       this.customers[index] = new Timesheet(updatedCustomer);
+  //       this.subject$.next(this.customers);
+  //     }
+  //   });
+  // }
 
   deleteCustomer(customer: Timesheet) {
     /**
@@ -247,25 +247,25 @@ export class AdminTimesheetComponent implements OnInit, AfterViewInit {
   }
   confirmJob(customer: Timesheet){
     console.log('confirmJob', customer);
-    let old_cust = { ...customer};
-    this.authService.timeSheetData.next(old_cust);
+    // let old_cust = { ...customer};
+    // this.authService.timeSheetData.next(old_cust);
 
     let ordersDialog = this.dialog.open(AddTimesheetComponent, {
-      data: old_cust
+      data: customer
     }).afterClosed().subscribe((customer: Timesheet) => {
       console.log('here in confirmJob', customer);
       ordersDialog = null;
       /**
        * Customer is the updated customer (if the user pressed Save - otherwise it's null)
        */
-      // if (customer) {
-      //   console.log('inside')
+      if (customer) {
+        console.log('inside')
 
-      //   const index = this.customers.findIndex((existingCustomer) => existingCustomer.id === customer.id);
-      //   customer.setStatus('Completed');
-      //   this.customers[index] = customer;
-      //   this.subject$.next(this.customers);
-      // }
+        const index = this.customers.findIndex((existingCustomer) => existingCustomer.id === customer.id);
+        customer.setStatus('Completed');
+        this.customers[index] = customer;
+        this.subject$.next(this.customers);
+      }
     });
   }
 }

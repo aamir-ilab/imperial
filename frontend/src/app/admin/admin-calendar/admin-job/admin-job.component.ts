@@ -1,4 +1,4 @@
-import { Component, OnInit, TemplateRef } from '@angular/core';
+import { Component, OnInit, TemplateRef, OnDestroy } from '@angular/core';
 import { ScrumboardList } from './interfaces/scrumboard-list.interface';
 import { CdkDragDrop, moveItemInArray, transferArrayItem } from '@angular/cdk/drag-drop';
 import { ScrumboardCard } from './interfaces/scrumboard-card.interface';
@@ -23,6 +23,7 @@ import { AuthService } from 'src/app/services/auth.service';
 import { Customer } from 'src/app/pages/apps/aio-table/interfaces/customer.model';
 import { CustomerCreateUpdateComponent } from '../../admin-dashboard/admin-job-table/customer-create-update/customer-create-update.component';
 import data from '@iconify/icons-ic/twotone-visibility';
+import { Subscription } from 'rxjs';
 
 @Component({
   selector: 'vex-admin-job',
@@ -36,7 +37,7 @@ import data from '@iconify/icons-ic/twotone-visibility';
 export class AdminJobComponent implements OnInit {
 
   static nextId = 100;
-  currentJob = this.authService.currentJob;
+  currentJob = this.authService.currentJob || [];
   currentScrum: any;
   board: any;
 
@@ -51,19 +52,28 @@ export class AdminJobComponent implements OnInit {
   icClose = icClose;
   icEdit = icEdit;
   fulfilled;
-  // scrumboardUsers;
-
   constructor(private dialog: MatDialog,
               private route: ActivatedRoute,
               private popover: PopoverService,
               private authService: AuthService) {
-    console.log('admin job scrumboard construct');
-
               }
 
-  ngOnInit() {
-    console.log('admin job scrumboard ng on int');
-    if (this.authService.currentScrumboard){
+  async ngOnInit() {
+    const id = this.route.snapshot.paramMap.get('scrumboardId');
+    if (!this.authService.currentScrumboard){
+      let res = await this.authService.getCurrentJob(id);
+      console.log('res', res);
+      this.currentJob['client'] = res;
+      console.log('this.currentJob', this.currentJob);
+      this.authService.currentScrumboard = [];
+      res['shifts'].forEach((element, i) => {
+        this.updateCurrentScrum(element, i, res)
+      });
+      this.authService.setCurrentScrumboardLocal(this.authService.currentScrumboard);
+      this.currentScrum = this.authService.currentScrumboard;
+      console.log('this.currentScrum', this.authService.currentScrumboard);
+    }
+    else{
       console.log('authService scrumboard', this.authService.currentScrumboard);
       this.authService.setCurrentScrumboard();
       this.currentScrum = this.authService.currentScrumboard;
@@ -186,6 +196,13 @@ export class AdminJobComponent implements OnInit {
       this.authService.setStatusJob(event.container.data[0].id, event.container.id).subscribe((res) => {
           console.log('res', res);
           this.currentJob.client = res;
+          this.authService.currentScrumboard = [];
+          res.shifts.forEach((element, i) => {
+            this.updateCurrentScrum(element, i, res)
+          });
+          this.authService.setCurrentScrumboardLocal(this.authService.currentScrumboard);
+          this.currentScrum = this.authService.currentScrumboard;
+          console.log('this.currentScrum', this.authService.currentScrumboard);
           this.authService.openSnackbar('Job status updated successfully');
 
         });
@@ -264,5 +281,6 @@ export class AdminJobComponent implements OnInit {
 
     this.addCardCtrl.setValue(null);
   }
+
 
 }

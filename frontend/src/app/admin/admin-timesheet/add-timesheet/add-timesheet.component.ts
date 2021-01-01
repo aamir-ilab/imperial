@@ -60,29 +60,19 @@ export class AddTimesheetComponent implements OnInit, OnDestroy  {
   ngOnInit() {
     this.timesheets = [];
     this.workers = [];
-    // this.timesheets = this.jobData;
-    // this.timesheets = {...this.jobData};
-
-    this.authService.timeSheetData.subscribe((res) => {
-      console.log(' authService timeSheetData subscribe = ', res);
-      this.timesheets = res;
-
-        this.workers = this.timesheets['workers'];
-        this.workers.forEach(ele => {
-          console.log('hours', ele.hours)
-          if(ele.hours === null || ele.hours === undefined){
-            var start = new Date("01/01/2021 " + ele.startTime).getHours();
-            var end = new Date("01/01/2021 " + ele.endTime).getHours();
-            ele.hours = end - start;
-          }
-        });
-
+    this.timesheets = this.jobData;
+    this.timesheets = JSON.parse(JSON.stringify(this.jobData))
+    console.log('this.timesheets', this.timesheets)
+    this.workers = this.timesheets['workers'];
+    this.workers.forEach(element => {
+      console.log('hours', element.hours)
+      if(element.hours === null || element.hours === undefined){
+        var start = new Date("01/01/2021 " + element.startTime).getHours();
+        var end = new Date("01/01/2021 " + element.endTime).getHours();
+        element.hours = end - start;
+      }
     });
-
-    // console.log(' add-timesheet.comp  ngOnInit ', this.timesheets);
-    // console.log(this.jobData);
-
-    // console.log('workers', this.workers);
+    console.log('workers', this.workers);
   }
 
   break(event: MatSelectChange, element) {
@@ -149,7 +139,8 @@ export class AddTimesheetComponent implements OnInit, OnDestroy  {
   }
   saveDraft(){
     this.authService.setTimesheetDraft(this.jobData._id, this.workers).subscribe((res) => {
-      console.log(res);
+      console.log('saveDraft',res);
+      this.jobData.workers = res.workers;
       this.authService.openSnackbar('Timesheet draft saved successfully');
     });
     console.log('Save draft', this.workers);

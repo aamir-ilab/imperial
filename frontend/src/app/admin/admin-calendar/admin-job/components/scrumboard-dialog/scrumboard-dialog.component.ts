@@ -273,7 +273,7 @@ export class ScrumboardDialogComponent implements OnInit {
     this.authService.setJobWorkers(this.list.id, this.list.shift._id,workers).subscribe((res) => {
       console.log('res', res);
       if (this.checked === true) {
-        this.authService.sendShiftEmail(workers, this.list).subscribe((sendemail_res) => {
+        this.authService.sendShiftEmail(workers, this.list, this.data).subscribe((sendemail_res) => {
           this.authService.openSnackbar('Shift Detail Sent to workers');
         });
         // workers.forEach(worker => {

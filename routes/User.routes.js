@@ -11,7 +11,7 @@ module.exports = (app) => {
   app.post("/getAllSubType",VerifyToken, client.getAllSubType);
   app.post("/getAllType", VerifyToken, authRole(ROLE.ADMIN), client.getAllType);
 
-  app.post("/client/verify/email", client.emailverify);
+  app.post("/client/verify/email",  VerifyToken,client.emailverify);
   app.post("/client/verify/setEmail", client.setEmail);
   app.post('/setVerify',client.setVerify);
   app.post("/resetpassword", client.resetpassword);

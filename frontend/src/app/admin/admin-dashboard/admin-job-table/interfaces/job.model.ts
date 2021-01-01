@@ -4,18 +4,13 @@ export class Job {
   _id: string;
   id: number;
   client: string;
-  // department: string;
-  // role: string;
   shiftDate: Date;
-  // startTime: number;
-  // endTime: number;
   locationShift: string;
   purchaseOrderNo: string; // optional
   additionalInformation: string;
   status: any;
   statusStr: string;
   fulfilled: number;
-  // total: number;
   totalStaff: string;
   clientId: any;
   shifts: [
@@ -40,11 +35,7 @@ export class Job {
     this.id = job.id;
     this.client = job.client;
     this.shifts = job.shifts;
-    // this.department = job.department;
-    // this.role = job.role;
     this.shiftDate = job.shiftDate;
-    // this.startTime = job.startTime;
-    // this.endTime = job.endTime;
     this.locationShift = job.locationShift;
     this.purchaseOrderNo = job.purchaseOrderNo;
     this.additionalInformation = job.additionalInformation;

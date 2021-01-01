@@ -26,7 +26,7 @@ export class AuthService {
   adminInfo: any;
   clientJob: any;
 
-  public timeSheetData = new BehaviorSubject<any>('');
+  // public timeSheetData = new BehaviorSubject<any>('');
 
 
    constructor(private http: HttpClient,
@@ -104,11 +104,8 @@ export class AuthService {
   //   });
   // }
   addJob(user: any, str): Observable<any>{
-    // if(type != 'other')
-    //   user['accountType'] = type;
-    // const httpHeaders = new HttpHeaders();
-    // httpHeaders.set('Content-Type', 'application/json');
     user.clientId = str;
+    user.accountType = this.currenctUser.accountType;
     return this.http.post<Job>(`${USERS_URL}job/register`, user).pipe(
       map((res: Job) => {
         return res;
@@ -202,6 +199,9 @@ export class AuthService {
   getAllJobsSync(): Observable<Job[]>{
     return  this.http.post<Job[]>(`${USERS_URL}job/getAllJob`, {});
   }
+  async getCurrentJob(id): Promise<Job[]>{
+    return  this.http.post<Job[]>(`${USERS_URL}job/current`, {id: id}).toPromise();
+  }
   getParent(id): Observable<User>{
     return this.http.post<User>(`${USERS_URL}getParent`, {_id: id});
   }
@@ -220,6 +220,10 @@ export class AuthService {
   }
   getAllTimesheets(): Observable<Job[]>{
     return this.http.post<Job[]>(`${USERS_URL}getAllTimesheets`, {});
+  }
+  getClientTimesheets(): Observable<Job[]>{
+    const id = JSON.parse(localStorage.getItem('userInfo'))._id;
+    return this.http.post<Job[]>(`${USERS_URL}getClientTimesheets`, {id});
   }
   getAllInvoices(): Observable<Invoice[]>{
     return this.http.post<Invoice[]>(`${USERS_URL}getAllInvoices`, {});
@@ -361,10 +365,10 @@ export class AuthService {
     return this.http.post<any>(`${USERS_URL}removeTimesheetsJob`, {arr: obj});
   }
   sendEmail(obj): Observable<any>{
-    return this.http.post<any>(`${USERS_URL}client/shiftDetail/email`, obj);
+    return this.http.post<any>(`${USERS_URL}client/verify/email`, obj);
   }
-  sendShiftEmail(workers, data): Observable<any>{
-    return this.http.post<any>(`${USERS_URL}client/shiftDetail/email`, {workers:workers, data: data});
+  sendShiftEmail(workers, data, old_Data): Observable<any>{
+    return this.http.post<any>(`${USERS_URL}client/shiftDetail/email`, {workers:workers, data: data, old_Data: old_Data});
   }
   resetPassword(obj): Observable<any>{
     return this.http.post<any>(`${USERS_URL}resetpassword`, obj);

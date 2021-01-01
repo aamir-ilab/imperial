@@ -55,6 +55,7 @@ exports.register = (req, res) => {
         newClient.JobId = 'JOB'+ newClient.id.toString();
       newClient.timesheetId = timesheet._id;
       newClient.totalStaff = 0;
+      let departments = [];
       newClient.shifts.forEach(element => {
         for (let i = 0; i < element.total; i++) {
           element.workers[i] = {
@@ -65,6 +66,7 @@ exports.register = (req, res) => {
         }
         newClient.shifts.workers = element.workers;
         newClient.totalStaff += element.total;
+        departments.push(element.department);
       });
       newClient.save((err) => {
         if (err) {
@@ -95,8 +97,8 @@ exports.register = (req, res) => {
               timesheet.timesheetId = 'TS'+ timesheet.id.toString();
               timesheet.JobId_Id = job_id;
               timesheet.totalStaff = newClient.totalStaff;
-              // timesheet.shifts = newClient.shifts;
-              // timesheet.workers = workers;
+              timesheet.departments = departments.join(' / ');
+              console.log('departments', timesheet.departments);
               timesheet.save((err) => {
                 if (err) {
                   console.log(err)
@@ -106,7 +108,42 @@ exports.register = (req, res) => {
               });
             })
           });
-
+          if(req.body.accountType == 'Client'){
+            User.findById(req.body.clientId, function(err, user) {
+              if (!user)
+                res.status(404).send("data is not found");
+              else {
+                readHTMLFile((path.join(__dirname, '../public/pages/AdminJobNotification.php')), function(err, html) {
+                  console.log('==found==', user)
+                  const name = user.firstName + ' ' + user.lastName ;
+                  const shiftdate = dateFormat(req.body.shiftDate, "fullDate").toString();
+                  console.log('==shiftdate==', shiftdate)
+                  var template = handlebars.compile(html);
+                  var replacements = {
+                    name: name,
+                    shiftdate:shiftdate,
+                    totalStaff: newClient.totalStaff,
+                  };
+                  console.log('replacements', replacements);
+                  var htmlToSend = template(replacements);
+                  var mailOptions = {
+                      from: 'my@email.com',
+                      to : 'admin@admin.com',
+                      subject : 'New job request from '+name,
+                      html : htmlToSend
+                    };
+                    transport.sendMail(mailOptions, function (error, info) {
+                    if (error) {
+                      if (error) {
+                        console.log(error);
+                        return res.status(401).json(error)
+                      }
+                    }
+                  });
+                });
+              }
+            })
+          }
           res.status(200).json(newClient);
         }
       });
@@ -228,7 +265,7 @@ exports.setJobWorkers = (req, res) => {
         });
       })
       .catch(err => {
-          res.status(400).send("Update not possible", err );
+          res.status(400).send("Update not possible");
       });
 
     }
@@ -237,6 +274,16 @@ exports.setJobWorkers = (req, res) => {
 exports.getAll = (req, res) => {
   console.log('--req--', req.body.id)
   Job.find({clientId:req.body.id}).sort({ 'createdAt': -1 }).populate(['clientId','timesheetId']).exec(function(err, client) {
+      if (err) {
+          console.log(err);
+      } else {
+          res.json(client);
+      }
+  })
+}
+exports.getClientTimesheets = (req, res) => {
+  console.log('--req--', req.body.id)
+  Timesheet.find({clientId:req.body.id}).sort({ 'createdAt': -1 }).populate(['JobId_Id','clientId','workers.workerId']).exec(function(err, client) {
       if (err) {
           console.log(err);
       } else {
@@ -294,7 +341,10 @@ exports.setTimesheetDraft = (req, res) => {
     else {
       timesheet.workers = req.body.workers;
       timesheet.save().then(timesheet => {
-        res.status(200).json(timesheet);
+        Timesheet.findOne({id:timesheet.id}).populate('workers.workerId').exec(function (err, client){
+          if (err) return res.json(err, 400);
+          res.status(200).json(client);
+        });
       })
       .catch(err => {
         res.status(400).send("Update not possible");
@@ -329,52 +379,198 @@ exports.updateTimesheet = (req, res) => {
     }
   });
 };
+////////////////////////////
+function comparer(otherArray){
+  return function(current){
+    return otherArray.filter(function(other){
+      return other.role == current.role && other.startTime == current.startTime && other.endTime == current.endTime && other.workerId == current.workerId
+    }).length == 0;
+  }
+}
+////////////////////////////
 exports.emailshiftDetail = (req, res) => {
-  console.log('--email obj--', req.body.data);
+  console.log('--email obj--', req.body);
+  console.log('--email old obj--', req.body.old_Data.shift.workers);
+  var a = req.body.workers;
+  var b = req.body.old_Data.shift.workers;
+  var onlyInReq = a.filter(comparer(b));
+  var onlyInOld = b.filter(comparer(a));
+
+  result = onlyInReq.concat(onlyInOld);
+  console.log('onlyInReq', onlyInReq, onlyInReq.length);
+  console.log('onlyInOld', onlyInOld, onlyInOld.length);
+  console.log('equal', JSON.stringify(onlyInReq) === JSON.stringify(onlyInOld));
+  console.log('obj old obj diff', result);
+
   let job;
   Job.findOne({id: req.body.data.id}).then(client => {
     if (client) {
         job = client;
         console.log('==job==', job);
-        req.body.workers.forEach(worker => {
-          User.findById(worker.workerId, function(err, user) {
-            if (!user)
-              res.status(404).send("data is not found");
-            else {
-              readHTMLFile((path.join(__dirname, '../public/pages/emailTemplate.php')), function(err, html) {
-                console.log('==found==', user)
-                const name = user.forename + ' ' + user.surename ;
-                const shiftdate = dateFormat(req.body.data.shiftDate, "fullDate");
-                console.log('==shiftdate==', shiftdate)
-                var template = handlebars.compile(html);
-                var replacements = {
-                  name: name,
-                  shiftdate:shiftdate,
-                  worker: worker,
-                  data: req.body.data,
-                  location:job.locationShift ? job.locationShift : '',
-                  comments:job.additionalInformation ? job.additionalInformation : '',
-                };
-                var htmlToSend = template(replacements);
-                var mailOptions = {
-                    from: 'my@email.com',
-                    to : user.emailAddress,
-                    subject : 'You have been assigned a new shift (ID #'+job.JobId+')',
-                    html : htmlToSend
+        // no diffreance in shift details
+        if(JSON.stringify(onlyInReq) === JSON.stringify(onlyInOld)){
+          req.body.workers.forEach(worker => {
+            User.findById(worker.workerId, function(err, user) {
+              if (!user)
+                res.status(404).send("data is not found");
+              else {
+                readHTMLFile((path.join(__dirname, '../public/pages/ShiftDetails.php')), function(err, html) {
+                  console.log('==found==', user)
+                  const name = user.forename + ' ' + user.surename ;
+                  const shiftdate = dateFormat(req.body.data.shiftDate, "fullDate").toString();
+                  console.log('==shiftdate==', shiftdate)
+                  var template = handlebars.compile(html);
+                  var replacements = {
+                    name: name,
+                    shiftdate:shiftdate,
+                    worker: worker,
+                    data: req.body.data,
+                    location:job.locationShift ? job.locationShift : '',
+                    comments:job.additionalInformation ? job.additionalInformation : '',
                   };
-                  transport.sendMail(mailOptions, function (error, info) {
-                  if (error) {
+                  var htmlToSend = template(replacements);
+                  var mailOptions = {
+                      from: 'my@email.com',
+                      to : user.emailAddress,
+                      subject : 'You have been assigned a new shift (ID #'+job.JobId+')',
+                      html : htmlToSend
+                    };
+                    transport.sendMail(mailOptions, function (error, info) {
                     if (error) {
-                      console.log(error);
-                      return res.status(401).json(error)
+                      if (error) {
+                        console.log(error);
+                        return res.status(401).json(error)
+                      }
                     }
-                  }
+                  });
                 });
-              });
-            }
+              }
+            });
+            return res.status(200).json('email sent');
           });
-          return res.status(200).json('email sent');
-        });
+        }
+        // new woker added to shift
+        else if(onlyInReq.length > 0 && onlyInOld.length === 0){
+          onlyInReq.forEach(worker => {
+            User.findById(worker.workerId, function(err, user) {
+              if (!user)
+                res.status(404).send("data is not found");
+              else {
+                readHTMLFile((path.join(__dirname, '../public/pages/ShiftDetails.php')), function(err, html) {
+                  console.log('==found==', user)
+                  const name = user.forename + ' ' + user.surename ;
+                  const shiftdate = dateFormat(req.body.data.shiftDate, "fullDate").toString();
+                  console.log('==shiftdate==', shiftdate)
+                  var template = handlebars.compile(html);
+                  var replacements = {
+                    name: name,
+                    shiftdate:shiftdate,
+                    worker: worker,
+                    data: req.body.data,
+                    location:job.locationShift ? job.locationShift : '',
+                    comments:job.additionalInformation ? job.additionalInformation : '',
+                  };
+                  var htmlToSend = template(replacements);
+                  var mailOptions = {
+                      from: 'my@email.com',
+                      to : user.emailAddress,
+                      subject : 'You have been assigned a new shift (ID #'+job.JobId+')',
+                      html : htmlToSend
+                    };
+                    transport.sendMail(mailOptions, function (error, info) {
+                    if (error) {
+                      if (error) {
+                        console.log(error);
+                        return res.status(401).json(error)
+                      }
+                    }
+                  });
+                });
+              }
+            });
+            return res.status(200).json('email sent');
+          });
+        }
+        // woker removed from shift
+        else if(onlyInReq.length === 0 && onlyInOld.length > 0){
+          onlyInOld.forEach(worker => {
+            User.findById(worker.workerId, function(err, user) {
+              if (!user)
+                res.status(404).send("data is not found");
+              else {
+                readHTMLFile((path.join(__dirname, '../public/pages/ShiftCancelled.php')), function(err, html) {
+                  console.log('==found==', user)
+                  const name = user.forename + ' ' + user.surename ;
+                  console.log('==shiftdate==', shiftdate)
+                  var template = handlebars.compile(html);
+                  var replacements = {
+                    name: name,
+                    data: req.body.data
+                  };
+                  var htmlToSend = template(replacements);
+                  var mailOptions = {
+                      from: 'my@email.com',
+                      to : user.emailAddress,
+                      subject : 'Your shift has been cancelled (ID #'+job.JobId+')',
+                      html : htmlToSend
+                    };
+                    transport.sendMail(mailOptions, function (error, info) {
+                    if (error) {
+                      if (error) {
+                        console.log(error);
+                        return res.status(401).json(error)
+                      }
+                    }
+                  });
+                });
+              }
+            });
+            return res.status(200).json('email sent');
+          });
+        }
+        // shift detail amended
+        else{
+          result.forEach(worker => {
+            User.findById(worker.workerId, function(err, user) {
+              if (!user)
+                res.status(404).send("data is not found");
+              else {
+                readHTMLFile((path.join(__dirname, '../public/pages/ShiftDetailAmend.php')), function(err, html) {
+                  console.log('==found==', user)
+                  const name = user.forename + ' ' + user.surename ;
+                  const shiftdate = dateFormat(req.body.data.shiftDate, "fullDate").toString();
+                  console.log('==shiftdate==', shiftdate)
+                  var template = handlebars.compile(html);
+                  var replacements = {
+                    name: name,
+                    jobID: '(#'+job.JobId+')',
+                    shiftdate:shiftdate,
+                    worker: worker,
+                    data: req.body.data,
+                    location:job.locationShift ? job.locationShift : '',
+                    comments:job.additionalInformation ? job.additionalInformation : '',
+                  };
+                  var htmlToSend = template(replacements);
+                  var mailOptions = {
+                      from: 'my@email.com',
+                      to : user.emailAddress,
+                      subject : 'Your shift has been amended (ID #'+job.JobId+')',
+                      html : htmlToSend
+                    };
+                    transport.sendMail(mailOptions, function (error, info) {
+                    if (error) {
+                      if (error) {
+                        console.log(error);
+                        return res.status(401).json(error)
+                      }
+                    }
+                  });
+                });
+              }
+            });
+            return res.status(200).json('email sent');
+          });
+        }
     } else {
       res.status(404).send("data is not found");
     }
@@ -416,7 +612,38 @@ exports.setStatusJob = (req, res) => {
           }); }
   });
 };
+exports.getCurrentJob = (req, res) => {
 
+  Job.findOne({id:req.body.id}, function(err, client) {
+      if (!client)
+          res.status(404).send("data is not found");
+      else {
+          // Object.assign(client, req.body);
+          if(req.body.status == 1 || req.body.status == 2 || req.body.status == 3 ){
+              if(req.body.status == 1){
+               client.statusStr = 'In Progress';
+              }else if(req.body.status == 2){
+                  client.statusStr = 'Submitted';
+              }else if(req.body.status == 3){
+                  client.statusStr = 'Completed';
+              }
+          }else{
+              client.statusStr = req.body.status;
+
+          }
+
+          client.save().then(client => {
+              // res.status(200).json(client);
+            Job.findOne({id:client.id}).populate('clientId').exec(function (err, client){
+              if (err) return res.json(err, 400);
+              res.status(200).json(client);
+            });
+          })
+          .catch(err => {
+              res.status(400).send("Update not possible");
+          }); }
+  });
+};
 
 exports.getAllInvoices = (req, res) => {
   Invoice.find({}).sort({ 'invoiceDate': -1 }).populate({
@@ -1481,6 +1708,7 @@ exports.removeJob = (req, res) =>{
       Timesheet.findOneAndDelete({ _id: req.body.timesheetId }, function(err) {
         if (err) res.json(err);
       });
+      res.status(200).send("Job and related Timesheet Removed");
     }
   });
 }

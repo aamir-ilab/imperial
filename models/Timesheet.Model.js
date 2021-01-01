@@ -9,6 +9,7 @@ var TimesheetSchema = new mongoose.Schema({
     clientId: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
     JobId_Id: { type: mongoose.Schema.Types.ObjectId, ref: 'Job' },
     invoiceId_Id: { type: mongoose.Schema.Types.ObjectId, ref: 'Invoice' },
+    departments: {type:String},
     shiftDate: {type:Date},
     workers:[
       {

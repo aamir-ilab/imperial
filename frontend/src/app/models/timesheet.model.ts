@@ -12,6 +12,7 @@ export class Timesheet {
     totalStaff:string;
     status: any;
     clientId: any;
+    departments: string;
     workers:[
       {
         role: {type:String},
@@ -33,6 +34,7 @@ export class Timesheet {
       this.timesheetId = client.timesheetId;
       this.JobId_Id= client.JobId_Id;
       this.clientId = client.clientId;
+      this.departments = client.departments;
       this.shiftDate= client.shiftDate;
       this.shiftDateStr= formatDate(client.shiftDate, 'yy-MM-dd','en').toString();
       this.workers = client.workers;

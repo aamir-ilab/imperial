@@ -55,7 +55,6 @@ export class Job {
     this.statusStr = job.statusStr;
     this.clientId = job.clientId;
     this.timesheetId = job.timesheetId;
-    this.timesheetIdStr = this.timesheetId.timesheetId;
     if (job.statusStr){
       if (job.statusStr === 'Completed') {
       this.status = statusTableLabels[4];

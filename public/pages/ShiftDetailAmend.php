@@ -3,7 +3,7 @@
   <head>
     <meta name="viewport" content="width=device-width" />
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
-    <title>Simple Transactional Email</title>
+    <title>Shift Amend Email</title>
     <style>
       /* -------------------------------------
           GLOBAL RESETS
@@ -353,9 +353,8 @@
                   <table role="presentation" border="0" cellpadding="0" cellspacing="0">
                     <tr>
                       <td>
-                        <p>Hi {{name}},</p>
-                        <p>You have been assigned a shift with {{data.clientId.firstName}} {{data.clientId.lastName
-                        }}. Please read the shift details carefully below. If you have any questions relating to the shift, or if you’re unable to attend this shift, please contact Imperial Recruitment as soon as possible on 020 7436 7424.</p>
+                        <p>Hello {{name}},</p>
+                        <p>We are notifying you that the shift you were originally given {{jobID}} has been amended.</p> <p>The new shift details can be viewed below.</p>
                         <p><span class="bold">Shift Date:</span> {{shiftDate}}</p>
                         <p><span class="bold">Shift start time:</span> {{worker.startTime}} – {{worker.endTime}}</p>
                         <p><span class="bold">Role:</span> {{worker.role}}</p>
@@ -363,6 +362,8 @@
                         <?php if ($comments != ''): ?>
                         <p><span class="bold">Comments:</span> {{comments}}</p>
                         <?php endif; ?>
+                          <p>If you are unable with the new shift details, please speak to someone from the team as soon as possible by calling 020 7436 7424.
+                          </p>
                         <table role="presentation" border="0" cellpadding="0" cellspacing="0" class="btn btn-primary">
                           <tbody>
                             <tr>
@@ -370,7 +371,7 @@
                                 <table role="presentation" border="0" cellpadding="0" cellspacing="0">
                                   <tbody>
                                     <tr>
-                                      <td> <a href="http://imperial-recruitment.herokuapp.com/#/login" target="_blank">LOGIN TO PORTAL</a> </td>
+                                      <td> <a href="http://stagings.tk:5500/#/login" target="_blank">LOGIN TO PORTAL</a> </td>
                                     </tr>
                                   </tbody>
                                 </table>
