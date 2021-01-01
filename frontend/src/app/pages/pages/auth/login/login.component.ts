@@ -66,42 +66,16 @@ export class LoginComponent implements OnInit {
           this.authService.currenctUser = user;
           localStorage.setItem('userInfo', JSON.stringify(user));
           if (user.accountType === 'Client'){
-            // this.authService.getClientJob(user._id).subscribe((res) => {
-            //   this.authService.setClientJobLocal(res);
-            //   console.log('cccc');
-            //   console.log(res);
-            //   console.log(this.authService.clientJob);
-            //   if (user.clientType === 'User' || user.clientType === 'Admin') {
-            //     this.authService.getParent(user['parentId']).subscribe((res1) => {
-            //       this.authService.setCurrentParentLocal(res1);
-            //       console.log('cccc');
-            //       console.log(res1);
-            //       console.log(this.authService.currentParent);
-            //       this.snackbar.open('Logged in Successfully', 'Cancel', {
-            //         duration: 10000
-            //       });
-            //       this.router.navigate(['/client']);
-
-            //     });
-            //   }
-            //   else{
-            //     this.snackbar.open('Logged in Successfully', 'Cancel', {
-            //       duration: 10000
-            //     });
-            //     this.router.navigate(['/client']);
-            //   }
-            // });
             this.snackbar.open('Logged in Successfully', 'Cancel', {
               duration: 2000
             });
             this.router.navigate(['/client']);
           }
           else if (user.accountType === 'Worker'){
+            console.log('accountType', user.accountType)
               this.authService.getWorkerJob(user._id).subscribe((res2) => {
                 this.authService.setCurrentWorkerJobLocal(res2);
-                console.log('ddd');
-                console.log(res2);
-                console.log(this.authService.workerJobInfo);
+                console.log('workerJobInfo',this.authService.workerJobInfo);
                 this.snackbar.open('Logged in Successfully', 'Cancel', {
                   duration: 2000
                 });

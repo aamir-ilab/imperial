@@ -62,14 +62,10 @@ export class ClientJobTableComponent implements OnInit {
   columns: TableColumn<Job>[] = [
     { label: 'Job ID', property: 'JobId', type: 'text', visible: true },
     { label: 'Department', property: 'department', type: 'text', visible: false },
-    { label: 'Role', property: 'role', type: 'text', visible: false },
     { label: 'Shift Date', property: 'shiftDate', type: 'text', visible: true },
-    { label: 'Start Time', property: 'startTime', type: 'text', visible: false },
-    { label: 'End Time', property: 'endTime', type: 'text', visible: false },
     { label: 'Total Staff', property: 'totalStaff', type: 'text', visible: true},
     { label: 'Status', property: 'status', type: 'button', visible: true },
-    { label: 'ID', property: '_id', type: 'text', visible: false },
-    // { label: 'Actions', property: 'actions', type: 'button', visible: true }
+    { label: 'Actions', property: 'actions', type: 'button', visible: true }
   ];
   pageSize = 10;
   pageSizeOptions: number[] = [5, 10, 20, 50];
@@ -137,9 +133,6 @@ export class ClientJobTableComponent implements OnInit {
       this.dataSource.data = customers;
     });
 
-    // this.searchCtrl.valueChanges.pipe(
-    //   untilDestroyed(this)
-    // ).subscribe(value => this.onFilterChange(value));
   }
 
   ngAfterViewInit() {
@@ -167,43 +160,6 @@ export class ClientJobTableComponent implements OnInit {
     });
   }
 
-  updateCustomer(customer: Customer) {
-    this.dialog.open(CustomerCreateUpdateComponent, {
-      data: customer
-    }).afterClosed().subscribe(updatedCustomer => {
-      /**
-       * Customer is the updated customer (if the user pressed Save - otherwise it's null)
-       */
-      if (updatedCustomer) {
-        /**
-         * Here we are updating our local array.
-         * You would probably make an HTTP request here.
-         */
-        const index = this.customers.findIndex((existingCustomer) => existingCustomer.id === updatedCustomer.id);
-        this.customers[index] = new Job(updatedCustomer);
-        this.subject$.next(this.customers);
-      }
-    });
-  }
-
-  deleteCustomer(customer: Job) {
-    /**
-     * Here we are updating our local array.
-     * You would probably make an HTTP request here.
-     */
-    this.customers.splice(this.customers.findIndex((existingCustomer) => existingCustomer.id === customer.id), 1);
-    this.selection.deselect(customer);
-    this.subject$.next(this.customers);
-  }
-
-  deleteCustomers(customers: Job[]) {
-    /**
-     * Here we are updating our local array.
-     * You would probably make an HTTP request here.
-     */
-    customers.forEach(c => this.deleteCustomer(c));
-  }
-
   onFilterChange(value: string) {
     if (!this.dataSource) {
       return;
@@ -213,34 +169,12 @@ export class ClientJobTableComponent implements OnInit {
     this.dataSource.filter = value;
   }
 
-  toggleColumnVisibility(column, event) {
-    event.stopPropagation();
-    event.stopImmediatePropagation();
-    column.visible = !column.visible;
-  }
-
-  /** Whether the number of selected elements matches the total number of rows. */
-  isAllSelected() {
-    const numSelected = this.selection.selected.length;
-    const numRows = this.dataSource.data.length;
-    return numSelected === numRows;
-  }
-
-  /** Selects all rows if they are not all selected; otherwise clear selection. */
-  masterToggle() {
-    this.isAllSelected() ?
-      this.selection.clear() :
-      this.dataSource.data.forEach(row => this.selection.select(row));
-  }
-
   trackByProperty<T>(index: number, column: TableColumn<T>) {
     return column.property;
   }
 
-  onLabelChange(change: MatSelectChange, row: Job) {
-    // const index = this.customers.findIndex(c => c === row);
-    // this.customers[index].status = change.value;
-    // this.subject$.next(this.customers);
+  viewJob(data){
+    console.log('view job', data)
   }
 
 }

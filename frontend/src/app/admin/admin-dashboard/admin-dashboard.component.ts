@@ -52,7 +52,7 @@ export class AdminDashboardComponent implements OnInit {
   async ngOnInit() {
       await this.authService.getAllUserAuth();
       await this.authService.getAllJobAuth();
-      this.authService.getTimesheets('Completed').subscribe((res) => {
+      this.authService.getTimesheets('Timesheet Submitted').subscribe((res) => {
         this.reviewTimesheets = res.length;
       });
     // if(!this.authService.AllJob)

@@ -1,6 +1,6 @@
 export const statusTableLabels = [
   {
-    text: 'Submitted',
+    text: 'Timesheet Submitted',
     textClass: 'text-green',
     bgClass: 'bg-green-light',
     previewClass: 'bg-green'

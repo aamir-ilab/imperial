@@ -135,7 +135,7 @@ export class WorkerCalendarComponent {
         else if (ele.statusStr === 'Completed') {
           col = colors.green;
  }
-        else if (ele.statusStr === 'Submitted') {
+        else if (ele.statusStr === 'Timesheet Submitted') {
           col = colors.yellow;
  }
         if (ele.statusStr !== 'Pending') {

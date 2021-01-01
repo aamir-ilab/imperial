@@ -2,7 +2,7 @@ import { formatDate } from '@angular/common';
 
 export const aioTableLabelsOne = [
   {
-    text: 'Submitted',
+    text: 'Timesheet Submitted',
     textClass: 'text-green',
     bgClass: 'bg-green-light',
     previewClass: 'bg-green'

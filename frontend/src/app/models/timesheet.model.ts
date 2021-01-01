@@ -43,7 +43,7 @@ export class Timesheet {
         if (client.statusStr === 'Completed') {
         this.status = statusTableLabels[4];
         }
-        else  if (client.statusStr === 'Submitted') {
+        else  if (client.statusStr === 'Timesheet Submitted') {
           this.status = statusTableLabels[0];
         }
         else  if (client.statusStr === 'Pending') {
@@ -70,7 +70,7 @@ export class Timesheet {
       if (this.statusStr === 'Completed') {
         this.status = statusTableLabels[4];
         }
-      else  if (this.statusStr === 'Submitted') {
+      else  if (this.statusStr === 'Timesheet Submitted') {
         this.status = statusTableLabels[0];
       }
       else  if (this.statusStr === 'Pending') {

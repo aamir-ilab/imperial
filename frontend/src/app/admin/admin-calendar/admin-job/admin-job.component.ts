@@ -125,12 +125,12 @@ export class AdminJobComponent implements OnInit {
         // { id:1, label:'Unassigned Shifts', children:[] },
         // { id:2, label:'Assigned', children:[] },
         { id: 1, label: 'In Progress', children: [] },
-        { id: 2, label: 'Submitted', children: [] },
+        { id: 2, label: 'Timesheet Submitted', children: [] },
         { id: 3, label: 'Completed', children: [] },
       ]
     });
     console.log('currentJob', this.authService.currentJob);
-    const arrLabel = ['In Progress', 'Submitted', 'Completed'];
+    const arrLabel = ['In Progress', 'Timesheet Submitted', 'Completed'];
     arrLabel.forEach((ele, index) => {
       if (ele === res.statusStr) {
         this.authService.currentScrumboard[i].children[index].children.push({

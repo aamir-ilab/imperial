@@ -62,13 +62,6 @@ export class AuthService {
       localStorage.setItem('scrumboardInfo', JSON.stringify(res));
       this.setCurrentScrumboard();
     }
-    // setClientJob(){
-    //   this.clientJob = JSON.parse(localStorage.getItem('clientJobInfo'));
-    // }
-    // setClientJobLocal(res){
-    //   localStorage.setItem('clientJobInfo', JSON.stringify(res));
-    //   this.setClientJob();
-    // }
 
     setCurrentParent(){
       this.currentParent = JSON.parse(localStorage.getItem('parentInfo'));
@@ -106,6 +99,8 @@ export class AuthService {
   addJob(user: any, str): Observable<any>{
     user.clientId = str;
     user.accountType = this.currenctUser.accountType;
+    if(user.accountType ==='Client')
+      user.client = this.currenctUser.firstName +' '+ this.currenctUser.lastName;
     return this.http.post<Job>(`${USERS_URL}job/register`, user).pipe(
       map((res: Job) => {
         return res;

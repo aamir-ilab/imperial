@@ -116,7 +116,7 @@ export class AdminCalendarComponent {
           col = colors.green;
           console.log('col', ele.statusStr, col);
         }
-        else if (ele.statusStr === 'Submitted') {
+        else if (ele.statusStr === 'Timesheet Submitted') {
           col = colors.yellow;
           console.log('col', ele.statusStr, col);
         }
@@ -190,13 +190,13 @@ export class AdminCalendarComponent {
           // { id:1, label:'Unassigned Shifts', children:[] },
           // { id:2, label:'Assigned', children:[] },
           { id: 1, label: 'In Progress', children: [] },
-          { id: 2, label: 'Submitted', children: [] },
+          { id: 2, label: 'Timesheet Submitted', children: [] },
           { id: 3, label: 'Completed', children: [] },
         ]
       });
       this.authService.currentJob = event;
       console.log('currentJob', this.authService.currentJob);
-      const arrLabel = ['In Progress', 'Submitted', 'Completed'];
+      const arrLabel = ['In Progress', 'Timesheet Submitted', 'Completed'];
       console.log('&&&&', event.client);
       arrLabel.forEach((ele, index) => {
         if (ele === event.client.statusStr) {

@@ -321,7 +321,7 @@ export const scrumboards: Scrumboard[] = [
       },
       {
         id: 3,
-        label: 'Submitted',
+        label: 'Timesheet Submitted',
         children: [
           {
             id: 31,

@@ -47,12 +47,12 @@ export class CalendarEditComponent implements OnInit {
         // { id:1, label:'Unassigned Shifts', children:[] },
         // { id:2, label:'Assigned', children:[] },
         { id: 1, label: 'In Progress', children: [] },
-        { id: 2, label: 'Submitted', children: [] },
+        { id: 2, label: 'Timesheet Submitted', children: [] },
         { id: 3, label: 'Completed', children: [] },
       ]
     }];
     this.authService.currentJob = this.event;
-    const arrLabel = ['In Progress', 'Submitted', 'Completed'];
+    const arrLabel = ['In Progress', 'Timesheet Submitted', 'Completed'];
     console.log('&&&&');
     console.log(' this.event.client', this.event.client);
     console.log('&&&&');

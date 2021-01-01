@@ -22,7 +22,7 @@ module.exports = (app) => {
     app.post("/invoice/profile", client.invoiceupdate);
     app.post("/client/hash", client.updateHash);
     app.delete("/auth/client/:id", client.delete);
-    app.post("/getWorkerJob", client.getWorkerJob);
+    app.post("/getWorkerJob", VerifyToken, authRole(ROLE.WORKER), client.getWorkerJob);
     app.post("/getClientJob", VerifyToken, authRole(ROLE.CLIENT), client.getClientJob);
     app.post("/getAllInvoices",VerifyToken, client.getAllInvoices);
     app.post("/getFindTimesheets",VerifyToken, client.getFindTimesheets);

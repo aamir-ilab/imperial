@@ -8,7 +8,7 @@ import { MatSort } from '@angular/material/sort';
 import { MatDialog } from '@angular/material/dialog';
 import { TableColumn } from '../../../@vex/interfaces/table-column.interface';
 import { aioTableData, aioTableLabels } from '../../../static-data/aio-table-data';
-import { CustomerCreateUpdateComponent } from './customer-create-update/customer-create-update.component';
+// import { CustomerCreateUpdateComponent } from './customer-create-update/customer-create-update.component';
 import icEdit from '@iconify/icons-ic/twotone-edit';
 import icDelete from '@iconify/icons-ic/twotone-delete';
 import icSearch from '@iconify/icons-ic/twotone-search';
@@ -26,10 +26,11 @@ import { MatSelectChange } from '@angular/material/select';
 import icPhone from '@iconify/icons-ic/twotone-phone';
 import icMail from '@iconify/icons-ic/twotone-mail';
 import icMap from '@iconify/icons-ic/twotone-map';
-import { Job } from './interfaces/job.model';
-import { TimesheetTableData } from 'src/static-data/timesheet-table-data';
-import { aioTableLabelsOne } from 'src/static-data/timesheet-table-data';
+import { Timesheet } from 'src/app/models/timesheet.model';
+import { Job } from 'src/app/client/clients-dashboard/client-job-table/interfaces/job.model';
 import { AuthService } from 'src/app/services/auth.service';
+import { AddTimesheetComponent } from './add-timesheet/add-timesheet.component';
+import { statusTableLabels } from 'src/static-data/status-table-data';
 
 
 @UntilDestroy()
@@ -58,32 +59,26 @@ export class ClientTimesheetComponent implements OnInit, AfterViewInit {
    * Simulating a service with HTTP that returns Observables
    * You probably want to remove this and do all requests in a service with HTTP
    */
-  subject$: ReplaySubject<Job[]> = new ReplaySubject<Job[]>(1);
-  data$: Observable<Job[]> = this.subject$.asObservable();
-  customers: Job[];
+  subject$: ReplaySubject<Timesheet[]> = new ReplaySubject<Timesheet[]>(1);
+  data$: Observable<Timesheet[]> = this.subject$.asObservable();
+  customers: Timesheet[];
 
   @Input()
-  columns: TableColumn<Job>[] = [
-    // { label: 'Checkbox', property: 'checkbox', type: 'checkbox', visible: true },
-    { label: 'Job ID', property: 'JobId', type: 'text', visible: true, cssClasses: ['font-medium'] },
-    { label: 'Shift Date', property: 'shiftDateStr', type: 'text', visible: true },
-    { label: 'Department', property: 'department', type: 'text', visible: true },
-    { label: 'Role', property: 'role', type: 'text', visible: true },
-    // { label: 'Start Time', property: 'startTime', type: 'text', visible: true },
-    // { label: 'End Time', property: 'endTime', type: 'text', visible: true },
-    { label: 'Total Staff', property: 'totalStaff', type: 'text', visible: true},
+  columns: TableColumn<Timesheet>[] = [
+    { label: 'Job ID', property: 'JobId_Id', type: 'text', visible: true },
+    { label: 'Departments', property: 'departments', type: 'text', visible: true },
+    { label: 'Shift Date', property: 'shiftDate', type: 'text', visible: true, cssClasses: ['text-secondary', 'font-medium'] },
+    { label: 'Total Staff', property: 'totalStaff', type: 'text', visible: true, cssClasses: ['text-secondary', 'font-medium'] },
     { label: 'Status', property: 'status', type: 'button', visible: true },
-    { label: 'ID', property: '_id', type: 'button', visible: false },
-    { label: 'jobID', property: 'id', type: 'button', visible: false },
     { label: 'Actions', property: 'actions', type: 'button', visible: true }
   ];
   pageSize = 10;
   pageSizeOptions: number[] = [5, 10, 20, 50];
-  dataSource: MatTableDataSource<Job> | null;
-  selection = new SelectionModel<Job>(true, []);
+  dataSource: MatTableDataSource<Timesheet> | null;
+  selection = new SelectionModel<Timesheet>(true, []);
   searchCtrl = new FormControl();
-
-  // labels = aioTableLabels;
+  statuss = statusTableLabels;
+  labels = aioTableLabels;
 
   icPhone = icPhone;
   icMail = icMail;
@@ -95,7 +90,7 @@ export class ClientTimesheetComponent implements OnInit, AfterViewInit {
   icFilterList = icFilterList;
   icMoreHoriz = icMoreHoriz;
   icFolder = icFolder;
-
+  currentUser;
   @ViewChild(MatPaginator, { static: true }) paginator: MatPaginator;
   @ViewChild(MatSort, { static: true }) sort: MatSort;
 
@@ -112,22 +107,25 @@ export class ClientTimesheetComponent implements OnInit, AfterViewInit {
    * We are simulating this request here.
    */
   getData() {
-    this.authService.getSelectedJobs().subscribe((clients) => {
-      of(clients.map(client => new Job(client))).subscribe(clientes => {
-        console.log('123213123');
-        console.log(clientes);
-        this.subject$.next(clientes);
+    this.authService.getClientTimesheets().subscribe((clients) => {
+      of(clients.map(client => new Timesheet(client))).subscribe(timesheets => {
+        console.log('timesheets',timesheets);
+        this.subject$.next(timesheets);
       });
     });
   }
 
   ngOnInit() {
+    if (!this.authService.currenctUser) {
+    this.authService.setCurrentUser();
+    }
+    this.currentUser = this.authService.currenctUser;
     this.getData();
 
     this.dataSource = new MatTableDataSource();
 
     this.data$.pipe(
-      filter<Job[]>(Boolean)
+      filter<Timesheet[]>(Boolean)
     ).subscribe(customers => {
       this.customers = customers;
       this.dataSource.data = customers;
@@ -143,42 +141,42 @@ export class ClientTimesheetComponent implements OnInit, AfterViewInit {
     this.dataSource.sort = this.sort;
   }
 
-  createCustomer() {
-    this.dialog.open(CustomerCreateUpdateComponent).afterClosed().subscribe((customer: Customer) => {
-      /**
-       * Customer is the updated customer (if the user pressed Save - otherwise it's null)
-       */
-      if (customer) {
-        /**
-         * Here we are updating our local array.
-         * You would probably make an HTTP request here.
-         */
-        this.customers.unshift(new Job(customer));
-        this.subject$.next(this.customers);
-      }
-    });
-  }
+  // createCustomer() {
+  //   this.dialog.open(CustomerCreateUpdateComponent).afterClosed().subscribe((customer: Job) => {
+  //     /**
+  //      * Customer is the updated customer (if the user pressed Save - otherwise it's null)
+  //      */
+  //     if (customer) {
+  //       /**
+  //        * Here we are updating our local array.
+  //        * You would probably make an HTTP request here.
+  //        */
+  //       this.customers.unshift(new Timesheet(customer));
+  //       this.subject$.next(this.customers);
+  //     }
+  //   });
+  // }
 
-  updateCustomer(customer: Customer) {
-    this.dialog.open(CustomerCreateUpdateComponent, {
-      data: customer
-    }).afterClosed().subscribe(updatedCustomer => {
-      /**
-       * Customer is the updated customer (if the user pressed Save - otherwise it's null)
-       */
-      if (updatedCustomer) {
-        /**
-         * Here we are updating our local array.
-         * You would probably make an HTTP request here.
-         */
-        const index = this.customers.findIndex((existingCustomer) => existingCustomer.id === updatedCustomer.id);
-        this.customers[index] = new Job(updatedCustomer);
-        this.subject$.next(this.customers);
-      }
-    });
-  }
+  // updateCustomer(customer: Timesheet) {
+  //   this.dialog.open(CustomerCreateUpdateComponent, {
+  //     data: customer
+  //   }).afterClosed().subscribe(updatedCustomer => {
+  //     /**
+  //      * Customer is the updated customer (if the user pressed Save - otherwise it's null)
+  //      */
+  //     if (updatedCustomer) {
+  //       /**
+  //        * Here we are updating our local array.
+  //        * You would probably make an HTTP request here.
+  //        */
+  //       const index = this.customers.findIndex((existingCustomer) => existingCustomer.id === updatedCustomer.id);
+  //       this.customers[index] = new Timesheet(updatedCustomer);
+  //       this.subject$.next(this.customers);
+  //     }
+  //   });
+  // }
 
-  deleteCustomer(customer: Job) {
+  deleteCustomer(customer: Timesheet) {
     /**
      * Here we are updating our local array.
      * You would probably make an HTTP request here.
@@ -187,22 +185,8 @@ export class ClientTimesheetComponent implements OnInit, AfterViewInit {
     this.selection.deselect(customer);
     this.subject$.next(this.customers);
   }
-  updateStatus(customer: Job, str){
 
-    this.authService.updateStatus(customer, str).subscribe((res) => {
-      this.authService.openSnackbar(`${str} Job Successfully!`);
-    });
-    const index = this.customers.findIndex((existingCustomer) => existingCustomer.id === customer.id);
-    if (str == 'Cancelled') {
-         this.customers[index]['status'] = aioTableLabelsOne[3];
-    }
-    else {
-    this.customers[index]['status'] = aioTableLabelsOne[0];
-    }
-
-    this.subject$.next(this.customers);
-  }
-  deleteCustomers(customers: Job[]) {
+  deleteCustomers(customers: Timesheet[]) {
     /**
      * Here we are updating our local array.
      * You would probably make an HTTP request here.
@@ -242,36 +226,44 @@ export class ClientTimesheetComponent implements OnInit, AfterViewInit {
   trackByProperty<T>(index: number, column: TableColumn<T>) {
     return column.property;
   }
-  selectRow(column){
-    console.log('selectRow')
-    if (column.statusStr == 'Submitted'){
-      this.dialog.open(CustomerCreateUpdateComponent, {
-        data: column
-      }).afterClosed().subscribe((customer: Job) => {
+
+  onLabelChange(change: MatSelectChange, row: Timesheet) {
+    const index = this.customers.findIndex(c => c === row);
+    // this.customers[index].labels = change.value;
+    this.subject$.next(this.customers);
+  }
+  updateStatus(customer: Timesheet , status){
+    this.authService.setStatusJob(customer.id, status).subscribe((res) => {
+      console.log(res);
+      this.authService.openSnackbar('status has updated successfully');
+    });
+    const index = this.customers.findIndex((existingCustomer) => existingCustomer.id === customer.id);
+    customer.setStatus(status);
+    this.customers[index] = customer;
+    this.subject$.next(this.customers);
+
+  }
+  confirmJob(customer: Timesheet){
+    console.log('confirmJob', customer);
+    // let old_cust = { ...customer};
+    // this.authService.timeSheetData.next(old_cust);
+
+    let ordersDialog = this.dialog.open(AddTimesheetComponent, {
+      data: customer
+    }).afterClosed().subscribe((customer: Timesheet) => {
+      console.log('here in confirmJob', customer);
+      ordersDialog = null;
       /**
        * Customer is the updated customer (if the user pressed Save - otherwise it's null)
        */
       if (customer) {
-        /**
-         * Here we are updating our local array.
-         * You would probably make an HTTP request here.
-         */
+        console.log('inside')
+
         const index = this.customers.findIndex((existingCustomer) => existingCustomer.id === customer.id);
-        // if(customer.statusStr == 'Completed')
-        this.customers[index].status = aioTableLabelsOne[4];
-        // else
-        // this.customers[index]['status'] = aioTableLabelsOne[0];
-        console.log(this.customers[index]);
+        customer.setStatus('Timesheet Submitted');
+        this.customers[index] = customer;
         this.subject$.next(this.customers);
       }
     });
-    }
-    console.log('selectRow');
-    console.log(column);
   }
-  // onLabelChange(change: MatSelectChange, row: Customer) {
-  //   const index = this.customers.findIndex(c => c === row);
-  //   this.customers[index].labels = change.value;
-  //   this.subject$.next(this.customers);
-  // }
 }

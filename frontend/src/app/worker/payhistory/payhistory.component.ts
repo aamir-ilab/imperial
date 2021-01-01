@@ -109,7 +109,7 @@ export class PayhistoryComponent implements OnInit {
       console.log(this.completedShifts)
       console.log(this.totalHours);
       console.log(this.tableData)
-      this.tableData.filter((obj) => {if(obj.statusStr == 'Completed' || obj.statusStr == 'Submitted') this.totalHours += parseInt(obj.endTime) - parseInt(obj.startTime); })
+      this.tableData.filter((obj) => {if(obj.statusStr == 'Completed' || obj.statusStr == 'Timesheet Submitted') this.totalHours += parseInt(obj.endTime) - parseInt(obj.startTime); })
       // this.totalHours = this.tableData.filter((obj) => obj.statusStr == 'Completed').length;
 
     setTimeout(() => {

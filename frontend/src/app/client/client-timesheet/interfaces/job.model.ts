@@ -50,7 +50,7 @@ export class Job {
       if (job.statusStr === 'Completed') {
       this.status = statusTableLabels[4];
       }
-    else  if (job.statusStr === 'Submitted') {
+    else  if (job.statusStr === 'Timesheet Submitted') {
       this.status = statusTableLabels[0];
   }
     else  if (job.statusStr === 'Pending') {
@@ -90,7 +90,7 @@ export class Job {
     if (this.statusStr === 'Completed') {
       this.status = statusTableLabels[4];
       }
-    else  if (this.statusStr === 'Submitted') {
+    else  if (this.statusStr === 'Timesheet Submitted') {
       this.status = statusTableLabels[0];
   }
     else  if (this.statusStr === 'Pending') {

@@ -9,6 +9,7 @@ import { TableColumn } from '../../../@vex/interfaces/table-column.interface';
 import icMoreVert from '@iconify/icons-ic/twotone-more-vert';
 import { AuthService } from 'src/app/services/auth.service';
 import moment from 'moment';
+import icReceipt from '@iconify/icons-ic/twotone-receipt';
 
 @Component({
   selector: 'vex-clients-dashboard',
@@ -19,18 +20,22 @@ export class ClientsDashboardComponent implements OnInit {
   clientJob: any;
   totalJobs = 0;
   requestTime = 0;
+  reviewTimesheets = 0;
 
   icGroup = icGroup;
   icPageView = icPageView;
   icCloudOff = icCloudOff;
   icTimer = icTimer;
   icMoreVert = icMoreVert;
-
+  icReceipt = icReceipt;
   constructor(private cd: ChangeDetectorRef,
               private authService: AuthService) { }
 
   async ngOnInit() {
     await this.authService.getAuthClientJob();
+    this.authService.getTimesheets('In Progress').subscribe((res) => {
+      this.reviewTimesheets = res.length;
+    });
     this.clientJob = this.authService.clientJob;
     console.log('--client AllJob--', this.clientJob);
     // this.clientJob = this.authService.clientJob;

@@ -324,14 +324,14 @@ exports.getAllJobs = (req, res) => {
 }
 exports.getAllTimesheets = (req, res) => {
 
-Timesheet.find({}).sort({ 'createdAt': -1 }).populate(['JobId_Id','clientId','workers.workerId']).exec(function(err, client) {
-    if (err) {
-      console.log('err',err);
-    } else {
+  Timesheet.find({}).sort({ 'createdAt': -1 }).populate(['JobId_Id','clientId','workers.workerId']).exec(function(err, client) {
+      if (err) {
+        console.log('err',err);
+      } else {
 
-      res.json(client);
-    }
-});
+        res.json(client);
+      }
+  });
 }
 exports.setTimesheetDraft = (req, res) => {
   console.log('setTimesheetDraft', req.body)
@@ -408,7 +408,7 @@ exports.emailshiftDetail = (req, res) => {
         job = client;
         console.log('==job==', job);
         // no diffreance in shift details
-        if(JSON.stringify(onlyInReq) === JSON.stringify(onlyInOld)){
+        if(job){
           req.body.workers.forEach(worker => {
             User.findById(worker.workerId, function(err, user) {
               if (!user)
@@ -437,138 +437,16 @@ exports.emailshiftDetail = (req, res) => {
                     };
                     transport.sendMail(mailOptions, function (error, info) {
                     if (error) {
-                      if (error) {
-                        console.log(error);
-                        return res.status(401).json(error)
-                      }
+                      console.log(error);
+                      return res.status(401).json(error)
+                    }
+                    else{
+                      return res.status(200).json('email sent');
                     }
                   });
                 });
               }
             });
-            return res.status(200).json('email sent');
-          });
-        }
-        // new woker added to shift
-        else if(onlyInReq.length > 0 && onlyInOld.length === 0){
-          onlyInReq.forEach(worker => {
-            User.findById(worker.workerId, function(err, user) {
-              if (!user)
-                res.status(404).send("data is not found");
-              else {
-                readHTMLFile((path.join(__dirname, '../public/pages/ShiftDetails.php')), function(err, html) {
-                  console.log('==found==', user)
-                  const name = user.forename + ' ' + user.surename ;
-                  const shiftdate = dateFormat(req.body.data.shiftDate, "fullDate").toString();
-                  console.log('==shiftdate==', shiftdate)
-                  var template = handlebars.compile(html);
-                  var replacements = {
-                    name: name,
-                    shiftdate:shiftdate,
-                    worker: worker,
-                    data: req.body.data,
-                    location:job.locationShift ? job.locationShift : '',
-                    comments:job.additionalInformation ? job.additionalInformation : '',
-                  };
-                  var htmlToSend = template(replacements);
-                  var mailOptions = {
-                      from: 'my@email.com',
-                      to : user.emailAddress,
-                      subject : 'You have been assigned a new shift (ID #'+job.JobId+')',
-                      html : htmlToSend
-                    };
-                    transport.sendMail(mailOptions, function (error, info) {
-                    if (error) {
-                      if (error) {
-                        console.log(error);
-                        return res.status(401).json(error)
-                      }
-                    }
-                  });
-                });
-              }
-            });
-            return res.status(200).json('email sent');
-          });
-        }
-        // woker removed from shift
-        else if(onlyInReq.length === 0 && onlyInOld.length > 0){
-          onlyInOld.forEach(worker => {
-            User.findById(worker.workerId, function(err, user) {
-              if (!user)
-                res.status(404).send("data is not found");
-              else {
-                readHTMLFile((path.join(__dirname, '../public/pages/ShiftCancelled.php')), function(err, html) {
-                  console.log('==found==', user)
-                  const name = user.forename + ' ' + user.surename ;
-                  console.log('==shiftdate==', shiftdate)
-                  var template = handlebars.compile(html);
-                  var replacements = {
-                    name: name,
-                    data: req.body.data
-                  };
-                  var htmlToSend = template(replacements);
-                  var mailOptions = {
-                      from: 'my@email.com',
-                      to : user.emailAddress,
-                      subject : 'Your shift has been cancelled (ID #'+job.JobId+')',
-                      html : htmlToSend
-                    };
-                    transport.sendMail(mailOptions, function (error, info) {
-                    if (error) {
-                      if (error) {
-                        console.log(error);
-                        return res.status(401).json(error)
-                      }
-                    }
-                  });
-                });
-              }
-            });
-            return res.status(200).json('email sent');
-          });
-        }
-        // shift detail amended
-        else{
-          result.forEach(worker => {
-            User.findById(worker.workerId, function(err, user) {
-              if (!user)
-                res.status(404).send("data is not found");
-              else {
-                readHTMLFile((path.join(__dirname, '../public/pages/ShiftDetailAmend.php')), function(err, html) {
-                  console.log('==found==', user)
-                  const name = user.forename + ' ' + user.surename ;
-                  const shiftdate = dateFormat(req.body.data.shiftDate, "fullDate").toString();
-                  console.log('==shiftdate==', shiftdate)
-                  var template = handlebars.compile(html);
-                  var replacements = {
-                    name: name,
-                    jobID: '(#'+job.JobId+')',
-                    shiftdate:shiftdate,
-                    worker: worker,
-                    data: req.body.data,
-                    location:job.locationShift ? job.locationShift : '',
-                    comments:job.additionalInformation ? job.additionalInformation : '',
-                  };
-                  var htmlToSend = template(replacements);
-                  var mailOptions = {
-                      from: 'my@email.com',
-                      to : user.emailAddress,
-                      subject : 'Your shift has been amended (ID #'+job.JobId+')',
-                      html : htmlToSend
-                    };
-                    transport.sendMail(mailOptions, function (error, info) {
-                    if (error) {
-                      if (error) {
-                        console.log(error);
-                        return res.status(401).json(error)
-                      }
-                    }
-                  });
-                });
-              }
-            });
-            return res.status(200).json('email sent');
           });
         }
     } else {
@@ -591,7 +469,7 @@ exports.setStatusJob = (req, res) => {
               if(req.body.status == 1){
                client.statusStr = 'In Progress';
               }else if(req.body.status == 2){
-                  client.statusStr = 'Submitted';
+                  client.statusStr = 'Timesheet Submitted';
               }else if(req.body.status == 3){
                   client.statusStr = 'Completed';
               }
@@ -623,7 +501,7 @@ exports.getCurrentJob = (req, res) => {
               if(req.body.status == 1){
                client.statusStr = 'In Progress';
               }else if(req.body.status == 2){
-                  client.statusStr = 'Submitted';
+                  client.statusStr = 'Timesheet Submitted';
               }else if(req.body.status == 3){
                   client.statusStr = 'Completed';
               }
@@ -1094,35 +972,28 @@ exports.getFindTimesheets = (req, res) => {
         }
     })
 }
-exports.getWorkerJob = async(req, res) =>{
-    console.log('===  workedId ====')
-    console.log(req.body._id)
-    var timesheets = await Timesheet.find({}, '_id');
-    var timesheetsArr = [];
-    timesheets.forEach(ele => timesheetsArr.push(ele._id))
-    console.log(timesheets);
-    Job.find({timesheetId:{
-        $in:timesheetsArr
-    }})
-.populate('timesheetId').exec( function(err, client){
-        if (!client)
-                res.status(404).send("data is not found");
-        else {
-            console.log(client)
-            res.status(200).json(client);
-        }
-    })
-    // Job.find({'timesheetId.workerId._id':req.body._id}).populate(['timesheetId']).exec( function(err, client){
-//             Job.  find()
-//   .populate('timesheetId')
-//   .where({'timesheetId': {$eq: {$in 'workId': 'online'}}})
-//             if (!client)
-//                     res.status(404).send("data is not found");
-//             else {
-//                 console.log(client)
-//                 res.status(200).json(client);
-//             }
-//         })
+exports.getWorkerJob = (req, res) =>{
+    console.log('===  workedId ====', req.body._id)
+    var workerJobs  = [];
+    Timesheet.find({}).populate(['clientId']).exec(function(err, timesheets) {
+      if (err) {
+        console.log('err',err);
+      } else {
+        console.log('==timesheets==', timesheets);
+        timesheets.forEach(element => {
+          element.workers.forEach(ele => {
+            console.log('==workers==', ele);
+            if (ele.workerId == req.body._id){
+              console.log('==worker==', element);
+              element.workers = [];
+              element.workers.push(ele);
+              workerJobs.push(element);
+            }
+          });
+        });
+        res.json(workerJobs);
+      }
+  });
 }
 exports.getClientJob= (req, res) =>{
     Job.find({'clientId':req.body._id}, function(err, client){
