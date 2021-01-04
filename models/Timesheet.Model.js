@@ -16,7 +16,7 @@ var TimesheetSchema = new mongoose.Schema({
         role: {type:String},
         startTime: {type:String},
         endTime: {type:String},
-        hours: {type:Number},
+        hours: {type:String},
         break: {type:Number, default: 0},
         status: {type:String, default: 'amend'},
         workerId: {type: mongoose.Schema.Types.ObjectId, ref: 'User'},
@@ -24,10 +24,6 @@ var TimesheetSchema = new mongoose.Schema({
       }
     ],
     statusStr:{type:String, default:'In Progress'},
-    // profilePhoto:{type:String},
-    // workerIdName:{type:String},
-    // fulfilled: {type:Number, default: 0},
-    // total:{type:Number, default: 1},
     totalStaff:{type:Number},
 }, { toJSON: { getters: true } });
 module.exports = mongoose.model('Timesheet', TimesheetSchema);

@@ -29,6 +29,7 @@ import { Customer } from 'src/app/pages/apps/aio-table/interfaces/customer.model
 import { statusTableLabels, statusTableData } from 'src/static-data/status-table-data';
 import { Job } from './interfaces/job.model';
 import { AuthService } from 'src/app/services/auth.service';
+import { ViewJobComponent } from './view-job/view-job.component';
 @Component({
   selector: 'vex-client-job-table',
   templateUrl: './client-job-table.component.html',
@@ -173,8 +174,10 @@ export class ClientJobTableComponent implements OnInit {
     return column.property;
   }
 
-  viewJob(data){
-    console.log('view job', data)
+  viewJob(data: Job){
+    this.dialog.open(ViewJobComponent, {
+      data: data
+    });
   }
 
 }

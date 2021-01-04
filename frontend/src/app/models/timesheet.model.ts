@@ -22,7 +22,7 @@ export class Timesheet {
         break: {type:Number, default: 0},
         status: {type:String, default: 'amend'},
         show: {type:Boolean, default: true},
-        hours: {type:Number},
+        hours: {type:String},
       }
     ]
     clear():void{

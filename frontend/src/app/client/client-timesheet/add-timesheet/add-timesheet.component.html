@@ -32,7 +32,7 @@
   <ng-container matColumnDef="break">
     <th mat-header-cell *matHeaderCellDef>Break</th>
     <td mat-cell *matCellDef="let element"  class="b-with-60">
-      <mat-select [disabled]="element.status === 'confirm'" (selectionChange)="break($event,element)" [value]="element.break" [placeholder]="element.break_label_text">
+      <mat-select [disabled]="element.status === 'confirm' || element.show !== true" (selectionChange)="break($event,element)" [value]="element.break" [placeholder]="element.break_label_text">
         <mat-option *ngFor="let break of break_times" [value]="break.value">
           {{break.viewValue}}
         </mat-option>

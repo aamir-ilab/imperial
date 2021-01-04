@@ -455,11 +455,8 @@ exports.emailshiftDetail = (req, res) => {
   });
 }
 exports.setStatusJob = (req, res) => {
-  // var role = req.type;
   console.log('setStatusJob')
   console.log(req.body)
-      // var clientId = req.clientId;
-      // if (role == 0){
   Job.findOne({id:req.body.id}, function(err, client) {
       if (!client)
           res.status(404).send("data is not found");
@@ -475,10 +472,23 @@ exports.setStatusJob = (req, res) => {
               }
           }else{
               client.statusStr = req.body.status;
-
           }
 
           client.save().then(client => {
+            console.log(':client._id', client._id)
+            Timesheet.findOne({JobId_Id:client._id}, function(err, timesheet) {
+              if (!timesheet)
+                res.status(404).send("data is not found");
+              else {
+                console.log('client.statusStr', client.statusStr)
+                timesheet.statusStr = client.statusStr;
+                timesheet.save().then(timesheet => {
+                  console.log("Updated");
+                }).catch(err => {
+                  console.log("Update not possible");
+                });
+              }
+            });
               // res.status(200).json(client);
             Job.findOne({id:client.id}).populate('clientId').exec(function (err, client){
               if (err) return res.json(err, 400);
@@ -487,7 +497,8 @@ exports.setStatusJob = (req, res) => {
           })
           .catch(err => {
               res.status(400).send("Update not possible");
-          }); }
+          });
+      }
   });
 };
 exports.getCurrentJob = (req, res) => {

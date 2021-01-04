@@ -14,6 +14,7 @@ import { AuthService } from 'src/app/services/auth.service';
 import { MatTable } from '@angular/material/table';
 import { MatSelectChange } from '@angular/material/select';
 import { MatCheckboxChange } from '@angular/material/checkbox';
+import moment from 'moment';
 
 @Component({
   selector: 'vex-add-timesheet',
@@ -66,27 +67,37 @@ export class AddTimesheetComponent implements OnInit  {
     this.workers.forEach(element => {
       console.log('hours', element.hours)
       if(element.hours === null || element.hours === undefined){
-        var start = new Date("01/01/2021 " + element.startTime).getHours();
-        var end = new Date("01/01/2021 " + element.endTime).getHours();
-        element.hours = end - start;
+        element.hours = this.time_diff(element.startTime, element.endTime);
+        console.log('time_diff', element.hours)
       }
     });
     console.log('workers', this.workers);
+  }
+
+  time_diff(start, end){
+    var startTime=moment(start, "HH:mm");
+    var endTime=moment(end, "HH:mm");
+    var duration = moment.duration(endTime.diff(startTime));
+    var hours = 0
+    var hours = parseInt(duration.asHours().toString());
+    var minutes = parseInt(duration.asMinutes().toString())-hours*60;
+    var diff = hours+':'+minutes
+    console.log('diff', diff);
+    return diff;
   }
 
   break(event: MatSelectChange, element) {
     console.log(' break event ', event);
     console.log(' break element ', element);
     element.break = event.value;
-    var start = new Date("01/01/2021 " + element.startTime).getHours();
-    var end = new Date("01/01/2021 " + element.endTime).getHours();
     if(event.value !== 0){
-      element.hours = end - start;
-      element.hours = (end - start) -
-      ((event.value + 40) / 100);
+      var diff = this.time_diff(element.startTime, element.endTime);
+      console.log("diff", diff);
+      element.hours =  moment(diff,"hh:mm").subtract(event.value, 'minutes').format('hh:mm');
+      console.log("element.hours", element.hours);
     }
     else
-      element.hours = end - start;
+      element.hours = this.time_diff(element.startTime, element.endTime);
   }
 
   amend(element){
@@ -107,7 +118,7 @@ export class AddTimesheetComponent implements OnInit  {
       element.break = 0;
       element.startTime = '00:00';
       element.endTime = '00:00';
-      element.hours = 0;
+      element.hours = '0';
     }
     else{
       element.show = true;
@@ -117,15 +128,16 @@ export class AddTimesheetComponent implements OnInit  {
   editStartEnd(property: string, event: any, element){
     element[property] = event.target.textContent;
     console.log('element[property]', element[property])
-    var start = new Date("01/01/2021 " + element.startTime).getHours();
-    var end = new Date("01/01/2021 " + element.endTime).getHours();
-    console.log('start', start, 'end', end)
+    element.hours = this.time_diff(element.startTime, element.endTime);
+
     if(element.break !== 0){
-      element.hours = (end - start) -
-      ((element.break + 40) / 100)
+      var diff = this.time_diff(element.startTime, element.endTime);
+      console.log("diff", diff);
+      element.hours =  moment(diff,"hh:mm").subtract(event.value, 'minutes').format('hh:mm');
+      console.log("element.hours", element.hours);
     }
     else{
-      element.hours = end - start;
+      element.hours = this.time_diff(element.startTime, element.endTime);
     }
   }
 

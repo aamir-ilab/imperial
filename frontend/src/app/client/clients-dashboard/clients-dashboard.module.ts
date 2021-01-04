@@ -31,10 +31,12 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatSelectModule } from '@angular/material/select';
 import { MatButtonToggleModule } from '@angular/material/button-toggle';
 import { MatSnackBarModule } from '@angular/material/snack-bar';
-
+import { ViewJobComponent } from './client-job-table/view-job/view-job.component';
+import { MatDividerModule } from '@angular/material/divider';
+import {MatDialogModule } from '@angular/material/dialog';
 
 @NgModule({
-  declarations: [ClientsDashboardComponent, ClientJobTableComponent ],
+  declarations: [ClientsDashboardComponent, ClientJobTableComponent, ViewJobComponent ],
   imports: [
     CommonModule,
     ClientsDashboardRoutingModule,
@@ -72,7 +74,9 @@ import { MatSnackBarModule } from '@angular/material/snack-bar';
     ContainerModule,
     MatSelectModule,
     MatButtonToggleModule,
-    MatSnackBarModule
+    MatSnackBarModule,
+    MatDividerModule,
+    MatDialogModule
   ]
 })
 export class ClientsDashboardModule {
