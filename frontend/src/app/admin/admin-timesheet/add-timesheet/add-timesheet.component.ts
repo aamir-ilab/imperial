@@ -14,14 +14,13 @@ import { AuthService } from 'src/app/services/auth.service';
 import { MatTable } from '@angular/material/table';
 import { MatSelectChange } from '@angular/material/select';
 import { MatCheckboxChange } from '@angular/material/checkbox';
-import { OnDestroy } from '@angular/core';
 
 @Component({
   selector: 'vex-add-timesheet',
   templateUrl: './add-timesheet.component.html',
   styleUrls: ['./add-timesheet.component.scss']
 })
-export class AddTimesheetComponent implements OnInit, OnDestroy  {
+export class AddTimesheetComponent implements OnInit  {
 
   workers = [];
   break_times  = [
@@ -153,10 +152,6 @@ export class AddTimesheetComponent implements OnInit, OnDestroy  {
     this.dialogRef.afterClosed().subscribe(result => {
       this.workers = [];
     });
-  }
-
-  ngOnDestroy() {
-    console.log(' dialog box ngOnDestroy  ');
   }
 
 }

@@ -232,7 +232,9 @@ export class AuthService {
     return this.http.post<User[]>(`${USERS_URL}getAllType`, {accountType: type});
   }
   getTimesheets(type): Observable<any[]>{
-    return this.http.post<any[]>(`${USERS_URL}getFindTimesheets`, {status: type});
+    let id = this.currenctUser._id;
+    let userType = this.currenctUser.accountType;
+    return this.http.post<any[]>(`${USERS_URL}getFindTimesheets`, {status: type, id: id, userType: userType});
   }
   getTypeSubUsers(id): Observable<User[]>{
     return this.http.post<User[]>(`${USERS_URL}getAllSubType`, {clientId: id});

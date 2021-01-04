@@ -193,7 +193,7 @@ const routes: VexRoutes = [
         children: [
           {
             path: '',
-            loadChildren: () => import('./pages/dashboards/dashboard-analytics/dashboard-analytics.module').then(m => m.DashboardAnalyticsModule),
+            loadChildren: () => import('./worker/workers-dashboard/workers-dashboard.module').then(m => m.WorkersDashboardModule),
           },
           {
             path: 'payslips',

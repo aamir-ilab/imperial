@@ -964,13 +964,24 @@ exports.findById = (req, res) => {
     }
 }
 exports.getFindTimesheets = (req, res) => {
-    Timesheet.find({statusStr:req.body.status}).exec(function(err, client) {
+    if(req.body.userType == "Client"){
+      Timesheet.find({statusStr:req.body.status, clientId:req.body.id }).exec(function(err, client) {
         if (err) {
             console.log(err);
         } else {
             res.json(client);
         }
-    })
+      })
+    }
+    else{
+      Timesheet.find({statusStr:req.body.status}).exec(function(err, client) {
+          if (err) {
+              console.log(err);
+          } else {
+              res.json(client);
+          }
+      })
+    }
 }
 exports.getWorkerJob = (req, res) =>{
     console.log('===  workedId ====', req.body._id)
@@ -984,10 +995,17 @@ exports.getWorkerJob = (req, res) =>{
           element.workers.forEach(ele => {
             console.log('==workers==', ele);
             if (ele.workerId == req.body._id){
-              console.log('==worker==', element);
-              element.workers = [];
-              element.workers.push(ele);
-              workerJobs.push(element);
+              var data = {
+                workers: ele,
+                clientId: element.clientId,
+                statusStr: element.statusStr,
+                shiftDate: element.shiftDate,
+
+              }
+              console.log('==worker==', data);
+              // element.workers = [];
+              // element.workers.push(ele);
+              workerJobs.push(data);
             }
           });
         });

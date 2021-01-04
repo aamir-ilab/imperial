@@ -24,12 +24,7 @@
     label="Total Hours"
     [value]="totalHours">
   </vex-widget-quick-value-center>
-  <vex-widget-table [columns]="tableColumns"
-    [data]="tableData"
-    [topic]="'My Shifts'"
-    class="w-full overflow-auto shadow"
-    gdColumn.lt-md="1"
-    gdColumn="1 / -1"
-    gdColumn.lt-sm="1">
-  </vex-widget-table>
+  <div gdColumn="1 / -1"  gdColumn.lt-sm="1" style="padding-top: 15px;">
+    <vex-worker-job-table></vex-worker-job-table>
+  </div>
 </div>
