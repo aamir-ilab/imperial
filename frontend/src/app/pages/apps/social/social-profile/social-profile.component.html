@@ -14,7 +14,8 @@
 
           <div @fadeInRight>
             <p class="m-0 body-1" *ngIf="userInfo.accountType == 'Worker'">{{userInfo.mobileNumber}}</p>
-            <p class="m-0 body-1" *ngIf="userInfo.accountType == 'Client'">{{userInfo.phoneNumber}}</p>
+            <p class="m-0 body-1" *ngIf="userInfo.accountType == 'Client'
+            || userInfo.accountType == 'Team'">{{userInfo.phoneNumber}}</p>
             <p class="m-0 body-1" *ngIf="userInfo.accountType == 'Admin'">{{userInfo.companyPhoneNumber}}</p>
             <p class="m-0 caption text-hint">Mobile Number</p>
           </div>
@@ -44,7 +45,7 @@
           </div>
         </div>
 
-        <div class="py-3" fxLayout="row" fxLayoutAlign="start center">
+        <div class="py-3" fxLayout="row" fxLayoutAlign="start center" *ngIf="userInfo.accountType != 'Team'" >
           <div @scaleIn
                class="w-10 h-10 rounded-full bg-primary-light text-primary ltr:mr-3 rtl:ml-3 flex items-center justify-center">
             <ic-icon [icon]="icAccessTime" size="20px"></ic-icon>

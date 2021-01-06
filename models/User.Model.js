@@ -105,7 +105,7 @@ var UserSchema = new mongoose.Schema({
     accessToken:{ type: String },
     refreshToken:{ type: String },
     companyLogo:{type:String},
-    clientType:{type:String, default:'Master Admin'},
+    clientType:{type:String},
     parentId:{type:String, default:''},
     clientStatus:{type:String, default:'Pending'},
 
@@ -113,6 +113,7 @@ var UserSchema = new mongoose.Schema({
 // admin-setting
     fromEmailAddress: { type: String },
     SMTPHost: { type: String },
+    SMTPUser: { type: String },
     SMTPPassword: { type: String },
     SMPTPort: { type: String },
     Encryption: { type: String },

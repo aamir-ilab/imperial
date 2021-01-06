@@ -130,6 +130,14 @@ const routes: VexRoutes = [
                 loadChildren: () => import('./admin/settings/email-settings/email-settings.module').then(m => m.EmailSettingsModule),
               },
               {
+                path: 'teamaccounts',
+                loadChildren: () => import('./admin/settings/teamaccounts/teamaccounts.module').then(m => m.TeamAccountsModule),
+              },
+              {
+                path: 'invoicesettings',
+                loadChildren: () => import('./admin/settings/invoice-settings/invoice-settings.module').then(m => m.InvoiceSettingsModule),
+              },
+              {
                 path: 'generaltemplates',
                 loadChildren: () => import('./admin/settings/general-templates/general-templates.module').then(m => m.GeneralTemplatesModule),
               }
@@ -142,6 +150,98 @@ const routes: VexRoutes = [
         ],
         data: {
           role: 'Admin'
+        }
+      },
+      // admin team routes
+      {
+        path: 'team',
+        canActivate: [RoleGuard],
+        children: [
+          {
+            path: '',
+            loadChildren: () => import('./admin/admin-dashboard/admin-dashboard.module').then(m => m.AdminDashboardModule),
+          },
+          {
+            path: 'timesheets',
+            loadChildren: () => import('./admin/admin-timesheet/admin-timesheet.module').then(m => m.AdminTimesheetModule),
+          },
+          {
+            path: 'clients',
+            loadChildren: () => import('./admin/clients/clients.module').then(m => m.ClientsModule),
+          },
+          {
+            path: 'workers',
+            children: [
+              {
+                path: '',
+                loadChildren: () => import('./admin/workers/workers.module').then(m => m.WorkersModule),
+              },
+              {
+                path: 'edit',
+                loadChildren: () => import('./admin/workers/edit-worker/edit-worker.module').then(m => m.EditWorkerModule),
+              }
+            ]
+          },
+          {
+            path: 'payroll',
+            loadChildren: () => import('./admin/payroll/payroll.module').then(m => m.PayrollModule),
+
+          },
+          {
+            path: 'invoices',
+            children: [
+                {
+                  path: '',
+                  loadChildren: () => import('./admin/invoices/invoices.module').then(m => m.InvoicesModule),
+                },
+                {
+                  path: 'pdf',
+                  loadChildren: () => import('./admin/invoices/invoice/invoice.module').then(m => m.InvoiceModule),
+                }
+            ]
+          },
+          {
+            path: 'jobs',
+            children: [
+              {
+                path: '',
+                loadChildren: () => import('./admin/admin-calendar/admin-calendar.module').then(m => m.AdminCalendarModule),
+              },
+              {
+                path: 'scrumboard',
+                loadChildren: () => import('./admin/admin-calendar/admin-job/admin-job.module').then(m => m.AdminJobModule),
+
+              }
+            ]
+          },
+          {
+            path: 'settings',
+            children: [
+              {
+                path: 'companydetails',
+                loadChildren: () => import('./admin/settings/companydetails/companydetails.module').then(m => m.CompanydetailsModule),
+              },
+              {
+                path: 'emailsettings',
+                loadChildren: () => import('./admin/settings/email-settings/email-settings.module').then(m => m.EmailSettingsModule),
+              },
+              {
+                path: 'teamaccounts',
+                loadChildren: () => import('./admin/settings/teamaccounts/teamaccounts.module').then(m => m.TeamAccountsModule),
+              },
+              {
+                path: 'generaltemplates',
+                loadChildren: () => import('./admin/settings/general-templates/general-templates.module').then(m => m.GeneralTemplatesModule),
+              }
+            ]
+          },
+          {
+            path: 'profile',
+            loadChildren: () => import('./pages/apps/social/social.module').then(m => m.SocialModule)
+          }
+        ],
+        data: {
+          role: 'Team'
         }
       },
       // client routes

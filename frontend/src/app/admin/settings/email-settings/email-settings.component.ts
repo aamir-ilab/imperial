@@ -53,15 +53,17 @@ export class EmailSettingsComponent implements OnInit {
     this.selectedType = this.userInfo.Encryption;
     this.form = this.fb.group({
       fromEmailAddress:[this.userInfo.fromEmailAddress,Validators.required],
+      SMTPUser: [this.userInfo.SMTPUser, Validators.required],
       SMTPHost: [this.userInfo.SMTPHost, Validators.required],
       SMTPPassword: [this.userInfo.SMTPPassword, Validators.required],
       SMTPPort: [this.userInfo.SMTPPort, Validators.required],
-      Encryption: [this.userInfo.Encryption, Validators.required],
+      Encryption: [this.userInfo.Encryption],
     });
   }
   onSubmit(){
     const controls = this.form.controls;
     this.userInfo.fromEmailAddress = controls.fromEmailAddress.value;
+    this.userInfo.SMTPUser = controls.SMTPUser.value;
     this.userInfo.SMTPHost = controls.SMTPHost.value;
     this.userInfo.SMTPPassword = controls.SMTPPassword.value;
     this.userInfo.SMTPPort = controls.SMTPPort.value;
@@ -70,8 +72,7 @@ export class EmailSettingsComponent implements OnInit {
     this.userInfo.hash = null;
     this.authService.updateUser(this.userInfo).subscribe((res)=>{
       this.authService.openSnackbar('Updated Successfully!');
-      console.log('===  Email detail setting == ')
-      console.log(res)
+      console.log('===  Email detail setting == ',res);
       console.log('================================')
     })
   }

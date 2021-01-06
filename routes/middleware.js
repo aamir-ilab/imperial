@@ -25,9 +25,9 @@ function VerifyToken(req, res, next) {
   }
 }
 
-function authRole(role){
-  return (req, res, next) => {
-    if(req.user.accountType !== role){
+function authRole(roles){
+return (req, res, next) => {
+    if(!roles.includes(req.user.accountType)){
       res.status(401);
       return res.send('Not Allowed')
     }

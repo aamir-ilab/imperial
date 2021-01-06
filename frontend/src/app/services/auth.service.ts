@@ -25,7 +25,7 @@ export class AuthService {
   workerJobInfo: any;
   adminInfo: any;
   clientJob: any;
-
+  invoiceInfo: any;
   // public timeSheetData = new BehaviorSubject<any>('');
 
 
@@ -162,9 +162,7 @@ export class AuthService {
     return this.http.post(`${USERS_URL}` + 'forgot/' + email, {})
       .pipe(catchError(this.handleError('forgot-password', [])));
   }
-  // getAllUsers():Observable<User[]>{
-  //   return this.http.post<User[]>(`${USERS_URL}getAll`,{});
-  // }
+
   async getAllUsers(): Promise<User[]> {
     try {
       const response = await this.http
@@ -176,11 +174,6 @@ export class AuthService {
     }
   }
   async getAllUserAuth(): Promise<void>{
-    // this.getAllUsers().subscribe((res)=>{
-    //   this.AllUser = res;
-    //   this.setAllUsersLocal(this.AllUser);
-    //   console.log(res)
-    // })
     this.AllUser = await this.getAllUsers();
     console.log('AllUser', this.AllUser);
   }
@@ -216,6 +209,11 @@ export class AuthService {
   getAllTimesheets(): Observable<Job[]>{
     return this.http.post<Job[]>(`${USERS_URL}getAllTimesheets`, {});
   }
+
+  getInvoiceInfo(): Observable<any[]>{
+    return this.http.get<any[]>(`${USERS_URL}invoiceInfo`);
+  }
+
   getClientTimesheets(): Observable<Job[]>{
     const id = JSON.parse(localStorage.getItem('userInfo'))._id;
     return this.http.post<Job[]>(`${USERS_URL}getClientTimesheets`, {id});
@@ -293,10 +291,31 @@ export class AuthService {
     }
   }
   updateUser(_user: any): Observable<any> {
-    console.log('... auth update user ..');
-    console.log(_user);
+    console.log('... auth update user ..', _user);
     console.log('----------------');
     return this.http.post(`${USERS_URL}profile`, _user);
+  }
+
+  // async getInvoiceInfo(): Promise<void>{
+  //   this.invoiceInfo = await this.getInvoiceInfoSync();
+  //   console.log('invoiceInfo', this.invoiceInfo);
+  // }
+
+  // async getInvoiceInfoSync(): Promise<any[]> {
+  //   try {
+  //     const response = await this.http
+  //       .get(`${USERS_URL}invoiceInfo`, {})
+  //       .toPromise();
+  //     return response as any[];
+  //   } catch (error) {
+  //     await this.handleError(error);
+  //   }
+  // }
+
+  updateInvoicsInfo(_info: any): Observable<any> {
+    console.log('... auth update invoice info ..', _info);
+    console.log('----------------');
+    return this.http.post(`${USERS_URL}updateInvoicsInfo`, _info);
   }
   updateClientStatus(_user: any, status): Observable<any> {
     console.log('... status ..', status);

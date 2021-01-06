@@ -180,16 +180,17 @@ export class NavigationService {
              label: 'Company Details',
              route: '/admin/settings/companydetails'
            },
+           {
+             type: 'link',
+             label: 'Invoice Settings',
+             route: '/admin/settings/invoicesettings'
+           },
+           {
+             type: 'link',
+             label: 'Team Accounts',
+             route: '/admin/settings/teamaccounts'
+           },
           //  {
-          //    type: 'link',
-          //    label: 'Invoice Settings',
-          //    route: '/admin/settings/invoicesettings'
-          //  },
-          //  {
-          //    type: 'link',
-          //    label: 'Team Accounts',
-          //    route: '/admin/settings/teamaccounts'
-          //  },{
           //    type: 'link',
           //    label: 'Departments & Roles',
           //    route: '/admin/settings/departmentsroles'
@@ -213,6 +214,100 @@ export class NavigationService {
          ]
        }
  ];
+ items_team: NavigationItem[]  = [
+  {
+    type: 'link',
+    label: 'Dashboard',
+    route: '/team',
+    icon: icLayers,
+    routerLinkActiveOptions: { exact: true }
+  },
+  {
+    type: 'link',
+    label: 'Jobs',
+    route: '/team/jobs',
+    icon: icAssessment,
+    routerLinkActiveOptions: { exact: true }
+  },
+  {
+    type: 'link',
+    label: 'Clients',
+    route: '/team/clients',
+    icon: icPersonOutline,
+    routerLinkActiveOptions: { exact: true }
+  },
+  {
+    type: 'link',
+    label: 'Workers',
+    route: '/team/workers',
+    icon: icPersonOutline,
+    routerLinkActiveOptions: { exact: true }
+  },
+  {
+    type: 'link',
+    label: 'Invoices',
+    route: '/team/invoices',
+    icon: icReceipt,
+    routerLinkActiveOptions: { exact: true }
+  },
+  {
+    type: 'link',
+    label: 'Timesheets',
+    route: '/team/timesheets',
+    icon: icDateRange,
+    routerLinkActiveOptions: { exact: true }
+  },
+  {
+    type: 'link',
+    label: 'Payroll',
+    route: '/team/payroll',
+    icon: icReceipt,
+    routerLinkActiveOptions: { exact: true }
+  },
+  {
+    type: 'dropdown',
+    label: 'Settings',
+    icon: icSettings,
+    children: [
+          {
+            type: 'link',
+            label: 'Company Details',
+            route: '/team/settings/companydetails'
+          },
+          {
+            type: 'link',
+            label: 'Invoice Settings',
+            route: '/team/settings/invoicesettings'
+          },
+          {
+            type: 'link',
+            label: 'Team Accounts',
+            route: '/team/settings/teamaccounts'
+          },
+         //  {
+         //    type: 'link',
+         //    label: 'Departments & Roles',
+         //    route: '/admin/settings/departmentsroles'
+         //  },
+          {
+            type:'dropdown',
+            label:'Email Configurations',
+            children:[
+             //  {
+             //    type:'link',
+             //    label:'General Templates',
+             //    route:'/admin/settings/generaltemplates'
+             //  },
+              {
+                type:'link',
+                label:'Email Settings',
+                route:'/team/settings/emailsettings'
+              }
+            ]
+          }
+        ]
+      }
+  ];
   private _openChangeSubject = new Subject<NavigationDropdown>();
   openChange$ = this._openChangeSubject.asObservable();
 

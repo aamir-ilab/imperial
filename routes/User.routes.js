@@ -5,11 +5,11 @@ module.exports = (app) => {
   app.post("/register", client.register);
   app.post("/login", client.login);
   app.post("/profile", VerifyToken, client.updateProfile);
-  app.post("/updateClientStatus", VerifyToken, authRole(ROLE.ADMIN), client.updateClientStatus);
-  app.post("/getAll", VerifyToken, authRole(ROLE.ADMIN), client.getAll);
+  app.post("/updateClientStatus", VerifyToken, authRole([ROLE.ADMIN,ROLE.TEAM]), client.updateClientStatus);
+  app.post("/getAll", VerifyToken, authRole([ROLE.ADMIN,ROLE.TEAM]), client.getAll);
 
   app.post("/getAllSubType",VerifyToken, client.getAllSubType);
-  app.post("/getAllType", VerifyToken, authRole(ROLE.ADMIN), client.getAllType);
+  app.post("/getAllType", VerifyToken, authRole([ROLE.ADMIN,ROLE.TEAM]), client.getAllType);
 
   app.post("/client/verify/email",  VerifyToken,client.emailverify);
   app.post("/client/verify/setEmail", client.setEmail);

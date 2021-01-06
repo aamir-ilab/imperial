@@ -24,6 +24,7 @@ export class SidenavComponent implements OnInit {
   items_worker = this.navigationService.items_worker;
   items_client = this.navigationService.items_client;
   items_admin = this.navigationService.items_admin;
+  items_team = this.navigationService.items_team;
   trackByRoute = trackByRoute;
   icRadioButtonChecked = icRadioButtonChecked;
   icRadioButtonUnchecked = icRadioButtonUnchecked;

@@ -85,14 +85,19 @@ export class CustomerCreateUpdateComponent implements OnInit {
       flag: 'https://upload.wikimedia.org/wikipedia/commons/f/f7/Flag_of_Texas.svg'
     }
   ];
+  currentUser:any;
   public headers: any[] = [];
   icArrowDropDown = icArrowDropDown;
   constructor(@Inject(MAT_DIALOG_DATA) public defaults: any,
-              private dialogRef: MatDialogRef<CustomerCreateUpdateComponent>,
-              private fb: FormBuilder,
-              private route: Router,
-              private authService: AuthService) {
-  }
+    private dialogRef: MatDialogRef<CustomerCreateUpdateComponent>,
+    private fb: FormBuilder,
+    private route: Router,
+    private authService: AuthService) {
+      if (!this.authService.currenctUser) {
+        this.authService.setCurrentUser();
+        }
+        this.currentUser = this.authService.currenctUser;
+    }
   filterStates(name: string) {
     return this.states.filter(state =>
       state.name.toLowerCase().indexOf(name.toLowerCase()) === 0);
@@ -254,54 +259,11 @@ export class CustomerCreateUpdateComponent implements OnInit {
       });
     });
     this.authService.setCurrentScrumboardLocal(this.authService.currentScrumboard);
-    this.route.navigate(['/admin/jobs/scrumboard', event.id]);
+    if(this.currentUser.accountType === 'Admin')
+      this.route.navigate(['/admin/jobs/scrumboard', event.id]);
+    else if(this.currentUser.accountType === 'Team')
+      this.route.navigate(['/team/jobs/scrumboard', event.id]);
 
-
-    // event.title = event.client;
-    // this.authService.currentScrumboard = [{
-    //   id: event.id,
-    //   title: event.client,
-    //   children: [
-    //     // { id:1, label:'Unassigned Shifts', children:[] },
-    //     // { id:2, label:'Assigned', children:[] },
-    //     { id: 1, label: 'In Progress', children: [] },
-    //     { id: 2, label: 'Submitted', children: [] },
-    //     { id: 3, label: 'Completed', children: [] },
-    //   ]
-    // }];
-    // this.authService.currentJob = event;
-    // console.log('///////////////');
-    // console.log(this.authService.currentJob);
-    // console.log('///////////////');
-    // const arrLabel = ['In Progress', 'Submitted', 'Completed'];
-    // console.log('&&&&');
-    // console.log(event);
-    // console.log('&&&&');
-    // arrLabel.forEach((ele, index) => {
-    //   if (ele === event.statusStr) {
-    //     this.authService.currentScrumboard[0].children[index].children.push({
-    //         id: event.id,
-    //         title: event.department,
-    //         client: event.client,
-    //         department: event.department,
-    //         role: event.role,
-    //         shiftDate: event.shiftDate,
-    //         startTime: event.startTime,
-    //         endTime: event.endTime,
-    //         locationShift: event.locationShift,
-    //         purchaseOrderNo: event.purchaseOrderNo,
-    //         additionalInformation: event.additionalInformation,
-    //         statusStr: event.statusStr,
-    //         fulfilled: event.fulfilled,
-    //         total: event.total,
-    //         totalStaff: event.totalStaff,
-    //         clientId: event.clientId,
-    //         timesheetId: event.timesheetId
-    //       });
-    //   }
-    // });
-    // this.authService.setCurrentScrumboardLocal(this.authService.currentScrumboard);
-    // this.route.navigate(['/admin/jobs/scrumboard', event.id]);
     this.dialogRef.close();
   }
 

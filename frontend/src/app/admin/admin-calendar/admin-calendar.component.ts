@@ -96,9 +96,13 @@ export class AdminCalendarComponent {
   // ];
   activeDayIsOpen = true;
   assigned: any;
-
+  currentUser:any;
   constructor(private dialog: MatDialog, private snackbar: MatSnackBar, private router: Router, private authService: AuthService){
     this.getEventData();
+    if (!this.authService.currenctUser) {
+      this.authService.setCurrentUser();
+      }
+      this.currentUser = this.authService.currenctUser;
   }
 
   getEventData(){
@@ -219,7 +223,11 @@ export class AdminCalendarComponent {
       });
     });
     this.authService.setCurrentScrumboardLocal(this.authService.currentScrumboard);
-    this.router.navigate(['/admin/jobs/scrumboard', event.client.id]);
+    console.log('currentUser', this.currentUser)
+    if(this.currentUser.accountType === 'Admin')
+      this.router.navigate(['/admin/jobs/scrumboard', event.client.id]);
+    else if(this.currentUser.accountType === 'Team')
+      this.router.navigate(['/team/jobs/scrumboard', event.client.id]);
   }
 
   addEvent(): void {

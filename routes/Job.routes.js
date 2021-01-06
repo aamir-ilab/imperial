@@ -4,16 +4,19 @@ const {ROLE} = require("../config/roles");
 module.exports = (app) => {
     app.post("/job/register", VerifyToken, client.register);
     app.post("/updatejob", VerifyToken, client.updateJob);
-    app.post("/getAllTimesheets",VerifyToken, authRole(ROLE.ADMIN), client.getAllTimesheets);
+    app.post("/getAllTimesheets",VerifyToken, authRole([ROLE.ADMIN,ROLE.TEAM]), client.getAllTimesheets);
     app.post("/job/getAll", VerifyToken, client.getAll);
-    app.post("/job/getAllJob",VerifyToken, authRole(ROLE.ADMIN), client.getAllJob);
-    app.post("/job/getAllType",VerifyToken, authRole(ROLE.ADMIN), client.getAllJobs);
+    app.post("/job/getAllJob",VerifyToken, authRole([ROLE.ADMIN,ROLE.TEAM]), client.getAllJob);
+    app.post("/job/getAllType",VerifyToken, authRole([ROLE.ADMIN,ROLE.TEAM]), client.getAllJobs);
     app.post("/job/current",VerifyToken, client.getCurrentJob);
     app.post('/setJobWorkers',VerifyToken,client.setJobWorkers);
     app.post('/setTimesheetDraft',VerifyToken,client.setTimesheetDraft);
     app.post('/updateTimesheet',VerifyToken,client.updateTimesheet);
     app.post("/getClientTimesheets", VerifyToken, client.getClientTimesheets);
-
+    app.post("/updateInvoicsInfo", VerifyToken,
+    authRole([ROLE.ADMIN,ROLE.TEAM]), client.updateInvoicsInfo);
+    app.get("/invoiceInfo", VerifyToken,
+    authRole([ROLE.ADMIN,ROLE.TEAM]), client.invoiceInfo);
 
     app.post("/invoiceregister", VerifyToken, client.invoiceregister);
     app.post("/removeJob", VerifyToken, client.removeJob);

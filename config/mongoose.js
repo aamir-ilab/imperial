@@ -7,4 +7,5 @@ module.exports = () => {
     require('../models/Message.Model');
     require('../models/Payroll.Model');
     require('../models/Payslip.Model');
+    require('../models/InvoiceInfo.Model');
 };

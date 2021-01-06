@@ -2,6 +2,7 @@ module.exports = {
   ROLE: {
     ADMIN : 'Admin',
     CLIENT : 'Client',
-    WORKER : 'Worker'
+    WORKER : 'Worker',
+    TEAM : 'Team'
   }
 }

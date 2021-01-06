@@ -84,6 +84,9 @@
       <mat-form-field class="flex-auto">
         <mat-label>New Password</mat-label>
         <input type="password" formControlName="Password" minlength="6" matInput [(ngModel)]="password">
+        <mat-error *ngIf="form.get('Password').hasError('minlength')" >
+          Password should have minimum 6 characters.
+        </mat-error>
       </mat-form-field>
 
       <mat-form-field class="sm:ml-6 flex-auto">

@@ -4,6 +4,7 @@ const Job = mongoose.model('Job');
 const Timesheet = mongoose.model('Timesheet');
 const User = mongoose.model('User');
 const Invoice = mongoose.model('Invoice');
+const InvoiceInfo = mongoose.model('InvoiceInfo');
 const Payroll=  mongoose.model('Payroll');
 const Payslip=  mongoose.model('Payslip');
 var handlebars = require('handlebars');
@@ -533,6 +534,42 @@ exports.getCurrentJob = (req, res) => {
           }); }
   });
 };
+
+exports.updateInvoicsInfo = (req, res) => {
+
+  InvoiceInfo.findOne({id:1}, function(err, invoice) {
+    if (!invoice)
+    {
+      const newInvoice = new InvoiceInfo(req.body);
+      newInvoice.save().then(invoice => {
+        res.status(200).json(invoice);
+      })
+      .catch(err => {
+        res.status(400).send("Update not possible");
+      });
+    }
+    else {
+      Object.assign(invoice, req.body)
+      invoice.save().then(invoice => {
+        res.status(200).json(invoice);
+      })
+      .catch(err => {
+        res.status(400).send("Update not possible");
+      });
+    }
+  });
+};
+
+exports.invoiceInfo = (req, res) => {
+  InvoiceInfo.findOne({id:1}).exec(function(err, invoice) {
+    if (err) {
+      console.log(err);
+    } else {
+      res.json(invoice);
+    }
+  })
+};
+
 
 exports.getAllInvoices = (req, res) => {
   Invoice.find({}).sort({ 'invoiceDate': -1 }).populate({

@@ -26,5 +26,8 @@
     <div class="sidenav-items" *ngIf="type == 'Admin'">
       <vex-sidenav-item *ngFor="let item of items_admin; trackBy: trackByRoute"[item]="item" [level]="0"></vex-sidenav-item>
     </div>
+    <div class="sidenav-items" *ngIf="type == 'Team'">
+      <vex-sidenav-item *ngFor="let item of items_team; trackBy: trackByRoute"[item]="item" [level]="0"></vex-sidenav-item>
+    </div>
   </vex-scrollbar>
 </div>

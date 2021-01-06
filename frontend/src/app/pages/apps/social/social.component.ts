@@ -46,7 +46,7 @@ export class SocialComponent implements OnInit {
     // }
   ];
 
-  constructor() { 
+  constructor() {
 
   }
 
@@ -57,11 +57,11 @@ export class SocialComponent implements OnInit {
     console.log(this.userInfo)
     var userType = localStorage.getItem('loggedIn');
     console.log(userType)
-    if(userType == 'Client'){
+    if(userType == 'Client' || userType == 'Team'){
       this.photo ='assets/img/0.jpg';
-      this.personName = this.userInfo['firstName'] + this.userInfo['lastName'];
+      this.personName = this.userInfo['firstName'] + ' '+ this.userInfo['lastName'];
     }else if(userType == 'Worker'){
-      this.personName = this.userInfo['forename'] + this.userInfo['surename'];
+      this.personName = this.userInfo['forename'] + ' '+ this.userInfo['surename'];
       this.photo = this.userInfo['profilePhoto'];
     }else{
       this.personName = "Admin";

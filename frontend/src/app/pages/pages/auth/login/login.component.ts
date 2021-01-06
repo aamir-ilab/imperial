@@ -44,12 +44,7 @@ export class LoginComponent implements OnInit {
 
    async send() {
     this.loading = true;
-    // await this.authService.getAllUserAuth();
-    // await this.authService.getAllJobAuth();
     console.log('---- send -----');
-    // await this.authService.getAll();
-    // const adminUser = this.authService.AllUser.filter(ele => ele.emailAddress === 'admin@admin.com');
-    // localStorage.setItem('adminUser', JSON.stringify(adminUser[0]));
     const controls = this.form.controls;
 
     if (this.form.invalid){
@@ -82,11 +77,17 @@ export class LoginComponent implements OnInit {
                 this.router.navigate(['/worker']);
               });
           }
-          else {
+          if (user.accountType === 'Admin'){
             this.snackbar.open('Logged in Successfully', 'Cancel', {
               duration: 2000
             });
             this.router.navigate(['/admin']);
+          }
+          else {
+            this.snackbar.open('Logged in Successfully', 'Cancel', {
+              duration: 2000
+            });
+            this.router.navigate(['/team']);
           }
         }else{
           this.loading = false;

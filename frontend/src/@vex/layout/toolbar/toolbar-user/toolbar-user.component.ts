@@ -20,10 +20,10 @@ export class ToolbarUserComponent implements OnInit {
   ngOnInit() {
     var userInfo =  JSON.parse(localStorage.getItem('userInfo'));
     var userType = localStorage.getItem('loggedIn');
-    if(userType == 'Client'){
-      this.personName = userInfo['firstName'] + userInfo['lastName'];
+    if(userType == 'Client' || userType == 'Team'){
+      this.personName = userInfo['firstName'] + ' '+ userInfo['lastName'];
     }else if(userType == 'Worker'){
-      this.personName = userInfo['forename'] + userInfo['surename'];
+      this.personName = userInfo['forename'] + ' '+ userInfo['surename'];
       this.photo = userInfo['profilePhoto'];
     }
   }

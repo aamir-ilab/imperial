@@ -19,13 +19,17 @@ export class CalendarEditComponent implements OnInit {
     role: null,
     title: null
   });
-
+  currentUser:any;
   constructor(private dialogRef: MatDialogRef<CalendarEditComponent>,
-              @Inject(MAT_DIALOG_DATA) public event: any,
-              private fb: FormBuilder,
-              private route: Router,
-              private authService: AuthService) {
-  }
+    @Inject(MAT_DIALOG_DATA) public event: any,
+    private fb: FormBuilder,
+    private route: Router,
+    private authService: AuthService) {
+      if (!this.authService.currenctUser) {
+        this.authService.setCurrentUser();
+        }
+        this.currentUser = this.authService.currenctUser;
+    }
 
   ngOnInit() {
     this.form.patchValue(this.event);
@@ -80,7 +84,10 @@ export class CalendarEditComponent implements OnInit {
       }
     });
     this.authService.setCurrentScrumboardLocal(this.authService.currentScrumboard);
-    this.route.navigate(['/admin/jobs/scrumboard', this.event.client.id]);
+    if(this.currentUser.accountType === 'Admin')
+      this.route.navigate(['/admin/jobs/scrumboard', this.event.client.id]);
+    else if(this.currentUser.accountType === 'Team')
+      this.route.navigate(['/team/jobs/scrumboard', this.event.client.id]);
     this.dialogRef.close({
       ...this.event,
       ...this.form.value
