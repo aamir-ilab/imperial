@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>Invoice</title>
+  </head>
+  <body>
+    <style type="text/css">
+       body {
+        padding: 30px 0 0 0;
+        position: relative;
+        width: 21cm;
+        height: 25.7cm;
+        margin: 0 auto;
+        color: #001028;
+        background: #FFFFFF;
+        font-family: Arial, sans-serif;
+        font-size: 12px;
+        font-family: Arial;
+        -webkit-print-color-adjust: exact;
+      }
+
+      .clearfix:after {
+        content: "";
+        display: table;
+        clear: both;
+      }
+      .table-header{
+        border: 2px solid #000;
+      }
+      .table-header thead{
+        background: #000;
+        color: #fff;
+        text-transform: uppercase;
+        font-weight: 600;
+        font-size: 14px;
+      }
+      .table-header th {
+      color: #fff;
+      background: #000;
+      text-transform: uppercase;
+      font-size: 11px;
+      font-weight: 600;
+     }
+      .table-header td {
+      background: #fff !important;
+      border-left: 2px solid #000;
+      padding: 10px 0;
+      text-transform: uppercase;
+      font-weight: 600;
+      font-size: 14px;
+      }
+
+
+      table.inner-table {
+        border: 2px solid #000;
+      }
+      .inner-table td{
+        border-left: 2px solid #000;
+        text-align: left;
+        padding-left: 10px;
+      }
+      .row2{
+        border-left: none !important;
+        font-weight: 600;
+        text-transform: capitalize;
+        font-size: 13px;
+      }
+      .row3{
+        font-weight: 600;
+        text-transform: capitalize;
+        font-size: 13px;
+      }
+      .row4{
+        font-weight: 600;
+        text-transform: uppercase;
+        font-size: 13px;
+      }
+      .Row {
+          display: flex;
+
+      }
+      .Column-1 {
+        border: 2px solid #000;
+        padding: 50px 0;
+        width: 37%;
+      }
+      .Column-2 {
+        border: 2px solid #000;
+        margin: 20px 0 20px 20px;
+        width: 26%;
+      }
+        .Column-3 {
+        border: 2px solid #000;
+        margin: 27px 0 30px 14px;
+        width: 31%;
+      }
+      .button {
+          margin-top: 14px;
+      }
+      .to-date span{
+        text-transform: capitalize;
+        font-weight: 600;
+      }
+      .to-date{
+        text-transform: uppercase;
+        font-size: 14px;
+      }
+      .date-last-col{
+        padding: 0 0 20px 0;
+      }
+      .name{
+        text-transform: uppercase;
+        font-weight: 600;
+      }
+          .note {
+        text-transform: uppercase;
+        width: 50%;
+        text-align: center;
+        float: right;
+        font-weight: 700;
+        font-size: 12px;
+        margin: -20px 0 0 0;
+      }
+      .message .button {
+        position: relative;
+        top: 30px;
+      }
+
+      .message .button a{
+        padding: 8px 16px;
+      }
+
+      textarea{
+        width: 100%;
+        border: 2px solid #000;
+        margin-top: 6px;
+      }
+      a {
+        color: #5D6975;
+        text-decoration: none;
+        text-transform: uppercase;
+        background: #000;
+        color: #fff;
+        padding: 15px 4px;
+        font-size: 12px;
+        font-weight: 600;
+      }
+
+
+
+      header {
+        padding: 10px 0;
+        margin-bottom: -16px;
+      }
+      h1 {
+        border-top: 1px solid  #5D6975;
+        border-bottom: 1px solid  #5D6975;
+        color: #5D6975;
+        font-size: 2.4em;
+        padding: 20px 0;
+        font-weight: normal;
+        text-align: center;
+        margin: 0 0 20px 0;
+      }
+
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        border-spacing: 0;
+        margin-bottom: 20px;
+      }
+
+      table th,
+      table td {
+        text-align: center;
+      }
+
+      table th {
+        padding: 5px 20px;
+      }
+    </style>
+    <header class="clearfix">
+
+      <table class="table-header">
+        <thead>
+          <tr>
+            <th>Employee</th>
+            <th>Number</th>
+            <th colspan="2">Employer</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><%= data.row.name %></td>
+            <td><%= data.row.empCode %></td>
+            <td colspan="2">IMPERIAL RECRUITMENT COMPANY LTD</td>
+          </tr>
+        </tbody>
+      </table>
+    </header>
+
+    <main>
+      <table class="inner-table">
+        <thead class="table-header">
+          <tr class="table-header">
+            <th colspan="2">PAYMENTS</th>
+            <th class="desc">DEDUCTIONS</th>
+            <th>TO DATE</th>
+        </thead>
+        <tbody>
+          <tr>
+            <td></td>
+            <td class="row2">Value &nbsp;= &nbsp;  Hours &nbsp;X &nbsp; Rate</td>
+            <td class="row4">P.A.Y.E. &nbsp; &nbsp; &nbsp; <%= data.row.net_pay %></td>
+            <td class="to-date">TAXABLE <span> &nbsp; &nbsp; &nbsp; &nbsp; {5352.80}</span></td>
+          </tr>
+          <tr>
+            <td class="name">belrun ltd</td>
+            <td class="row2">{340.00} &nbsp; &nbsp;  {43.50} &nbsp; &nbsp; {8.50}</td>
+            <td></td>
+            <td class="to-date">tax &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; <span>258.20</span></td>
+          </tr>
+          <tr>
+            <td></td>
+            <td class="row2"></td>
+            <td class="row3" >Nat.Ins &nbsp; &nbsp; &nbsp; {24.45}</td>
+            <td class="to-date" >nat.ins <span> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; {441.65}</span></td>
+          </tr>
+          <tr>
+            <td></td>
+            <td class="row2"></td>
+            <td class="row4" style="padding-top: 30px; padding-bottom: 30px; ">pansion &nbsp;  <%= data.row.pension %></td>
+            <td class="to-date" ></td>
+          </tr>
+          <tr>
+            <td></td>
+            <td class="row2"></td>
+            <td></td>
+            <td class="to-date"> <span> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;N.1.Code <%= data.row.ni_code %></span></td>
+          </tr>
+          <tr>
+            <td></td>
+            <td class="row2"></td>
+            <td></td>
+            <td class="to-date"> pay date <span> &nbsp; &nbsp; &nbsp; &nbsp; <%= data.row.pay_date %></span></td>
+          </tr>
+          <tr>
+            <td></td>
+            <td class="row2"></td>
+            <td></td>
+            <td class="to-date">tax period <span> &nbsp; &nbsp; WEEK <%= data.row.week_no %> </span></td>
+          </tr>
+          <tr>
+            <td class="name">Total</td>
+            <td class="row2">{369.75}</td>
+            <td class="name">total &nbsp; &nbsp; {60.32}</td>
+            <td class="to-date">tax code <span> &nbsp; &nbsp; &nbsp; <%= data.row.tax_code %> WK <%= data.row.wk1m1 %> </span></td>
+          </tr>
+          <tr>
+            <td></td>
+            <td class="row2"></td>
+            <td></td>
+            <td  class="to-date date-last-col">n.i no <span> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;<%= data.row.ni_number %> </span></td>
+          </tr>
+        </tbody>
+      </table>
+      <div class="Row">
+        <div class="Column-1"></div>
+        <div class="Column-2"></div>
+        <div class="Column-3">
+          <div class="button">
+            <a href="">next pay</a>
+          </div>
+        </div>
+    </div>
+    <div class="note">
+      please keep this pay advice in a place.it may be required for the purpose of self assessment.
+    </div>
+    <div class="message">
+
+      <div class="button">
+        <a href="">message</a>
+      </div>
+      <textarea rows="5" cols="50"> </textarea>
+    </div>
+    </main>
+  </body>
+</html>

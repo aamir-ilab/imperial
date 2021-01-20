@@ -9,6 +9,7 @@ export class RoleGuard implements CanActivate
     console.log('/////////// Role Guard  ////////////');
     const userRole = localStorage.getItem('loggedIn');
     console.log('userRole', userRole);
+    console.log('route.data.role', route.data.role);
     if (route.data.role !== userRole) {
       this.router.navigate(['/404']);
     }

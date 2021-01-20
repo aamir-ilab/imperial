@@ -25,5 +25,6 @@ var TimesheetSchema = new mongoose.Schema({
     ],
     statusStr:{type:String, default:'In Progress'},
     totalStaff:{type:Number},
+    exportStatus: {type:Boolean, default: false},
 }, { toJSON: { getters: true } });
 module.exports = mongoose.model('Timesheet', TimesheetSchema);

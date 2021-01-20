@@ -1,5 +1,5 @@
 var mongoose = require('mongoose'),
-    passport = require('passport');
+passport = require('passport');
 const Job = mongoose.model('Job');
 const Timesheet = mongoose.model('Timesheet');
 const User = mongoose.model('User');
@@ -8,7 +8,10 @@ const InvoiceInfo = mongoose.model('InvoiceInfo');
 const Payroll=  mongoose.model('Payroll');
 const Payslip=  mongoose.model('Payslip');
 var handlebars = require('handlebars');
+var ejs = require('ejs');
 var fs = require('fs');
+const puppeteer = require('puppeteer')
+var moment = require('moment');
 path = require('path');
 var dateFormat = require("dateformat");
 var nodemailer = require('nodemailer');
@@ -42,9 +45,8 @@ exports.register = (req, res) => {
     const timesheet = new Timesheet(req.body);
     newClient.statusStr = 'In Progress';
     Job.countDocuments({}, function(err, c) {
-      console.log(req.body)
-      console.log(newClient)
-      console.log('location count document')
+      console.log('count', c);
+      console.log('newClient', newClient)
       newClient.id = c + 1;
       if(newClient.id < 10)
       newClient.JobId = 'JOB000' + newClient.id;
@@ -146,6 +148,10 @@ exports.register = (req, res) => {
             })
           }
           res.status(200).json(newClient);
+          Job.findOne({id:newClient.id}).populate('clientId').exec(function (err, client){
+            if (err) return res.json(err, 400);
+            res.status(200).json(client);
+          });
         }
       });
     })
@@ -207,7 +213,7 @@ exports.updateJob = (req, res) => {
             if (err) return res.json(err, 400);
             res.status(200).json(client);
           });
-          // res.status(200).json(client);
+          res.status(200).json(client);
         })
         .catch(err => {
           res.status(400).send(err);
@@ -534,7 +540,6 @@ exports.getCurrentJob = (req, res) => {
           }); }
   });
 };
-
 exports.updateInvoicsInfo = (req, res) => {
 
   InvoiceInfo.findOne({id:1}, function(err, invoice) {
@@ -559,7 +564,6 @@ exports.updateInvoicsInfo = (req, res) => {
     }
   });
 };
-
 exports.invoiceInfo = (req, res) => {
   InvoiceInfo.findOne({id:1}).exec(function(err, invoice) {
     if (err) {
@@ -569,15 +573,106 @@ exports.invoiceInfo = (req, res) => {
     }
   })
 };
+exports.getAllPayroll = (req, res) => {
+  Payroll.find({}).sort({ 'timestamp': -1 }).exec(function(err, client) {
+    if (err) {
+      console.log(err);
+    } else {
+      res.json(client);
+    }
+  })
+}
+function getAge(dateString) {
+  var today = new Date();
+  var birthDate = new Date(dateString);
+  var age = today.getFullYear() - birthDate.getFullYear();
+  var m = today.getMonth() - birthDate.getMonth();
+  if (m < 0 || (m === 0 && today.getDate() < birthDate.getDate())) {
+      age--;
+  }
+  return age;
+}
+exports.getExportTimesheets = (req, res) => {
+  ///// for current week check /////
+  // const now = moment().subtract(1, 'isoWeek').startOf('isoWeek');
+  // const end = moment().subtract(1, 'isoWeek').endOf('isoWeek');
+  // console.log('current', now,end);
+  // find({$and:
+  // [
+  //   { $and: [{exportStatus: false},{statusStr:'Completed'} ] },
+  //   {shiftDate:{ $gte: now, $lte: end}}
+  // ]})
+  ///// for current week check ends /////
+  var timesheetData = [];
 
-
-exports.getAllInvoices = (req, res) => {
-  Invoice.find({}).sort({ 'invoiceDate': -1 }).populate({
-      path:'timesheetId_id',
-      populate:{
-          path:'JobId_Id',
-          model:'Job'
-      }}).exec(function(err, client) {
+  Timesheet.find({exportStatus: false, statusStr:'Completed'}).populate(['JobId_Id', 'workers.workerId']).exec(function(err, timesheet) {
+    if (err) {
+      console.log('error', err);
+    } else {
+      console.log('==timesheet==', timesheet)
+      timesheet.forEach(timesheet => {
+        console.log('element', timesheet.workers);
+        var inv_workers = [];var invoiceWorkers = [];
+        timesheet.workers.forEach(worker => {
+          let tempRate = 0;
+          let age = getAge(worker.workerId.dateBirth);
+          tempRate = age < 25 ? 7.70 : 8.21;
+          let WR_UNITS = parseFloat(worker.hours.replace(':','.'))*tempRate;
+          WR_UNITS = WR_UNITS.toFixed(2);
+          var obj ={
+            timesheet_id: timesheet.timesheetId,
+            WR_REF : worker.workerId.workerId,
+            WR_UNITS: WR_UNITS,
+            WR_TRNCDE :'p001',
+            WR_RATE : tempRate,
+            type : "Export Timesheets",
+            response : "Successful"
+          }
+          var inv_worker = {
+            workerId: worker.workerId._id,
+            chargeRate: tempRate,
+            hours: parseFloat(worker.hours.replace(':','.')),
+            net: WR_UNITS
+          }
+          timesheetData.push(obj);
+          inv_workers.push(inv_worker)
+          console.log('inv_worker', inv_worker)
+        });
+        invoiceWorkers.push(inv_workers);
+        console.log('invoiceWorkers', invoiceWorkers)
+        const invoice = new Invoice();
+        invoice.workers = invoiceWorkers[0];
+        invoice.timesheetId = timesheet.timesheetId;
+        invoice.timesheetId_id = timesheet._id;
+        invoice.invoiceId = timesheet.timesheetId.replace(/TS/g, "INV");
+        invoice.client_Id = timesheet.clientId;
+        invoice.save().then(inv => {
+          // res.status(200).json(inv);
+          console.log("invoice", inv);
+        })
+        .catch(err => {
+          // res.status(400).send("Update not possible");
+          console.log("invoice not created", err);
+        });
+      });
+      Timesheet.updateMany({exportStatus: false, statusStr:'Completed'}, {"$set":{"exportStatus": true}}, {"multi": true}, (err, writeResult) => {});
+      res.json(timesheetData);
+    }
+  })
+}
+exports.getPayslips = (req, res) => {
+  console.log('===  workedId ====', req.body._id)
+    Payslip.find({workerId: req.body._id}).populate(['workerId']).exec(function(err, payslips) {
+      if (err) {
+        console.log('err',err);
+      } else {
+        console.log('==Payslip==', payslips);
+        res.json(payslips);
+      }
+  });
+}
+exports.getClientInvoices = (req, res) => {
+  Invoice.find({client_Id:req.body.id, status:'Complete' }).sort({ 'invoiceDate': -1 }).populate(['client_Id','workers.workerId']).exec(function(err, client) {
       if (err) {
           console.log(err);
       } else {
@@ -585,36 +680,434 @@ exports.getAllInvoices = (req, res) => {
       }
   })
 }
-exports.invoiceregister = (req, res) => {
-    console.log('aaaa');
-    Invoice.findOne({timesheetId:req.body.timesheetId}).then(client => {
-        if (client) {
-            return res.status(400).json({ fullname: "Job already exists" });
+exports.getAllInvoices = (req, res) => {
+  Invoice.find({status:'Complete'}).sort({ 'invoiceDate': -1 }).populate(['client_Id','workers.workerId']).exec(function(err, client) {
+      if (err) {
+          console.log(err);
+      } else {
+          res.json(client);
+      }
+  })
+}
+exports.getFindTimesheets = (req, res) => {
+  if(req.body.userType == "Client"){
+    Timesheet.find({statusStr:req.body.status, clientId:req.body.id }).exec(function(err, client) {
+      if (err) {
+          console.log(err);
+      } else {
+          res.json(client);
+      }
+    })
+  }
+  else{
+    Timesheet.find({statusStr:req.body.status}).exec(function(err, client) {
+        if (err) {
+            console.log(err);
         } else {
-            delete req.body._id;
-            console.log('cccc');
-            const newClient = new Invoice(req.body);
-            Job.countDocuments({}, function(err, c) {
-                console.log(req.body)
-                console.log(newClient)
-                console.log('location count document')
-                newClient.id = c + 1;
-                newClient.save((err) => {
-                    if (err) {
-                        console.log(err)
-                        res.status(500).json(err);
-                    } else {
-                        console.log(newClient);
-                        // const token = client.generateJwt();
-                        res.status(200).json(newClient)
-                            // res.status(200).json("Registered successfully");
-                    }
-                });
-            })
-
+            res.json(client);
         }
-    });
+    })
+  }
+}
+exports.getWorkerJob = (req, res) =>{
+  console.log('===  workedId ====', req.body._id)
+  var workerJobs  = [];
+  Timesheet.find({}).populate(['clientId']).exec(function(err, timesheets) {
+    if (err) {
+      console.log('err',err);
+    } else {
+      console.log('==timesheets==', timesheets);
+      timesheets.forEach(element => {
+        element.workers.forEach(ele => {
+          console.log('==workers==', ele);
+          if (ele.workerId == req.body._id){
+            var data = {
+              workers: ele,
+              clientId: element.clientId,
+              statusStr: element.statusStr,
+              shiftDate: element.shiftDate,
+
+            }
+            console.log('==worker==', data);
+            // element.workers = [];
+            // element.workers.push(ele);
+            workerJobs.push(data);
+          }
+        });
+      });
+      res.json(workerJobs);
+    }
+  });
+}
+exports.getClientJob= (req, res) =>{
+  Job.find({'clientId':req.body._id}, function(err, client){
+    if (!client)
+      res.status(404).send("data is not found");
+    else {
+      console.log('client job', client);
+      res.status(200).json(client);
+    }
+  })
+}
+exports.updateStatus = (req, res) => {
+  console.log('updateStatus', req.body),
+      // var clientId = req.clientId;
+      // if (role == 0){
+  Job.findOne({id:req.body.id}, function(err, client) {
+      if (!client)
+          res.status(404).send("data is not found");
+      else {
+          // Object.assign(client, req.body);
+          client.statusStr = req.body.str;
+          client.save().then(client => {
+              res.status(200).json(client);
+          })
+          .catch(err => {
+              res.status(400).send("Update not possible");
+          });
+      }
+
+  });
 };
+exports.removeJob = (req, res) =>{
+  console.log('removeJob', req.body)
+  Job.findOneAndDelete({ id: req.body.id }, function(err) {
+    if (err) res.json(err);
+    else{
+      Timesheet.findOneAndDelete({ _id: req.body.timesheetId }, function(err) {
+        if (err) res.json(err);
+      });
+      res.status(200).send("Job and related Timesheet Removed");
+    }
+  });
+}
+exports.getGenerateWorkerID = async(req, res) => {
+    console.log('getGereanteworkerID')
+    var nowDay = new Date().getDay();
+    if(nowDay == 0){
+        nowDay = 7;
+    }
+    var gtDate = new Date();
+    gtDate.setDate(gtDate.getDate() - nowDay);
+    gtDate.setHours(23,59,59);
+    var gt1Date = new Date();
+    gt1Date.setDate(gt1Date.getDate() - nowDay - 6);
+    gt1Date.setHours(0,0,0);
+    // var gt2Date = new Date();
+    // gt2Date.setDate(gt2Date.getDate() - nowDay - 7);
+
+    // const userArrObj = await User.find({createdDate:{ $gte: gt1Date, $lte: gtDate}});
+    const userArrObj = await User.find({accountType:'Worker', createdDate:{ $gte: gt1Date, $lte: gtDate}});
+    // periodStart:{$gte:gt1Date,$lte:gtDate}
+    userArrObj.forEach((ele,index,arry) =>{
+        Payroll.findOne({}).then(client => {
+            if (client)
+                return res.status(200).json({ fullname: "Job already exists" });
+            // } else {
+                delete req.body._id;
+                console.log('cccc');
+                var tempObj ={
+                    workerId : ele._id,
+                    periodStart : gt1Date,
+                    periodEnd : gtDate,
+                    type : "Generated IDs",
+                    response : "Successful",
+                    firstName : 'Admin',
+                    lastName : '',
+                    timestamp : new Date(),
+                }
+                const newClient = new Payroll(tempObj);
+
+                Payroll.countDocuments({}, function(err, c) {
+                    console.log(req.body)
+                    console.log(newClient)
+                    console.log('location count document')
+                    newClient.id = c + 1;
+                    if(newClient.id < 10)
+                    newClient.logID = 'LOG000' + newClient.id;
+                    else if(this.id < 100)
+                    newClient.logID = 'LOG00' + newClient.id;
+                    else if(this.id < 1000)
+                    newClient.logID = 'LOG0'+newClient.id;
+                    else
+                         newClient.JobId = 'LOG'+ newClient.id.toString();
+                    newClient.save((err) => {
+                        if (err) {
+                            console.log(err)
+                            res.status(500).json(err);
+                        } else {
+                            console.log(newClient);
+                            if(index == (arry.length - 1)){
+                                Payroll.find({},function(err, cresult){
+                                    if(cresult){
+                                          res.status(200).json(cresult)
+                                    }
+                                })
+                            }
+                        }
+                    });
+                })
+
+            // }
+        });
+        // userArr.push(ele._id);
+
+    })
+}
+exports.getImportPayroll = async (req, res) => {
+  const rows = req.body.rows;
+  const user = req.body.user;
+  console.log('req.body.user', user)
+  ///// for current week check /////
+  const now = moment().subtract(1, 'isoWeek').startOf('isoWeek');
+  const end = moment().subtract(1, 'isoWeek').endOf('isoWeek');
+  // console.log('current', now,end);
+  ///// for current week check ends /////
+  var status = 'Successful';
+  console.log('getImportPayroll', rows);
+  // const slipdata = await generateInvoices(now, end);
+  await generateInvoices(now, end).then((resp)=>{
+    console.log('resp', resp);
+    generatePayslips(rows, now, end);
+  }, function(error) {
+    console.log(error);
+  });
+  // var unique = clients.filter(function onlyUnique(value, index, self) {
+  //   return self.indexOf(value) === index;
+  // });
+  // console.log('unique', unique);
+  var payrollData ={
+    periodStart : now,
+    periodEnd : end,
+    type : "Import Payroll",
+    response : status,
+    firstName : user,
+    timestamp : new Date()
+  }
+  const payroll = new Payroll(payrollData);
+  Payroll.countDocuments({}, function(err, c) {
+    payroll.id = c + 1;
+    if(payroll.id < 10)
+    payroll.logID = 'LOG000' + payroll.id;
+    else if(this.id < 100)
+    payroll.logID = 'LOG00' + payroll.id;
+    else if(this.id < 1000)
+    payroll.logID = 'LOG0'+payroll.id;
+    else
+    payroll.logID = 'LOG'+ payroll.id.toString();
+    payroll.save((err) => {
+      if (err) {
+        console.log(err)
+        res.status(500).json(err);
+      } else {
+        console.log('payroll', payroll);
+        Payroll.find({},function(err, cresult){
+          if(cresult){
+            res.status(200).json(cresult)
+          }
+        });
+      }
+    });
+  })
+}
+
+
+
+async function generateInvoices(now, end){
+  var wPsData = [];
+  Invoice.find({status: 'Pending'}).populate(['client_Id', 'workers.workerId']).exec(function(err, invoices) {
+    if (err) {
+      console.log('err',err);
+    } else {
+      console.log('==invoices==', invoices);
+      invoices.forEach(element => {
+        readHTMLFile((path.join(__dirname, '../public/pages/invoice.php')), async function(err, html) {
+          const name = element.client_Id.firstName + ' ' + element.client_Id.lastName ;
+          wPsData.push(element.workers);
+          console.log('after push', wPsData );
+          const periodStart = dateFormat(now, "fullDate").toString();
+          const periodEnd = dateFormat(end, "fullDate").toString();
+          const due = moment().add(7, 'd').format('dddd, MMMM DD,YYYY');
+          const created = moment().format('dddd, MMMM DD,YYYY');
+          // data for invoice attachment
+          var data = {
+            invoice: element.invoiceId,
+            DATE_CREATED: created,
+            DUE_DATE: due,
+            CLIENT_ID: element.client_Id,
+            CLIENT_NAME: name,
+            workers: element.workers,
+            TS_ID: element.timesheetId,
+            type:'Invoice'
+          };
+          // data for invoice email
+          var replacements = {
+            name: name,
+            periodStart: periodStart,
+            periodEnd: periodEnd,
+            dueDate: due
+          };
+
+          var mailOptions = {
+            path: path.join(__dirname, '../public/pages/'+element.invoiceId+'.pdf'),
+            from: 'my@email.com',
+            to : element.client_Id.emailAddress,
+            subject : 'New Invoice #'+element.invoiceId+ ' from  Imperial Recruitment',
+            attachments: [
+              {   // file on disk as an attachment
+                filename: 'Invoice.pdf',
+                contentType: 'application/pdf',
+                path: path.join(__dirname, '../public/pages/'+element.invoiceId+'.pdf'),// stream this file
+              },
+            ]
+          };
+          generatePdf(data,html,replacements,mailOptions)
+        });
+      });
+      return wPsData;
+    }
+  });
+
+}
+function generatePayslips(rows, now, end){
+  rows.forEach((row, i) => {
+    // find workers and create payslips
+    User.findOne({workerId:row.empCode}).exec(function (err, user){
+      if (err) {
+        status = 'Failed';
+        return res.json(err, 400);
+      }
+      else{
+        var data ={
+          workerId:user._id,
+          workerIDStr:user.workerId,
+          Names:row.name,
+          TAX:row.tax,
+          NI_EES:row.ni_ees,
+          GROSS_TO_DATE:row.gross_toDate,
+          TAX_TO_DATE:row.tax_toDate,
+          NI_TO_DATE:row.ni_toDate,
+          TOTAL_DEDUCTIONS:row.t_deductions,
+          NET_PAY:row.net_pay,
+          NI_CODE:row.ni_code,
+          PAY_DATE:row.pay_date,
+          WEEK_NO:row.week_no,
+          TAX_CODE:row.tax_code,
+          WK1M1:row.wk1m1,
+          NI_NUMBER:row.ni_number,
+          STUDENT_LOAN:row.student_loan,
+          PENSION:row.pension,
+          periodStart : now,
+          periodEnd : end,
+        }
+        const newSlip = new Payslip(data);
+        Payslip.countDocuments({}, function(err, c) {
+          newSlip.id = c + (i+1);
+          if(newSlip.id < 10)
+          newSlip.payslipID = 'PAYSLIP000' + newSlip.id;
+          else if(this.id < 100)
+          newSlip.payslipID = 'PAYSLIP00' + newSlip.id;
+          else if(this.id < 1000)
+          newSlip.payslipID = 'PAYSLIP0'+newSlip.id;
+          else
+          newSlip.payslipID = 'PAYSLIP'+ newSlip.id.toString();
+          newSlip.save((err) => {
+            if (err) {
+              console.log(err)
+              res.status(500).json(err);
+            }
+          });
+        });
+
+        readHTMLFile((path.join(__dirname, '../public/pages/payslip.php')), async function(err, html) {
+          const name = user.surename + ' ' + user.forename ;
+          const slipID = 'Payslip'+(i+1);
+          // data for payslip attachment
+          var data = {
+            row: row,
+            invoice: slipID,
+            type:'Payslip'
+          };
+          // data for payslip email
+          var replacements = {
+            name: name,
+          };
+
+          var mailOptions = {
+            path: path.join(__dirname, '../public/pages/'+slipID+'.pdf'),
+            from: 'my@email.com',
+            to : user.emailAddress,
+            subject : 'Your recent payslip is attached',
+            attachments: [
+              {   // file on disk as an attachment
+                filename: 'Payslip.pdf',
+                contentType: 'application/pdf',
+                path: path.join(__dirname, '../public/pages/'+slipID+'.pdf')// stream this file
+              },
+            ]
+          };
+          generatePdf(data,html,replacements,mailOptions)
+        });
+      }
+    });
+  });
+}
+function generateAndSendEmail(html,replacements,emailOptions) {
+
+  var template = handlebars.compile(html);
+
+  console.log('replacements', replacements);
+  var htmlToSend = template(replacements);
+  var mailOptions = {
+    from: emailOptions.from,
+    to : emailOptions.to,
+    subject : emailOptions.subject,
+    html : htmlToSend,
+    attachments: emailOptions.attachments
+  };
+  transport.sendMail(mailOptions, function (error, info) {
+    if (error) {
+      console.log('error sendMail',error);
+    }
+    else{
+      var filePath = emailOptions.path;
+      console.log('success sendMail',filePath);
+      fs.unlinkSync(filePath);
+      Invoice.updateMany({status: 'Pending'}, {"$set":{"status": 'Complete'}}, {"multi": true}, (err, writeResult) => {});
+    }
+  });
+}
+async function generatePdf(data,htmldata,replacements,mailOptions) {
+  var fullpath = path.join(__dirname,'../public/pages/attach'+data.type+'.ejs');
+  ejs.renderFile(fullpath, { data }, {}, async (err, str) =>  {
+    // str => Rendered HTML string
+    if (err) {
+     console.log(err)
+    } else {
+      const inv = str;
+      // we are using headless mode
+      const browser = await puppeteer.launch();
+      const page = await browser.newPage()
+      // We set the page content as the generated html by handlebars
+      await page.setContent(inv)
+      // We use pdf function to generate the pdf in the same folder as this file.
+      await page.pdf({ path: path.join(__dirname, '../public/pages/'+data.invoice+'.pdf'), format: 'A4' }).then(()=>{
+        generateAndSendEmail(htmldata,replacements,mailOptions)
+        console.log("PDF Generated");
+      }, function(error) {
+        console.log(error);
+      });
+      await browser.close();
+    }
+  })
+
+}
+
+
+
+
+
+////////// Not in use by Muzz dev //////////
 // exports.google = (req,res) =>{
 //     console.log('1');
 //     passport.authenticate('google', { scope:
@@ -869,58 +1362,7 @@ exports.updateProfile = (req, res) => {
 //       }
 //   });
 // };
-exports.invoiceupdate = (req, res) => {
-    // var role = req.type;
-    console.log('invoiceupdate')
-    console.log(req.body)
-        // var clientId = req.clientId;
-        // if (role == 0){
-    Invoice.findById(req.body._id, function(err, client) {
-        if (!client)
-            res.status(404).send("data is not found");
-        else {
-            Object.assign(client, req.body);
-            // client.invoiceDate = new Date(req.body.invoiceDate);
-            // client.invoiceDueDate = new Date(req.body.invoiceDueDate);
-            client.save().then(client => {
-                res.status(200).json(client);
-            })
-            .catch(err => {
-                res.status(400).send("Update not possible");
-            });
-        }
 
-    });
-};
-exports.delInvoice = (req, res) =>{
-    var temp ;
-    Invoice.findOneAndDelete({ id: req.body.id }, function(err, city) {
-     if (err) res.json(err);
-     else {
-        console.log('remove')
-        console.log(city)
-        console.log(req.body)
-        Invoice.countDocuments({}, function(err1, c) {
-                console.log('c')
-                var tempNum = c + 1;
-                User.findOne({ id: tempNum }, function(err, client) {
-                    if (!client)
-                        res.status(500).send("data is not found");
-                    else {
-                        client.id = city.id;
-                        client.save().then(user => {
-                                res.json('city updated!');
-                            })
-                            .catch(err => {
-                                res.status(400).send("Update not possible");
-                            });
-                    }
-                });
-
-            })
-        }
-    });
-}
 exports.updateHash = (req, res) => {
     // var role = req.type;
     console.log('updateHash')
@@ -940,47 +1382,7 @@ exports.updateHash = (req, res) => {
         }
     });
 };
-exports.delete = (req, res) => {
-    // var clientId = req.clientId;
-    // var role = req.type;
-    // if (role == 0) {
-    // Job.findByIdAndDelete(req.params.id, function(err, city) {
-    Job.findOneAndDelete({ id: req.params.id }, function(err, city) {
-        if (err) res.json(err);
-        else {
-            Job.countDocuments({}, function(err1, c) {
-                console.log('c')
-                var tempNum = c + 1;
-                Job.findOne({ id: tempNum }, function(err, client) {
-                    if (!client)
-                        res.status(500).send("data is not found");
-                    else {
-                        client.id = city.id;
-                        client.save().then(Job => {
-                                res.json('city updated!');
-                            })
-                            .catch(err => {
-                                res.status(400).send("Update not possible");
-                            });
-                    }
-                });
 
-            })
-        }
-    });
-    // } else if (role == 2) {
-    //     if (clientId == req.params.id) {
-    //         Job.findByIdAndRemove({ _id: req.params.id }, function(err, business) {
-    //             if (err) res.json(err);
-    //             else res.json('Successfully removed');
-    //         });
-    //     } else {
-    //         res.json('You are not owner of this profile. You are not permited');
-    //     }
-    // } else {
-    //     res.json('you are not permited , cannot delete !');
-    // }
-};
 exports.findByIdNum = (req, res) => {
     Job.findOne({ id: req.body.id }, function(err, client) {
         if (!client)
@@ -1010,66 +1412,6 @@ exports.findById = (req, res) => {
                 res.status(200).json(client);
         });
     }
-}
-exports.getFindTimesheets = (req, res) => {
-    if(req.body.userType == "Client"){
-      Timesheet.find({statusStr:req.body.status, clientId:req.body.id }).exec(function(err, client) {
-        if (err) {
-            console.log(err);
-        } else {
-            res.json(client);
-        }
-      })
-    }
-    else{
-      Timesheet.find({statusStr:req.body.status}).exec(function(err, client) {
-          if (err) {
-              console.log(err);
-          } else {
-              res.json(client);
-          }
-      })
-    }
-}
-exports.getWorkerJob = (req, res) =>{
-    console.log('===  workedId ====', req.body._id)
-    var workerJobs  = [];
-    Timesheet.find({}).populate(['clientId']).exec(function(err, timesheets) {
-      if (err) {
-        console.log('err',err);
-      } else {
-        console.log('==timesheets==', timesheets);
-        timesheets.forEach(element => {
-          element.workers.forEach(ele => {
-            console.log('==workers==', ele);
-            if (ele.workerId == req.body._id){
-              var data = {
-                workers: ele,
-                clientId: element.clientId,
-                statusStr: element.statusStr,
-                shiftDate: element.shiftDate,
-
-              }
-              console.log('==worker==', data);
-              // element.workers = [];
-              // element.workers.push(ele);
-              workerJobs.push(data);
-            }
-          });
-        });
-        res.json(workerJobs);
-      }
-  });
-}
-exports.getClientJob= (req, res) =>{
-    Job.find({'clientId':req.body._id}, function(err, client){
-      if (!client)
-        res.status(404).send("data is not found");
-      else {
-        console.log('client job', client);
-        res.status(200).json(client);
-      }
-    })
 }
 // exports.updateClientVendor = (req, res) => {
     //     // var role = req.type;
@@ -1604,26 +1946,6 @@ exports.addWorkerJob = (req, res) => {
 
     });
 };
-exports.updateStatus = (req, res) => {
-    console.log('updateStatus', req.body),
-        // var clientId = req.clientId;
-        // if (role == 0){
-    Job.findOne({id:req.body.id}, function(err, client) {
-        if (!client)
-            res.status(404).send("data is not found");
-        else {
-            // Object.assign(client, req.body);
-            client.statusStr = req.body.str;
-            client.save().then(client => {
-                res.status(200).json(client);
-            })
-            .catch(err => {
-                res.status(400).send("Update not possible");
-            });
-        }
-
-    });
-};
 exports.removeTimesheetsJob = (req, res) =>{
     req.body.arr.forEach((ele, index, arra)=>{
     Timesheet.findByIdAndDelete(ele._id, function(err, city) {
@@ -1636,422 +1958,4 @@ exports.removeTimesheetsJob = (req, res) =>{
         });
     })
 
-}
-exports.removeJob = (req, res) =>{
-  console.log('removeJob', req.body)
-  Job.findOneAndDelete({ id: req.body.id }, function(err) {
-    if (err) res.json(err);
-    else{
-      Timesheet.findOneAndDelete({ _id: req.body.timesheetId }, function(err) {
-        if (err) res.json(err);
-      });
-      res.status(200).send("Job and related Timesheet Removed");
-    }
-  });
-}
-
-
-exports.getAllPayroll = (req, res) => {
-    Payroll.find({}).sort({ 'timestamp': -1 }).exec(function(err, client) {
-        if (err) {
-            console.log(err);
-        } else {
-            res.json(client);
-        }
-    })
-}
-exports.getGenerateWorkerID = async(req, res) => {
-    console.log('getGereanteworkerID')
-    var nowDay = new Date().getDay();
-    if(nowDay == 0){
-        nowDay = 7;
-    }
-    var gtDate = new Date();
-    gtDate.setDate(gtDate.getDate() - nowDay);
-    gtDate.setHours(23,59,59);
-    var gt1Date = new Date();
-    gt1Date.setDate(gt1Date.getDate() - nowDay - 6);
-    gt1Date.setHours(0,0,0);
-    // var gt2Date = new Date();
-    // gt2Date.setDate(gt2Date.getDate() - nowDay - 7);
-
-    // const userArrObj = await User.find({createdDate:{ $gte: gt1Date, $lte: gtDate}});
-    const userArrObj = await User.find({accountType:'Worker', createdDate:{ $gte: gt1Date, $lte: gtDate}});
-    // periodStart:{$gte:gt1Date,$lte:gtDate}
-    userArrObj.forEach((ele,index,arry) =>{
-        Payroll.findOne({}).then(client => {
-            if (client)
-                return res.status(200).json({ fullname: "Job already exists" });
-            // } else {
-                delete req.body._id;
-                console.log('cccc');
-                var tempObj ={
-                    workerId : ele._id,
-                    periodStart : gt1Date,
-                    periodEnd : gtDate,
-                    type : "Generated IDs",
-                    response : "Successful",
-                    firstName : 'Admin',
-                    lastName : '',
-                    timestamp : new Date(),
-                }
-                const newClient = new Payroll(tempObj);
-
-                Payroll.countDocuments({}, function(err, c) {
-                    console.log(req.body)
-                    console.log(newClient)
-                    console.log('location count document')
-                    newClient.id = c + 1;
-                    if(newClient.id < 10)
-                    newClient.logID = 'LOG000' + newClient.id;
-                    else if(this.id < 100)
-                    newClient.logID = 'LOG00' + newClient.id;
-                    else if(this.id < 1000)
-                    newClient.logID = 'LOG0'+newClient.id;
-                    else
-                         newClient.JobId = 'LOG'+ newClient.id.toString();
-                    newClient.save((err) => {
-                        if (err) {
-                            console.log(err)
-                            res.status(500).json(err);
-                        } else {
-                            console.log(newClient);
-                            if(index == (arry.length - 1)){
-                                Payroll.find({},function(err, cresult){
-                                    if(cresult){
-                                          res.status(200).json(cresult)
-                                    }
-                                })
-                            }
-                        }
-                    });
-                })
-
-            // }
-        });
-        // userArr.push(ele._id);
-
-    })
-}
-exports.getExpertTimesheets = async(req, res) => {
-    console.log('getExpertTimesheets')
-    var nowDay = new Date().getDay();
-    if(nowDay == 0){
-        nowDay = 7;
-    }
-    var gtDate = new Date();
-    gtDate.setDate(gtDate.getDate() - nowDay);
-    gtDate.setHours(23,59,59);
-    var gt1Date = new Date();
-    gt1Date.setDate(gt1Date.getDate() - nowDay - 6);
-    gt1Date.setHours(0,0,0);
-
-    // const userArrObj = await User.find({createdDate:{ $gte: gt1Date, $lte: gtDate }});
-    // var userArr = [];
-    // userArrObj.forEach(ele =>{
-    //     userArr.push(ele._id);
-    // })
-    const userArrObj = await Timesheet.find({
-            $and:[
-            {statusStr:'Completed'},
-            {shiftDate:{ $gte: gt1Date, $lte: gtDate }},
-        ]
-    }
-            ).populate(['workerId','JobId_Id']);
-            console.log(userArrObj)
-    var tempObj = {};
-    userArrObj.forEach(ele =>{
-        if(!tempObj[ele.workerId._id]){
-            tempObj[ele.workerId._id] = 0 + (ele.JobId_Id.endTime-ele.JobId_Id.startTime);
-        }else{
-            tempObj[ele.workerId._id] += ele.JobId_Id.endTime-ele.JobId_Id.startTime;
-        }
-    })
-    console.log('tempObj')
-    console.log(Object.keys(tempObj))
-    if(Object.keys(tempObj).length == 0){
-        res.status(200).json('no Data')
-    }
-    // periodStart:{$gte:gt1Date,$lte:gtDate}
-    Object.keys(tempObj).forEach((ele,index,arry) =>{
-        Payroll.findOne({}).then((client) => {
-            // if (client)
-            //     return res.status(200).json({ fullname: "Job already exists" });
-                    var tempRate = 1;
-                 var tempObj1 ={
-                    workerId : ele,
-                    WR_UNITS: ele * tempRate,
-                    WR_TRNCDE :'p001',
-                    periodStart : gt1Date,
-                    periodEnd : gtDate,
-                    type : "Export Timesheets",
-                    response : "Successful",
-                    firstName : 'Admin',
-                    lastName : '',
-                    timestamp : new Date(),
-                }
-                const newClient = new Payroll(tempObj1);
-
-                Payroll.countDocuments({}, function(err, c) {
-                    console.log(req.body)
-                    console.log(newClient)
-                    newClient.id = c + 1;
-                    if(newClient.id < 10)
-                    newClient.logID = 'LOG000' + newClient.id;
-                    else if(this.id < 100)
-                    newClient.logID = 'LOG00' + newClient.id;
-                    else if(this.id < 1000)
-                    newClient.logID = 'LOG0'+newClient.id;
-                    else
-                         newClient.logID = 'LOG'+ newClient.id.toString();
-                    newClient.save((err) => {
-                        if (err) {
-                            console.log(err)
-                            res.status(500).json(err);
-                        } else {
-                            console.log(newClient);
-                            if(index == (arry.length - 1)){
-                                Payroll.find({},function(err, cresult){
-                                    if(cresult){
-                                          res.status(200).json(cresult)
-                                    }
-                                })
-                            }
-                        }
-                    });
-                })
-            });
-    })
-}
-exports.getImportPayroll = async(req, res) => {
-    console.log('getImportPayroll')
-    Date.prototype.getWeek = function() {
-        var date = new Date(this.getTime());
-        date.setHours(0, 0, 0, 0);
-        // Thursday in current week decides the year.
-        date.setDate(date.getDate() + 3 - (date.getDay() + 6) % 7);
-        // January 4 is always in week 1.
-        var week1 = new Date(date.getFullYear(), 0, 4);
-        // Adjust to Thursday in week 1 and count number of weeks from date to week1.
-        return 1 + Math.round(((date.getTime() - week1.getTime()) / 86400000
-                              - 3 + (week1.getDay() + 6) % 7) / 7);
-      }
-      Date.prototype.getWeekYear = function() {
-        var date = new Date(this.getTime());
-        date.setDate(date.getDate() + 3 - (date.getDay() + 6) % 7);
-        return date.getFullYear();
-      }
-      function getDateOfISOWeek(w, y) {
-        var simple = new Date(y, 0, 1 + (w - 1) * 7);
-        var dow = simple.getDay();
-        var ISOweekStart = simple;
-        if (dow <= 4)
-            ISOweekStart.setDate(simple.getDate() - simple.getDay() + 1);
-        else
-            ISOweekStart.setDate(simple.getDate() + 8 - simple.getDay());
-        return ISOweekStart;
-    }
-    var nowDay = new Date().getWeek();
-      nowDay --;
-    // if(nowDay == 0){
-    //     nowDay = 7;
-    // }
-    // gtDate.setDate(gtDate.getDate() - nowDay);
-    // gtDate.setHours(23,59,59);
-    // var gt1Date = new Date();
-    // gt1Date.setDate(gt1Date.getDate() - nowDay - 6);
-    // gt1Date.setHours(0,0,0);
-    var reqResultArr = req.body.linesR;
-    reqResultArr.pop();
-    reqResultArr.filter(ele => ele[0] != '');
-    reqResultArr.forEach(async(ele, index, arry)=>{
-                console.log('ele[0]')
-                var eleArr = ele[0].split(',');
-                var nameArr = eleArr[1].toString().split(' ');
-                console.log(eleArr[1])
-                var status = 'Successful';
-                var userInfo = await User.findOne({workerId: eleArr[1],forename:nameArr[1],surename:nameArr[2]},'_id');
-                console.log(userInfo)
-                if(!userInfo)
-                    status = 'Failed';
-                Payslip.find({WEEK_NO:nowDay}).then(result =>{
-                        console.log('Payslip')
-                        console.log(result)
-                        if(result.length > 0){}else{
-                            console.log('132')
-                            console.log(eleArr)
-                        var tempObj1 ={
-                            workerIDStr:eleArr[0],
-                            Names:eleArr[1],
-                            TAX:eleArr[2],
-                            NI_EES:eleArr[3],
-                            GROSS_TO_DATE:eleArr[4],
-                            TAX_TO_DATE:eleArr[5],
-                            NI_TO_DATE:eleArr[6],
-                            TOTAL_DEDUCTIONS:eleArr[7],
-                            NET_PAY_PREV:eleArr[8],
-                             NET_PAY:eleArr[9],
-                            NI_CODE:eleArr[10],
-                            PAY_DATE:eleArr[11],
-                            WEEK_NO:eleArr[12],
-                            TAX_CODE:eleArr[13],
-                            WK1M1:eleArr[14],
-                            NI_NUMBER:eleArr[15],
-                            STUDENT_LOAN:eleArr[16],
-                            PENSION:eleArr[17],
-                        }
-                        const newClient = new Payslip(tempObj1);
-                        if(userInfo)
-                            newClient.workerId = userInfo._id;
-                        console.log('newClient')
-                        Payslip.countDocuments({}, function(err, c) {
-                            console.log(newClient)
-                            newClient.id = c + 1;
-                            if(newClient.id < 10)
-                            newClient.payslipID = 'PAYSLIP000' + newClient.id;
-                            else if(this.id < 100)
-                            newClient.payslipID = 'PAYSLIP00' + newClient.id;
-                            else if(this.id < 1000)
-                            newClient.payslipID = 'PAYSLIP0'+newClient.id;
-                            else
-                                 newClient.payslipID = 'PAYSLIP'+ newClient.id.toString();
-                            newClient.save((err) => {
-                                if (err) {
-                                    console.log(err)
-                                    res.status(500).json(err);
-                                } else {
-                                    console.log(newClient);
-                                    Payroll.find({logID:'123j12kl3j1ljl'}).then(client => {
-                                        console.log(' ---------------------')
-                                        var periodStartDate = getDateOfISOWeek(tempObj1.WEEK_NO,new Date(tempObj1.PAY_DATE).getFullYear());
-                                        console.log(periodStartDate)
-                                        var periodEndDate = periodStartDate;
-                                        periodEndDate.setDate(periodEndDate.getDate()+ 6);
-                                        console.log(periodEndDate)
-
-                                        console.log(' ---------------------')
-                                        if (client.length > 0){console.log('aaa');console.log(client)}else{
-                                            var tempObj2 ={
-                                                // workerId : eleArr[1],
-                                                periodStart : periodStartDate,
-                                                periodEnd : periodEndDate,
-                                                type : "Import Payroll",
-                                                response : status,
-                                                firstName : 'Admin',
-                                                lastName : '',
-                                                timestamp : new Date(),
-                                                payslipId:newClient._id
-                                            }
-                                            const newClient2 = new Payroll(tempObj2);
-                                            if(userInfo)
-                                                newClient2.workerId = userInfo._id;
-                                            Payroll.countDocuments({}, function(err, c) {
-                                                console.log(req.body)
-                                                console.log(newClient2)
-                                                newClient2.id = c + 1;
-                                                if(newClient2.id < 10)
-                                                newClient2.logID = 'LOG000' + newClient2.id;
-                                                else if(this.id < 100)
-                                                newClient2.logID = 'LOG00' + newClient2.id;
-                                                else if(this.id < 1000)
-                                                newClient2.logID = 'LOG0'+newClient2.id;
-                                                else
-                                                    newClient2.logID = 'LOG'+ newClient2.id.toString();
-                                                newClient2.save((err) => {
-                                                    if (err) {
-                                                        console.log(err)
-                                                        res.status(500).json(err);
-                                                    } else {
-                                                        console.log(newClient2);
-                                                        if(index == (arry.length - 1)){
-                                                            Payroll.find({},function(err, cresult){
-                                                                if(cresult){
-                                                                    res.status(200).json(cresult)
-                                                                }
-                                                            })
-                                                        }
-                                                    }
-                                                });
-                                            })
-                                        }
-                                    });
-                                }
-                            });
-                        })
-                    }
-            })
-    })
-    // console.log(nowDay)
-    //     if(result){}else{
-
-    //     }
-    // })
-    // console.log(req.body.linesR);
-    // const userArrObj = await Timesheet.find({
-    //         $and:[
-    //         {statusStr:'Completed'},
-    //         {shiftDate:{ $gte: gt1Date, $lte: gtDate }},
-    //     ]
-    // }
-    //         ).populate(['workerId','JobId_Id']);
-    //         console.log(userArrObj)
-    // var tempObj = {};
-    // userArrObj.forEach(ele =>{
-    //     if(!tempObj[ele.workerId._id]){
-    //         tempObj[ele.workerId._id] = 0 + (ele.JobId_Id.endTime-ele.JobId_Id.startTime);
-    //     }else{
-    //         tempObj[ele.workerId._id] += ele.JobId_Id.endTime-ele.JobId_Id.startTime;
-    //     }
-    // })
-    // console.log('tempObj')
-    // console.log(tempObj)
-    // Object.keys(tempObj).forEach((ele,index,arry) =>{
-    //     Payroll.findOne({periodStart:{$gte:gt1Date,$lte:gtDate}}).then(client => {
-    //         if (client)
-    //             return res.status(200).json({ fullname: "Job already exists" });
-    //                 var tempRate = 1;
-    //              var tempObj1 ={
-    //                 workerId : ele,
-    //                 WR_UNITS: ele * tempRate,
-    //                 WR_TRNCDE :'xxx',
-    //                 periodStart : gt1Date,
-    //                 periodEnd : gtDate,
-    //                 type : "Export Timesheets",
-    //                 response : "Successful",
-    //                 firstName : 'Admin',
-    //                 lastName : '',
-    //                 timestamp : new Date(),
-    //             }
-    //             const newClient = new Payroll(tempObj1);
-
-    //             Payroll.countDocuments({}, function(err, c) {
-    //                 console.log(req.body)
-    //                 console.log(newClient)
-    //                 newClient.id = c + 1;
-    //                 if(newClient.id < 10)
-    //                 newClient.logID = 'LOG000' + newClient.id;
-    //                 else if(this.id < 100)
-    //                 newClient.logID = 'LOG00' + newClient.id;
-    //                 else if(this.id < 1000)
-    //                 newClient.logID = 'LOG0'+newClient.id;
-    //                 else
-    //                      newClient.JobId = 'LOG'+ newClient.id.toString();
-    //                 newClient.save((err) => {
-    //                     if (err) {
-    //                         console.log(err)
-    //                         res.status(500).json(err);
-    //                     } else {
-    //                         console.log(newClient);
-    //                         if(index == (arry.length - 1)){
-    //                             Payroll.find({},function(err, cresult){
-    //                                 if(cresult){
-    //                                       res.status(200).json(cresult)
-    //                                 }
-    //                             })
-    //                         }
-    //                     }
-    //                 });
-    //             })
-    //         });
-    // })
 }

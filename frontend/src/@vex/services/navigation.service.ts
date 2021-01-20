@@ -263,50 +263,7 @@ export class NavigationService {
     route: '/team/payroll',
     icon: icReceipt,
     routerLinkActiveOptions: { exact: true }
-  },
-  {
-    type: 'dropdown',
-    label: 'Settings',
-    icon: icSettings,
-    children: [
-          {
-            type: 'link',
-            label: 'Company Details',
-            route: '/team/settings/companydetails'
-          },
-          {
-            type: 'link',
-            label: 'Invoice Settings',
-            route: '/team/settings/invoicesettings'
-          },
-          {
-            type: 'link',
-            label: 'Team Accounts',
-            route: '/team/settings/teamaccounts'
-          },
-         //  {
-         //    type: 'link',
-         //    label: 'Departments & Roles',
-         //    route: '/admin/settings/departmentsroles'
-         //  },
-          {
-            type:'dropdown',
-            label:'Email Configurations',
-            children:[
-             //  {
-             //    type:'link',
-             //    label:'General Templates',
-             //    route:'/admin/settings/generaltemplates'
-             //  },
-              {
-                type:'link',
-                label:'Email Settings',
-                route:'/team/settings/emailsettings'
-              }
-            ]
-          }
-        ]
-      }
+  }
   ];
   private _openChangeSubject = new Subject<NavigationDropdown>();
   openChange$ = this._openChangeSubject.asObservable();

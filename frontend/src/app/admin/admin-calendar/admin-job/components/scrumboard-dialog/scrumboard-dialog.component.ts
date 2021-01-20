@@ -276,31 +276,6 @@ export class ScrumboardDialogComponent implements OnInit {
         this.authService.sendShiftEmail(workers, this.list, this.data).subscribe((sendemail_res) => {
           this.authService.openSnackbar('Shift Detail Sent to workers');
         });
-        // workers.forEach(worker => {
-        //   if(worker.workerId !== null){
-        //     const found = this._workers.find(x => x.id === worker.workerId);
-        //     console.log('worker', worker);
-        //     console.log('found', found);
-        //     const shiftDate = moment(moment(this.list.shiftDate)).format('DD-MM-YYYY');
-
-        //     const obj = {
-        //       content: 'content',
-        //       subject : 'You have been assigned a new shift (ID #' + this.list.id + ')',
-        //       name : found.name,
-        //       email: found.emailAddress,
-        //       // content: `You have been assigned a shift with ${this.list.clientId.firstName} ${this.list.clientId.lastName} <br/><br/>`+`Please read the shift details carefully below. If you have any questions relating to the shift, or if you’re unable to attend this shift, please contact Imperial Recruitment as soon as possible on 020 7436 7424.<br/><br/>`+
-        //       // `<span style="font-weight: bold;">Shift Date:</span><span> ${shiftDate} </span><br/>
-        //       // <span style="font-weight: bold;">Shift start time:</span><span> ${worker.startTime} – ${worker.endTime}</span><br/>
-        //       // <span style="font-weight: bold;">Role: </span><span>${worker.role}</span><br/>`
-        //       // +'LOGIN TO PORTAL'+ `\n http://imperial-recruitment.herokuapp.com/#/login`
-        //     };
-        //     console.log('email obj', obj);
-        //     this.authService.sendEmail(obj).subscribe((sendemail_res) => {
-        //       this.authService.openSnackbar('Shift Detail Sent to workers');
-        //     });
-        //   }
-
-        // });
       }
 
       this.dialogRef.close(res);
@@ -309,78 +284,6 @@ export class ScrumboardDialogComponent implements OnInit {
   sendEmail(sendEmail){
     console.log('send email', sendEmail);
   }
-//   save() {
-//     console.log('.........../.././././');
-//     // console.log(this.data.card.timesheetId[0].JobId)
-//     console.log(this.newWorkerId);
-//     if (this.originalTimesheets.length > 0){
-//     this.authService.removeTimesheetsJob(this.originalTimesheets).subscribe((res) => {
-//       console.log(this.data.card.timesheetId);
-//       console.log(this.data.card.id);
-//       this.authService.setJobWorkers(this.newWorkerId, this.data.card.id).subscribe((res) => {
-//             // this.authService.setJobWorkers(JSON.stringify(this.newWorkerId)).subscribe((res)=>{
-//             console.log('setJobWOrker');
-//             console.log(res);
-//           });
-//       this.dialogRef.close(this.form.value);
-//         });
-//     }
-//     else{
-//       console.log('./.././././');
-//       console.log(this.newWorkerId);
-//       console.log(this.data.card.id);
-//       this.authService.setJobWorkers(this.newWorkerId, this.data.card.id).subscribe((res) => {
-//       // this.authService.setJobWorkers(JSON.stringify(this.newWorkerId)).subscribe((res)=>{
-//       console.log('setJobWOrker');
-//       console.log(res);
-//       this.authService.openSnackbar('updated Successfully');
-//     });
-//       this.dialogRef.close(this.form.value);
-//     }
-//     this.authService.openSnackbar('updated Successfully');
-//     const controls = this.form.controls;
-//     const resultArr = this.oldWorkerId.filter(({ id: id1 }) => !this.newWorkerId.some(({ id: id2 }) => id2 === id1));
-//     if (resultArr.length > 0){
-//       resultArr.forEach(elementR => {
-//         const obj = {
-//         subject : 'Your shift has been cancelled  ' + this.data.card.timesheetId[0].JobId,
-//         name : elementR.workerId.forename + ' ' + elementR.workerId.surename,
-//         email: elementR.workerId.emailAddress,
-//         content1: `Your shift with ${this.data.card.clientId.firstName} ${this.data.card.clientId.lastName} has been cancelled.`,
-//         content2: `We are sorry for any inconvenience this may have caused.`,
-//         content3: `If you have any questions, please feel free to contact us.`,
-//         btn: 'LOGIN TO PORTAL',
-//         btn_link: 'http://imperial-recruitment.herokuapp.com/#/login',
-//         link: ''
-//       };
-//         console.log('obj');
-//         console.log(obj);
-//         this.authService.sendEmail(obj).subscribe((sendemail_res) => {
-//         console.log('crate job email');
-//     });
-// });
-//     }
-//     this.newWorkerId.forEach(element => {
-//             const obj = {
-//             subject : 'You have been assigned a new shift ' + this.data.card.timesheetId[0].JobId,
-//             name : element.name,
-//             email: element.emailAddress,
-//             content1: `You have been assigned a shift with ${this.data.card.clientId.firstName} ${this.data.card.clientId.lastName} `,
-//             content2: `Please read the shift details carefully below. If you have any questions relating to the shift, or if you’re unable to attend this shift, please contact Imperial Recruitment as soon as possible on 020 7436 7424.`,
-//             content3: `<span>Shift Date: ${controls.shiftDate.value} </span><br/>
-//             <span>Shift start time: ${controls.startTime.value} – ${controls.endTime.value}</span><br/>
-//             <span>Role: ${controls.role.value}</span><br/>`,
-//             btn: 'LOGIN TO PORTAL',
-//             btn_link: 'http://imperial-recruitment.herokuapp.com/#/login',
-//             link: ''
-//           };
-//             console.log('obj');
-//             console.log(obj);
-//             this.authService.sendEmail(obj).subscribe((sendemail_res) => {
-//             console.log('crate job email');
-//         });
-//     });
-//   }
 
   isImageExtension(extension: string) {
     return extension === 'jpg' || extension === 'png';

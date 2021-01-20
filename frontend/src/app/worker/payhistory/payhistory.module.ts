@@ -13,12 +13,16 @@ import { MatButtonModule } from '@angular/material/button';
 import { PageLayoutModule } from '../../../@vex/components/page-layout/page-layout.module';
 import { ContainerModule } from '../../../@vex/directives/container/container.module';
 import { IconModule } from '@visurel/iconify-angular';
-
+import { MatPaginatorModule } from '@angular/material/paginator';
+import { MatTableModule } from '@angular/material/table';
+import { MatSortModule } from '@angular/material/sort';
+import {NgxPrintModule} from'ngx-print';
 
 @NgModule({
   declarations: [PayhistoryComponent],
   imports: [
     CommonModule,
+    NgxPrintModule,
     PayhistoryRoutingModule,
     FlexLayoutModule,
     ChartModule,
@@ -29,7 +33,10 @@ import { IconModule } from '@visurel/iconify-angular';
     BreadcrumbsModule,
     MatButtonModule,
     PageLayoutModule,
-    ContainerModule
+    ContainerModule,
+    MatPaginatorModule,
+    MatTableModule,
+    MatSortModule
   ]
 })
 export class PayhistoryModule {

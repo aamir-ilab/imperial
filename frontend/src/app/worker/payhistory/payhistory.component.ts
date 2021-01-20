@@ -1,128 +1,374 @@
-import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
-import icGroup from '@iconify/icons-ic/twotone-group';
-import icPageView from '@iconify/icons-ic/twotone-pageview';
-import icCloudOff from '@iconify/icons-ic/twotone-cloud-off';
-import icTimer from '@iconify/icons-ic/twotone-timer';
-import { defaultChartOptions } from '../../../@vex/utils/default-chart-options';
-import { Order, tableSalesData } from '../../../static-data/table-sales-data';
+import { ChangeDetectorRef, Component, Input, OnInit, ViewChild } from '@angular/core';
 import { TableColumn } from '../../../@vex/interfaces/table-column.interface';
-import icMoreVert from '@iconify/icons-ic/twotone-more-vert';
-import { Job } from 'src/app/client/clients-dashboard/client-job-table/interfaces/job.model';
+import icMoreHoriz from '@iconify/icons-ic/twotone-more-horiz';
+import { fadeInUp400ms } from '../../../@vex/animations/fade-in-up.animation';
 import { AuthService } from 'src/app/services/auth.service';
+import { SelectionModel } from '@angular/cdk/collections';
+import { FormControl } from '@angular/forms';
+import { MatPaginator } from '@angular/material/paginator';
+import { stagger40ms } from '../../../@vex/animations/stagger.animation';
+import { MatSort } from '@angular/material/sort';
+import { MatTableDataSource } from '@angular/material/table';
+import { ReplaySubject, Observable, of } from 'rxjs';
+import { filter } from 'rxjs/operators';
+import { Payslip } from 'src/app/models/payslip.model';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'vex-payhistory',
   templateUrl: './payhistory.component.html',
-  styleUrls: ['./payhistory.component.scss']
+  styleUrls: ['./payhistory.component.scss'],
+  animations: [
+    fadeInUp400ms,
+    stagger40ms
+  ],
 })
+
 export class PayhistoryComponent implements OnInit {
 
-  tableColumns: TableColumn<Job>[] = [
-    {
-      label: 'Role',
-      property: 'role',
-      type: 'text'
-    },
-    {
-      label: 'Client',
-      property: 'client',
-      type: 'text',
-      cssClasses: ['font-medium']
-    },
-    {
-      label: 'Start Time',
-      property: 'startTime',
-      type: 'text',
-      cssClasses: ['text-secondary']
-    },
-    {
-      label: 'End Time',
-      property: 'endTime',
-      type: 'text',
-      cssClasses: ['text-secondary']
-    },
-    {
-      label: 'Status',
-      property: 'statusStr',
-      type: 'button',
-      cssClasses: ['text-secondary']
-    }
+  layoutCtrl = new FormControl('boxed');
+  payslipObj:any;
+  payslips:any;
+  /**
+   * Simulating a service with HTTP that returns Observables
+   * You probably want to remove this and do all requests in a service with HTTP
+   */
+  subject$: ReplaySubject<Payslip[]> = new ReplaySubject<Payslip[]>(1);
+  data$: Observable<Payslip[]> = this.subject$.asObservable();
+  customers: Payslip[];
+
+  @Input()
+  columns: TableColumn<Payslip>[] = [
+    { label: 'Pay ID', property: 'payslipID', type: 'text', visible: true },
+    { label: 'PAY DATE', property: 'PAY_DATE', type: 'text', visible: true, cssClasses: ['font-medium'] },
+    { label: 'AMOUNT', property: 'NET_PAY', type: 'text', visible: true },
+    { label: 'Period', property: 'period', type: 'text', visible: true },
+    { label: 'view', property: 'actions', type: 'button', visible: true },
   ];
-  tableData :any;
-  // series: ApexAxisChartSeries = [{
-  //   name: 'Subscribers',
-  //   data: [28, 40, 36, 0, 52, 38, 60, 55, 67, 33, 89, 44]
-  // }];
+  pageSize = 10;
+  pageSizeOptions: number[] = [5, 10, 20, 50];
+  dataSource: MatTableDataSource<Payslip> | null;
+  selection = new SelectionModel<Payslip>(true, []);
 
-  // userSessionsSeries: ApexAxisChartSeries = [
-  //   {
-  //     name: 'Users',
-  //     data: [10, 50, 26, 50, 38, 60, 50, 25, 61, 80, 40, 60]
-  //   },
-  //   {
-  //     name: 'Sessions',
-  //     data: [5, 21, 42, 70, 41, 20, 35, 50, 10, 15, 30, 50]
-  //   },
-  // ];
+  icMoreHoriz = icMoreHoriz;
+  currentUser;
+  @ViewChild(MatPaginator, { static: true }) paginator: MatPaginator;
+  @ViewChild(MatSort, { static: true }) sort: MatSort;
 
-  // salesSeries: ApexAxisChartSeries = [{
-  //   name: 'Sales',
-  //   data: [28, 40, 36, 0, 52, 38, 60, 55, 99, 54, 38, 87]
-  // }];
+  constructor(private authService: AuthService,
+    private route:Router) {
+      if (!this.authService.currenctUser) {
+      this.authService.setCurrentUser();
+      }
+      this.currentUser = this.authService.currenctUser;
+  }
 
-  // pageViewsSeries: ApexAxisChartSeries = [{
-  //   name: 'Page Views',
-  //   data: [405, 800, 200, 600, 105, 788, 600, 204]
-  // }];
+  get visibleColumns() {
+    return this.columns.filter(column => column.visible).map(column => column.property);
+  }
 
-  // uniqueUsersSeries: ApexAxisChartSeries = [{
-  //   name: 'Unique Users',
-  //   data: [356, 806, 600, 754, 432, 854, 555, 1004]
-  // }];
-
-  // uniqueUsersOptions = defaultChartOptions({
-  //   chart: {
-  //     type: 'area',
-  //     height: 100
-  //   },
-  //   colors: ['#ff9800']
-  // });
-
-  icGroup = icGroup;
-  icPageView = icPageView;
-  icCloudOff = icCloudOff;
-  icTimer = icTimer;
-  icMoreVert = icMoreVert;
-  completedShifts:number;
-  totalHours:number;
-  constructor(private cd: ChangeDetectorRef,
-    private authService:AuthService) { }
+  /**
+   * Example on how to get data and pass it to the table - usually you would want a dedicated service with a HTTP request for this
+   * We are simulating this request here.
+   */
+  getData() {
+    this.authService.getPaySlips(this.currentUser._id).subscribe((res) => {
+      console.log('Payslips',res)
+      of(res.map(client => new Payslip(client))).subscribe(clientes => {
+        console.log('clientes', clientes);
+        this.subject$.next(clientes);
+      });
+    });
+    // return of(statusTableData.map(customer => new Job(customer)));
+  }
 
   ngOnInit() {
-    if(!this.authService.workerJobInfo)
-      this.authService.setCurrentWorkerJob();
-      this.tableData = this.authService.workerJobInfo;
-    console.log(this.tableData)
-      this.completedShifts = this.tableData.filter((obj) => obj.statusStr == 'Completed').length;
-      this.totalHours = 0;
-      console.log('----------------------')
-      console.log(this.completedShifts)
-      console.log(this.totalHours);
-      console.log(this.tableData)
-      this.tableData.filter((obj) => {if(obj.statusStr == 'Completed' || obj.statusStr == 'Timesheet Submitted') this.totalHours += parseInt(obj.endTime) - parseInt(obj.startTime); })
-      // this.totalHours = this.tableData.filter((obj) => obj.statusStr == 'Completed').length;
+    const id = JSON.parse(localStorage.getItem('userInfo'))._id;
+    this.authService.getPaySlips(id).subscribe((clients)=>{
+      this.payslips = clients;
+    });
 
-    setTimeout(() => {
-      const temp = [
-        {
-          name: 'Subscribers',
-          data: [55, 213, 55, 0, 213, 55, 33, 55]
-        },
-        {
-          name: ''
-        }
-      ];
-    }, 3000);
+
+    if (!this.authService.currenctUser) {
+      this.authService.setCurrentUser();
+    }
+    this.currentUser = this.authService.currenctUser;
+    this.getData();
+
+    this.dataSource = new MatTableDataSource();
+
+    this.data$.pipe(
+      filter<Payslip[]>(Boolean)
+    ).subscribe(customers => {
+      this.customers = customers;
+      this.dataSource.data = customers;
+    });
+
   }
+
+  ngAfterViewInit() {
+    this.dataSource.paginator = this.paginator;
+    this.dataSource.sort = this.sort;
+  }
+
+  trackByProperty<T>(index: number, column: TableColumn<T>) {
+    return column.property;
+  }
+
+  downloadPayslip(payslipid){
+    console.log('downloadPayslip', payslipid)
+    this.payslipObj = this.payslips.filter((obj)=>obj.payslipID
+    == payslipid)[0];
+    console.log('payslipObj', this.payslipObj);
+    let printContents =
+    `<div id="print-section" class="p-gutter container ">
+      <div @fadeInUp class="card p-16">
+        <div class="clearfix">
+          <table class="table-header">
+            <thead class="table-header">
+              <tr>
+                <th>Employee</th>
+                <th>Number</th>
+                <th colspan="2">Employer</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>${this.payslipObj.workerId.surename} ${this.payslipObj.workerId.forename}</td>
+                <td>${this.payslipObj.workerId.workerId}</td>
+                <td colspan="2">IMPERIAL RECRUITMENT COMPANY LTD</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <div>
+          <table class="inner-table">
+            <thead class="table-header">
+              <tr>
+                <th colspan="2">PAYMENTS</th>
+                <th class="desc">DEDUCTIONS</th>
+                <th>TO DATE</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td></td>
+                <td class="row2">Value &nbsp;= &nbsp;  Hours &nbsp;X &nbsp; Rate</td>
+                <td class="row4">P.A.Y.E. &nbsp; &nbsp; &nbsp; ${this.payslipObj.NET_PAY}</td>
+                <td class="to-date">TAXABLE <span> &nbsp; &nbsp; &nbsp; &nbsp; ${this.payslipObj.TAX_TO_DATE}</span></td>
+              </tr>
+              <tr>
+                <td class="name">"belrun ltd"</td>
+                <td class="row2">"340.00" &nbsp; &nbsp;  "43.50" &nbsp; &nbsp; "8.50"</td>
+                <td></td>
+                <td class="to-date">tax &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; <span>${this.payslipObj.TAX}</span></td>
+              </tr>
+              <tr>
+                <td></td>
+                <td class="row2"></td>
+                <td class="row3" >Nat.Ins &nbsp; &nbsp; &nbsp; "24.45"</td>
+                <td class="to-date" >nat.ins <span> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; "441.65"</span></td>
+              </tr>
+              <tr>
+                <td></td>
+                <td class="row2"></td>
+                <td class="row4" style="padding-top: 30px; padding-bottom: 30px; ">pansion &nbsp;  ${this.payslipObj.PENSION}</td>
+                <td class="to-date" ></td>
+              </tr>
+              <tr>
+                <td></td>
+                <td class="row2"></td>
+                <td></td>
+                <td class="to-date"> <span> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;N.1.Code ${this.payslipObj.NI_CODE}</span></td>
+              </tr>
+              <tr>
+                <td></td>
+                <td class="row2"></td>
+                <td></td>
+                <td class="to-date"> pay date <span> &nbsp; &nbsp; &nbsp; &nbsp; ${this.payslipObj.PAY_DATE}</span></td>
+              </tr>
+              <tr>
+                <td></td>
+                <td class="row2"></td>
+                <td></td>
+                <td class="to-date">tax period <span> &nbsp; &nbsp; WEEK ${this.payslipObj.WEEK_NO} </span></td>
+              </tr>
+              <tr>
+                <td class="name">Total</td>
+                <td class="row2">"369.75"</td>
+                <td class="name">total &nbsp; &nbsp; "60.32"</td>
+                <td class="to-date">tax code <span> &nbsp; &nbsp; &nbsp; ${this.payslipObj.TAX_CODE} WK ${this.payslipObj.WK1M1} </span></td>
+              </tr>
+              <tr>
+                <td></td>
+                <td class="row2"></td>
+                <td></td>
+                <td  class="to-date date-last-col">n.i no <span> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;${this.payslipObj.NI_NUMBER} </span></td>
+              </tr>
+            </tbody>
+          </table>
+          <div class="note">
+            please keep this pay advice in a place.it may be required for the purpose of self assessment.
+          </div>
+        </div>
+      </div>
+    </div>
+    `;
+
+    let popupWin = window.open("", "_blank", "top=0,left=0,height=auto,width=auto");
+    popupWin.document.open();
+    popupWin.document.write(`<html>
+        <head>
+          <style>
+            @media print {
+              .p-gutter {
+                padding: 0 !important;
+              }
+
+              .card {
+                box-shadow: none !important;
+              }
+
+              .table-header thead, .inner-table thead{
+                background: #000!important;
+                -webkit-print-color-adjust: exact;
+                color: #fff!important;
+              }
+
+            }
+            .table {
+              td {
+                padding-left: var(--padding);
+                padding-right: var(--padding);
+              }
+            }
+
+            .bt-total{
+              border-top: 2px solid #eee;
+            }
+
+            .clearfix:after {
+              content: "";
+              display: table;
+              clear: both;
+            }
+            .table-header{
+              border: 2px solid #000;
+            }
+            .table-header thead{
+              background: #000;
+              color: #fff;
+              text-transform: uppercase;
+              font-weight: 600;
+              font-size: 14px;
+            }
+            .table-header th {
+              color: #fff;
+              background: #000;
+              text-transform: uppercase;
+              font-size: 11px;
+              font-weight: 600;
+            }
+            .table-header td {
+              background: #fff !important;
+              border-left: 2px solid #000;
+              padding: 10px 0;
+              text-transform: uppercase;
+              font-weight: 600;
+              font-size: 14px;
+            }
+            table.inner-table {
+              border: 2px solid #000;
+            }
+            .inner-table td{
+              border-left: 2px solid #000;
+              text-align: left;
+              padding-left: 10px;
+            }
+            .row2{
+              border-left: none !important;
+              font-weight: 600;
+              text-transform: capitalize;
+              font-size: 13px;
+            }
+            .row3{
+              font-weight: 600;
+              text-transform: capitalize;
+              font-size: 13px;
+            }
+            .row4{
+              font-weight: 600;
+              text-transform: uppercase;
+              font-size: 13px;
+            }
+            .button {
+              margin-top: 14px;
+            }
+            .to-date span{
+              text-transform: capitalize;
+              font-weight: 600;
+            }
+            .to-date{
+              text-transform: uppercase;
+              font-size: 14px;
+            }
+            .date-last-col{
+              padding: 0 0 20px 0;
+            }
+            .name{
+              text-transform: uppercase;
+              font-weight: 600;
+            }
+            .note {
+              text-transform: uppercase;
+              text-align: center;
+              font-weight: 700;
+              font-size: 12px;
+            }
+            .message .button {
+              position: relative;
+              top: 30px;
+            }
+            .message .button a{
+              padding: 8px 16px;
+            }
+            header {
+              padding: 10px 0;
+              margin-bottom: -16px;
+            }
+            table {
+              width: 100%;
+              border-collapse: collapse;
+              border-spacing: 0;
+              margin-bottom: 20px;
+            }
+            table th,
+            table td {
+              text-align: center;
+            }
+            table th {
+              padding: 5px 20px;
+            }
+
+          </style>
+        </head>
+        <body>
+          `+printContents+`
+          <script defer>
+            function triggerPrint(event) {
+              window.removeEventListener('load', triggerPrint, false);
+              setTimeout(function() {
+                window.print();
+                setTimeout(function() { window.close(); }, 0);
+              },0);
+            }
+            window.addEventListener('load', triggerPrint, false);
+          </script>
+        </body>
+      </html>`);
+    popupWin.document.close();
+  }
+
+
 
 }

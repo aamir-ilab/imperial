@@ -1,14 +1,11 @@
 import { AfterViewInit, Component, Input, OnInit, ViewChild } from '@angular/core';
 import { Observable, of, ReplaySubject } from 'rxjs';
 import { filter } from 'rxjs/operators';
-import { Customer } from './interfaces/customer.model';
 import { MatTableDataSource } from '@angular/material/table';
 import { MatPaginator } from '@angular/material/paginator';
 import { MatSort } from '@angular/material/sort';
-import { MatDialog } from '@angular/material/dialog';
 import { TableColumn } from '../../../@vex/interfaces/table-column.interface';
-import { aioTableData, aioTableLabels } from '../../../static-data/aio-table-data';
-import { CustomerCreateUpdateComponent } from './customer-create-update/customer-create-update.component';
+import { aioTableLabels } from '../../../static-data/aio-table-data';
 import icEdit from '@iconify/icons-ic/twotone-edit';
 import icDelete from '@iconify/icons-ic/twotone-delete';
 import icSearch from '@iconify/icons-ic/twotone-search';
@@ -18,7 +15,6 @@ import { SelectionModel } from '@angular/cdk/collections';
 import icMoreHoriz from '@iconify/icons-ic/twotone-more-horiz';
 import icFolder from '@iconify/icons-ic/twotone-folder';
 import { fadeInUp400ms } from '../../../@vex/animations/fade-in-up.animation';
-import { MAT_FORM_FIELD_DEFAULT_OPTIONS, MatFormFieldDefaultOptions } from '@angular/material/form-field';
 import { stagger40ms } from '../../../@vex/animations/stagger.animation';
 import { FormControl } from '@angular/forms';
 import { UntilDestroy, untilDestroyed } from '@ngneat/until-destroy';
@@ -41,14 +37,6 @@ import icPrint from '@iconify/icons-ic/twotone-print';
     fadeInUp400ms,
     stagger40ms
   ],
-  providers: [
-    {
-      provide: MAT_FORM_FIELD_DEFAULT_OPTIONS,
-      useValue: {
-        appearance: 'standard'
-      } as MatFormFieldDefaultOptions
-    }
-  ]
 })
 export class InvoicesComponent implements OnInit, AfterViewInit {
 
@@ -63,13 +51,12 @@ export class InvoicesComponent implements OnInit, AfterViewInit {
   customers: Invoice[];
 
   @Input()
-  columns: TableColumn<Customer>[] = [
-    // { label: 'Checkbox', property: 'checkbox', type: 'checkbox', visible: true },
+  columns: TableColumn<Invoice>[] = [
     { label: 'Invoice ID', property: 'invoiceId', type: 'text', visible: true, cssClasses: ['font-medium'] },
     { label: 'Timesheet ID', property: 'timesheetId', type: 'text', visible: true },
-    { label: 'Client Name', property: 'clientName', type: 'text', visible: false },
-    { label: 'Invoice Date', property: 'invoiceDateStr', type: 'text', visible: true },
-    { label: 'Invoice Due Date', property: 'invoiceDueDateStr', type: 'text', visible: true },
+    { label: 'Client Name', property: 'name', type: 'text', visible: false },
+    { label: 'Invoice Date', property: 'invoiceDate', type: 'text', visible: true },
+    { label: 'Invoice Due Date', property: 'invoiceDueDate', type: 'text', visible: true },
     { label: 'Actions', property: 'actions', type: 'button', visible: true }
   ];
   pageSize = 10;
@@ -94,7 +81,7 @@ export class InvoicesComponent implements OnInit, AfterViewInit {
   @ViewChild(MatPaginator, { static: true }) paginator: MatPaginator;
   @ViewChild(MatSort, { static: true }) sort: MatSort;
 
-  constructor(private dialog: MatDialog,
+  constructor(
     private authService:AuthService,
     private route:Router) {
   }
@@ -108,10 +95,9 @@ export class InvoicesComponent implements OnInit, AfterViewInit {
    * We are simulating this request here.
    */
   getData() {
-    this.authService.getAllInvoices().subscribe((clients)=>{
+    this.authService.getClientInvoices().subscribe((clients)=>{
       of(clients.map(client =>new Invoice(client))).subscribe(clientes =>{
-        console.log('123213123')  
-        console.log(clientes)  
+        console.log('ClientInvoices', clientes)
         this.subject$.next(clientes)
       });
     })
@@ -119,9 +105,6 @@ export class InvoicesComponent implements OnInit, AfterViewInit {
 
   ngOnInit() {
     this.getData();
-    // this.getData().subscribe(customers => {
-    //   this.subject$.next(customers);
-    // });
 
     this.dataSource = new MatTableDataSource();
 
@@ -142,67 +125,6 @@ export class InvoicesComponent implements OnInit, AfterViewInit {
     this.dataSource.sort = this.sort;
   }
 
-  createCustomer() {
-    this.dialog.open(CustomerCreateUpdateComponent).afterClosed().subscribe((customer: Invoice) => {
-      /**
-       * Customer is the updated customer (if the user pressed Save - otherwise it's null)
-       */
-      if (customer) {
-        /**
-         * Here we are updating our local array.
-         * You would probably make an HTTP request here.
-         */
-        this.authService.addInvoice(customer).subscribe((res)=>{
-          console.log('addInvoice')
-          this.authService.openSnackbar('Added Invoice Successfully ');
-        })
-        this.customers.unshift(new Invoice(customer));
-        this.subject$.next(this.customers);
-      }
-    });
-  }
-
-  updateCustomer(customer: Invoice) {
-    this.dialog.open(CustomerCreateUpdateComponent, {
-      data: customer
-    }).afterClosed().subscribe(updatedCustomer => {
-      /**
-       * Customer is the updated customer (if the user pressed Save - otherwise it's null)
-       */
-      if (updatedCustomer) {
-        /**
-         * Here we are updating our local array.
-         * You would probably make an HTTP request here.
-         */
-        this.authService.updateInvoice(updatedCustomer).subscribe((res)=>{
-          console.log('updateInvoice')
-          this.authService.openSnackbar('Changed Invoice Successfully ');
-        })
-        const index = this.customers.findIndex((existingCustomer) => existingCustomer.id === updatedCustomer.id);
-        this.customers[index] = new Invoice(updatedCustomer);
-        this.subject$.next(this.customers);
-      }
-    });
-  }
-
-  deleteCustomer(customer: Invoice) {
-    /**
-     * Here we are updating our local array.
-     * You would probably make an HTTP request here.
-     */
-    this.customers.splice(this.customers.findIndex((existingCustomer) => existingCustomer.id === customer.id), 1);
-    this.selection.deselect(customer);
-    this.subject$.next(this.customers);
-  }
-
-  deleteCustomers(customers: Invoice[]) {
-    /**
-     * Here we are updating our local array.
-     * You would probably make an HTTP request here.
-     */
-    customers.forEach(c => this.deleteCustomer(c));
-  }
-
   onFilterChange(value: string) {
     if (!this.dataSource) {
       return;
@@ -218,30 +140,11 @@ export class InvoicesComponent implements OnInit, AfterViewInit {
     column.visible = !column.visible;
   }
 
-  /** Whether the number of selected elements matches the total number of rows. */
-  isAllSelected() {
-    const numSelected = this.selection.selected.length;
-    const numRows = this.dataSource.data.length;
-    return numSelected === numRows;
-  }
-
-  /** Selects all rows if they are not all selected; otherwise clear selection. */
-  masterToggle() {
-    this.isAllSelected() ?
-      this.selection.clear() :
-      this.dataSource.data.forEach(row => this.selection.select(row));
-  }
-
   trackByProperty<T>(index: number, column: TableColumn<T>) {
     return column.property;
   }
 
-  onLabelChange(change: MatSelectChange, row: Invoice) {
-    // const index = this.customers.findIndex(c => c === row);
-    // this.customers[index].labels = change.value;
-    // this.subject$.next(this.customers);
-  }
   pdfCustomer(user:Invoice){
-    this.route.navigate(['/admin/invoices/pdf',user.invoiceId]);
+    this.route.navigate(['/client/invoices/pdf',user.invoiceId]);
   }
 }

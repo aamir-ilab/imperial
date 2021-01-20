@@ -81,8 +81,7 @@ export class AddTimesheetComponent implements OnInit  {
     var hours = 0
     var hours = parseInt(duration.asHours().toString());
     var minutes = parseInt(duration.asMinutes().toString())-hours*60;
-    var diff = hours+':'+minutes
-    console.log('diff', diff);
+    var diff = hours+':'+minutes;
     return diff;
   }
 
@@ -131,9 +130,10 @@ export class AddTimesheetComponent implements OnInit  {
     element.hours = this.time_diff(element.startTime, element.endTime);
 
     if(element.break !== 0){
+      console.log("element.break", element.break);
       var diff = this.time_diff(element.startTime, element.endTime);
       console.log("diff", diff);
-      element.hours =  moment(diff,"hh:mm").subtract(event.value, 'minutes').format('hh:mm');
+      element.hours =  moment(diff,"hh:mm").subtract(element.break, 'minutes').format('hh:mm');
       console.log("element.hours", element.hours);
     }
     else{

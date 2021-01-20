@@ -26,7 +26,8 @@ export class InvoiceComponent implements OnInit {
     private authService:AuthService) { }
 
   ngOnInit() {
-    this.authService.getAllInvoices().subscribe((clients)=>{
+    console.log('admin job scrumboard ng on int')
+    this.authService.getClientInvoices().subscribe((clients)=>{
       this.route.params.subscribe(params => {
           this.invoiceObj = clients.filter((obj)=>obj.invoiceId == params['invoice_Id'])[0];
           console.log('invoiceObj', this.invoiceObj)

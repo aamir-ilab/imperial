@@ -14,12 +14,14 @@ var PayslipSchema = new mongoose.Schema({
     NET_PAY_PREV:{type:Number},
     NET_PAY:{type:Number},
     NI_CODE:{type:String},
-    PAY_DATE:{type:Date},
+    PAY_DATE:{type:String},
     WEEK_NO:{type:Number},
     TAX_CODE:{type:String},
     WK1M1:{type:String},
     NI_NUMBER:{type:String},
     STUDENT_LOAN:{type:Number},
     PENSION:{type:Number},
+    periodStart:{type:Date},
+    periodEnd:{type:Date},
 }, { toJSON: { getters: true } });
 module.exports = mongoose.model('Payslip', PayslipSchema);

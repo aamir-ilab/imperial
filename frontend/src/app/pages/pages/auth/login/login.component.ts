@@ -77,7 +77,7 @@ export class LoginComponent implements OnInit {
                 this.router.navigate(['/worker']);
               });
           }
-          if (user.accountType === 'Admin'){
+          else if (user.accountType === 'Admin'){
             this.snackbar.open('Logged in Successfully', 'Cancel', {
               duration: 2000
             });

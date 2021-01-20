@@ -30,10 +30,10 @@ export class Payroll {
         this.periodStart = client.periodStart;
         this.periodEnd = client.periodEnd;
       }
-    
+
       get name() {
         let name = '';
-    
+
         if (this.firstName && this.lastName) {
           name = this.firstName + ' ' + this.lastName;
         } else if (this.firstName) {
@@ -41,12 +41,13 @@ export class Payroll {
         } else if (this.lastName) {
           name = this.lastName;
         }
-    
+
         return name;
       }
       get period(){
         let period = '';
-        period = formatDate(this.periodStart, 'dd MMM,yyyy','en') + ' - '+ formatDate(this.periodEnd, 'dd MMM,yyyy','en');
+        if(this.periodStart != undefined)
+          period = formatDate(this.periodStart, 'dd MMM,yyyy','en') + ' - '+ formatDate(this.periodEnd, 'dd MMM,yyyy','en');
         return period;
       }
 }

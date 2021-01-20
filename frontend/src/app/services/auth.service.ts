@@ -8,6 +8,7 @@ import { map, catchError, tap, last } from 'rxjs/operators';
 import { Job } from '../client/clients-dashboard/client-job-table/interfaces/job.model';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { Invoice } from '../models/invoice.model';
+import { Payslip } from '../models/payslip.model';
 
 const USERS_URL = environment.authURL;
 @Injectable({
@@ -110,11 +111,11 @@ export class AuthService {
       })
     );
   }
-  getExpertTimesheets(): Observable<any>{
-    return this.http.post<any>(`${USERS_URL}getExpertTimesheets`, {});
+  getExportTimesheets(): Observable<any>{
+    return this.http.post<any>(`${USERS_URL}getExportTimesheets`, {});
   }
-  getImportPayroll(linesR: any): Observable<any>{
-    return this.http.post<any>(`${USERS_URL}getImportPayroll`, {linesR});
+  getImportPayroll(rows: any, name: String): Observable<any>{
+    return this.http.post<any>(`${USERS_URL}getImportPayroll`, {rows:rows, user:name});
   }
   getAllPayroll(): Observable<any>{
     return this.http.post<any>(`${USERS_URL}getAllPayroll`, {});
@@ -206,6 +207,9 @@ export class AuthService {
   getTypeJobs(): Observable<Job[]>{
     return this.http.post<Job[]>(`${USERS_URL}job/getAllType`, {});
   }
+  getPaySlips(id): Observable<Payslip[]>{
+    return this.http.post<Payslip[]>(`${USERS_URL}job/getPayslips`, {_id: id});
+  }
   getAllTimesheets(): Observable<Job[]>{
     return this.http.post<Job[]>(`${USERS_URL}getAllTimesheets`, {});
   }
@@ -218,9 +222,13 @@ export class AuthService {
     const id = JSON.parse(localStorage.getItem('userInfo'))._id;
     return this.http.post<Job[]>(`${USERS_URL}getClientTimesheets`, {id});
   }
+  getClientInvoices(): Observable<Invoice[]>{
+    const id = JSON.parse(localStorage.getItem('userInfo'))._id;
+    console.log('getAllInvoices', id);
+    return this.http.post<Invoice[]>(`${USERS_URL}getClientInvoices`, {id});
+  }
   getAllInvoices(): Observable<Invoice[]>{
     return this.http.post<Invoice[]>(`${USERS_URL}getAllInvoices`, {});
-
   }
   getSelectedJobs(): Observable<Job[]>{
     const id = JSON.parse(localStorage.getItem('userInfo'))._id;
@@ -335,9 +343,9 @@ export class AuthService {
       horizontalPosition: 'center'
     });
   }
-  setWorkerJob(id, tId, wId, img, name, flag): Observable<any> {
-    return this.http.post<any>(`${USERS_URL}addWorkerJob`, {id, tId, wId, img, name, flag});
-  }
+  // setWorkerJob(id, tId, wId, img, name, flag): Observable<any> {
+  //   return this.http.post<any>(`${USERS_URL}addWorkerJob`, {id, tId, wId, img, name, flag});
+  // }
   setStatusJob(id, status): Observable<any>{
     return this.http.post<any>(`${USERS_URL}setStatusJob`, {id, status});
   }
@@ -377,9 +385,9 @@ export class AuthService {
   updateInvoice(obj): Observable<any>{
     return this.http.post<any>(`${USERS_URL}invoice/profile`, obj);
   }
-  removeTimesheetsJob(obj): Observable<any>{
-    return this.http.post<any>(`${USERS_URL}removeTimesheetsJob`, {arr: obj});
-  }
+  // removeTimesheetsJob(obj): Observable<any>{
+  //   return this.http.post<any>(`${USERS_URL}removeTimesheetsJob`, {arr: obj});
+  // }
   sendEmail(obj): Observable<any>{
     return this.http.post<any>(`${USERS_URL}client/verify/email`, obj);
   }

@@ -23,7 +23,7 @@ module.exports = (app) => {
   app.post('/forgot/:email', client.forgotPassword)
   app.post('/delFile', client.delFile);
 
-  app.post('/removeUser',VerifyToken,client.removeUser);
+  app.post('/removeUser',VerifyToken,authRole([ROLE.ADMIN,ROLE.TEAM]),client.removeUser);
   app.post('/sendmsg',client.sendmsg);
 
   ///////////////// cdev commented routes /////////////////

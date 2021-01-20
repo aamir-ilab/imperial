@@ -214,27 +214,27 @@ const routes: VexRoutes = [
               }
             ]
           },
-          {
-            path: 'settings',
-            children: [
-              {
-                path: 'companydetails',
-                loadChildren: () => import('./admin/settings/companydetails/companydetails.module').then(m => m.CompanydetailsModule),
-              },
-              {
-                path: 'emailsettings',
-                loadChildren: () => import('./admin/settings/email-settings/email-settings.module').then(m => m.EmailSettingsModule),
-              },
-              {
-                path: 'teamaccounts',
-                loadChildren: () => import('./admin/settings/teamaccounts/teamaccounts.module').then(m => m.TeamAccountsModule),
-              },
-              {
-                path: 'generaltemplates',
-                loadChildren: () => import('./admin/settings/general-templates/general-templates.module').then(m => m.GeneralTemplatesModule),
-              }
-            ]
-          },
+          // {
+          //   path: 'settings',
+          //   children: [
+          //     {
+          //       path: 'companydetails',
+          //       loadChildren: () => import('./admin/settings/companydetails/companydetails.module').then(m => m.CompanydetailsModule),
+          //     },
+          //     {
+          //       path: 'emailsettings',
+          //       loadChildren: () => import('./admin/settings/email-settings/email-settings.module').then(m => m.EmailSettingsModule),
+          //     },
+          //     {
+          //       path: 'teamaccounts',
+          //       loadChildren: () => import('./admin/settings/teamaccounts/teamaccounts.module').then(m => m.TeamAccountsModule),
+          //     },
+          //     {
+          //       path: 'generaltemplates',
+          //       loadChildren: () => import('./admin/settings/general-templates/general-templates.module').then(m => m.GeneralTemplatesModule),
+          //     }
+          //   ]
+          // },
           {
             path: 'profile',
             loadChildren: () => import('./pages/apps/social/social.module').then(m => m.SocialModule)
@@ -259,7 +259,16 @@ const routes: VexRoutes = [
             },
             {
               path: 'invoices',
-              loadChildren: () => import('./client/invoices/invoices.module').then(m => m.InvoicesModule),
+              children: [
+                {
+                  path: '',
+                  loadChildren: () => import('./client/invoices/invoices.module').then(m => m.InvoicesModule),
+                },
+                {
+                  path: 'pdf',
+                  loadChildren: () => import('./client/invoices/invoice/invoice.module').then(m => m.InvoiceModule),
+                }
+              ]
             },
             {
               path: 'companydetails',
