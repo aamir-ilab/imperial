@@ -554,6 +554,7 @@ exports.updateInvoicsInfo = (req, res) => {
       });
     }
     else {
+      console.log('InvoiceInfo', req.body)
       Object.assign(invoice, req.body)
       invoice.save().then(invoice => {
         res.status(200).json(invoice);
@@ -605,64 +606,100 @@ exports.getExportTimesheets = (req, res) => {
   ///// for current week check ends /////
   var timesheetData = [];
 
-  Timesheet.find({exportStatus: false, statusStr:'Completed'}).populate(['JobId_Id', 'workers.workerId']).exec(function(err, timesheet) {
+  Timesheet.find({exportStatus: false, statusStr:'Completed'}).populate(['JobId_Id', 'workers.workerId', 'clientId']).exec(function(err, timesheet) {
     if (err) {
       console.log('error', err);
     } else {
       console.log('==timesheet==', timesheet)
-      timesheet.forEach(timesheet => {
-        console.log('element', timesheet.workers);
-        var inv_workers = [];var invoiceWorkers = [];
-        timesheet.workers.forEach(worker => {
-          let tempRate = 0;
-          let age = getAge(worker.workerId.dateBirth);
-          tempRate = age < 25 ? 7.70 : 8.21;
-          let WR_UNITS = parseFloat(worker.hours.replace(':','.'))*tempRate;
-          WR_UNITS = WR_UNITS.toFixed(2);
-          var obj ={
-            timesheet_id: timesheet.timesheetId,
-            WR_REF : worker.workerId.workerId,
-            WR_UNITS: WR_UNITS,
-            WR_TRNCDE :'p001',
-            WR_RATE : tempRate,
-            type : "Export Timesheets",
-            response : "Successful"
-          }
-          var inv_worker = {
-            workerId: worker.workerId._id,
-            chargeRate: tempRate,
-            hours: parseFloat(worker.hours.replace(':','.')),
-            net: WR_UNITS
-          }
-          timesheetData.push(obj);
-          inv_workers.push(inv_worker)
-          console.log('inv_worker', inv_worker)
-        });
-        invoiceWorkers.push(inv_workers);
-        console.log('invoiceWorkers', invoiceWorkers)
-        const invoice = new Invoice();
-        invoice.workers = invoiceWorkers[0];
-        invoice.timesheetId = timesheet.timesheetId;
-        invoice.timesheetId_id = timesheet._id;
-        invoice.invoiceId = timesheet.timesheetId.replace(/TS/g, "INV");
-        invoice.client_Id = timesheet.clientId;
-        invoice.save().then(inv => {
-          // res.status(200).json(inv);
-          console.log("invoice", inv);
-        })
-        .catch(err => {
-          // res.status(400).send("Update not possible");
-          console.log("invoice not created", err);
-        });
+      InvoiceInfo.findOne({id:1}, function(err, invoiceinfo) {
+        if (invoiceinfo)
+        {
+          timesheet.forEach(timesheet => {
+            console.log('element', timesheet.workers);
+            var inv_workers = [];var invoiceWorkers = [];
+            timesheet.workers.forEach(worker => {
+              let tempRate = 0;  let chargeRate = 0;
+              let age = getAge(worker.workerId.dateBirth);
+              // worker pay rate
+              tempRate = age < 25 ? invoiceinfo.payrateU25 : invoiceinfo.payrateO25;
+              // worker net
+              let WR_UNITS = parseFloat(worker.hours.replace(':','.'))*tempRate;
+              // client charge rate
+              let chargerateU25 = 0 ; let chargerateO25 = 0;
+              if(timesheet.departments == 'Housekeeping'){
+                console.log('==department==', timesheet.departments);
+                chargerateU25 = timesheet.clientId.hk_chargerateU25 > 0 ?
+                timesheet.clientId.hk_chargerateU25 : invoiceinfo.hk_chargerateU25;
+                chargerateO25 = timesheet.clientId.hk_chargerateO25 > 0 ?
+                timesheet.clientId.hk_chargerateO25 : invoiceinfo.hk_chargerateO25;
+              }
+              else if(timesheet.departments == 'Back of House'){
+                chargerateU25 = timesheet.clientId.boh_chargerateU25 > 0 ?
+                timesheet.clientId.boh_chargerateU25 : invoiceinfo.boh_chargerateU25;
+                chargerateO25 = timesheet.clientId.boh_chargerateO25 > 0 ?
+                timesheet.clientId.boh_chargerateO25 : invoiceinfo.boh_chargerateO25;
+              }
+              else{
+                chargerateU25 = 0; chargerateO25 = 0;
+                console.log('==department==', timesheet.departments);
+                chargerateU25 = timesheet.clientId.fab_chargerateU25 > 0 ?
+                timesheet.clientId.fab_chargerateU25 : invoiceinfo.fab_chargerateU25;
+                chargerateO25 = timesheet.clientId.fab_chargerateO25 > 0 ?
+                timesheet.clientId.fab_chargerateO25 : invoiceinfo.fab_chargerateO25;
+              }
+              chargeRate = age < 25 ? chargerateU25 : chargerateO25;
+              let inv_WR_net = parseFloat(worker.hours.replace(':','.'))*chargeRate;
+              WR_UNITS = WR_UNITS.toFixed(2);
+              inv_WR_net = inv_WR_net.toFixed(2);
+              var obj ={
+                timesheet_id: timesheet.timesheetId,
+                WR_REF : worker.workerId.workerId,
+                WR_UNITS: WR_UNITS,
+                WR_TRNCDE :'p001',
+                WR_RATE : tempRate,
+                type : "Export Timesheets",
+                response : "Successful"
+              }
+              timesheetData.push(obj);
+              var inv_worker = {
+                workerId: worker.workerId._id,
+                chargeRate: chargeRate,
+                payRate: tempRate,
+                hours: parseFloat(worker.hours.replace(':','.')),
+                net: inv_WR_net,
+                client_Id: timesheet.clientId
+              }
+              inv_workers.push(inv_worker)
+              console.log('inv_worker', inv_worker)
+            });
+            invoiceWorkers.push(inv_workers);
+            console.log('invoiceWorkers', invoiceWorkers)
+            const invoice = new Invoice();
+            invoice.invoiceDate = new Date();
+            invoice.invoiceDueDate =  moment().add(invoiceinfo.dueDate, 'd').format('dddd, MMMM DD,YYYY');
+            invoice.workers = invoiceWorkers[0];
+            invoice.client_Id = timesheet.clientId
+            invoice.timesheetId = timesheet.timesheetId;
+            invoice.timesheetId_id = timesheet._id;
+            invoice.invoiceId = timesheet.timesheetId.replace(/TS/g, "INV");
+            invoice.totalVat = invoiceinfo.vat;
+            invoice.save().then(inv => {
+              console.log("invoice", inv);
+            })
+            .catch(err => {
+              console.log("invoice not created", err);
+            });
+            Timesheet.updateMany({exportStatus: false, statusStr:'Completed'}, {"$set":{"exportStatus": true}}, {"multi": true}, (err, writeResult) => {});
+          });
+        }
+        res.json(timesheetData);
       });
-      Timesheet.updateMany({exportStatus: false, statusStr:'Completed'}, {"$set":{"exportStatus": true}}, {"multi": true}, (err, writeResult) => {});
-      res.json(timesheetData);
     }
   })
 }
 exports.getPayslips = (req, res) => {
   console.log('===  workedId ====', req.body._id)
-    Payslip.find({workerId: req.body._id}).populate(['workerId']).exec(function(err, payslips) {
+    Payslip.find({workerId: req.body._id}).populate(['workerId','work.client_Id']).exec(function(err, payslips) {
       if (err) {
         console.log('err',err);
       } else {
@@ -854,28 +891,17 @@ exports.getGenerateWorkerID = async(req, res) => {
 
     })
 }
-exports.getImportPayroll = async (req, res) => {
+exports.getImportPayroll = (req, res) => {
   const rows = req.body.rows;
   const user = req.body.user;
-  console.log('req.body.user', user)
   ///// for current week check /////
   const now = moment().subtract(1, 'isoWeek').startOf('isoWeek');
   const end = moment().subtract(1, 'isoWeek').endOf('isoWeek');
   // console.log('current', now,end);
   ///// for current week check ends /////
   var status = 'Successful';
-  console.log('getImportPayroll', rows);
-  // const slipdata = await generateInvoices(now, end);
-  await generateInvoices(now, end).then((resp)=>{
-    console.log('resp', resp);
-    generatePayslips(rows, now, end);
-  }, function(error) {
-    console.log(error);
-  });
-  // var unique = clients.filter(function onlyUnique(value, index, self) {
-  //   return self.indexOf(value) === index;
-  // });
-  // console.log('unique', unique);
+  generateInvoices(now, end);
+  generatePayslips(rows, now, end);
   var payrollData ={
     periodStart : now,
     periodEnd : end,
@@ -900,7 +926,6 @@ exports.getImportPayroll = async (req, res) => {
         console.log(err)
         res.status(500).json(err);
       } else {
-        console.log('payroll', payroll);
         Payroll.find({},function(err, cresult){
           if(cresult){
             res.status(200).json(cresult)
@@ -911,24 +936,20 @@ exports.getImportPayroll = async (req, res) => {
   })
 }
 
-
-
-async function generateInvoices(now, end){
-  var wPsData = [];
-  Invoice.find({status: 'Pending'}).populate(['client_Id', 'workers.workerId']).exec(function(err, invoices) {
+function generateInvoices(now, end){
+  Invoice.find({status: 'Pending'}).populate(['workers.workerId', 'client_Id']).exec(function(err, invoices) {
     if (err) {
       console.log('err',err);
     } else {
-      console.log('==invoices==', invoices);
       invoices.forEach(element => {
         readHTMLFile((path.join(__dirname, '../public/pages/invoice.php')), async function(err, html) {
           const name = element.client_Id.firstName + ' ' + element.client_Id.lastName ;
-          wPsData.push(element.workers);
-          console.log('after push', wPsData );
           const periodStart = dateFormat(now, "fullDate").toString();
           const periodEnd = dateFormat(end, "fullDate").toString();
-          const due = moment().add(7, 'd').format('dddd, MMMM DD,YYYY');
-          const created = moment().format('dddd, MMMM DD,YYYY');
+          let created = element.invoiceDate;
+          let due = element.invoiceDueDate;
+          created = moment(created).format('dddd, MMMM DD,YYYY');
+          due = moment(due).format('dddd, MMMM DD,YYYY');
           // data for invoice attachment
           var data = {
             invoice: element.invoiceId,
@@ -938,6 +959,7 @@ async function generateInvoices(now, end){
             CLIENT_NAME: name,
             workers: element.workers,
             TS_ID: element.timesheetId,
+            vat: element.totalVat,
             type:'Invoice'
           };
           // data for invoice email
@@ -964,99 +986,112 @@ async function generateInvoices(now, end){
           generatePdf(data,html,replacements,mailOptions)
         });
       });
-      return wPsData;
     }
   });
 
 }
 function generatePayslips(rows, now, end){
-  rows.forEach((row, i) => {
-    // find workers and create payslips
-    User.findOne({workerId:row.empCode}).exec(function (err, user){
-      if (err) {
-        status = 'Failed';
-        return res.json(err, 400);
-      }
-      else{
-        var data ={
-          workerId:user._id,
-          workerIDStr:user.workerId,
-          Names:row.name,
-          TAX:row.tax,
-          NI_EES:row.ni_ees,
-          GROSS_TO_DATE:row.gross_toDate,
-          TAX_TO_DATE:row.tax_toDate,
-          NI_TO_DATE:row.ni_toDate,
-          TOTAL_DEDUCTIONS:row.t_deductions,
-          NET_PAY:row.net_pay,
-          NI_CODE:row.ni_code,
-          PAY_DATE:row.pay_date,
-          WEEK_NO:row.week_no,
-          TAX_CODE:row.tax_code,
-          WK1M1:row.wk1m1,
-          NI_NUMBER:row.ni_number,
-          STUDENT_LOAN:row.student_loan,
-          PENSION:row.pension,
-          periodStart : now,
-          periodEnd : end,
-        }
-        const newSlip = new Payslip(data);
-        Payslip.countDocuments({}, function(err, c) {
-          newSlip.id = c + (i+1);
-          if(newSlip.id < 10)
-          newSlip.payslipID = 'PAYSLIP000' + newSlip.id;
-          else if(this.id < 100)
-          newSlip.payslipID = 'PAYSLIP00' + newSlip.id;
-          else if(this.id < 1000)
-          newSlip.payslipID = 'PAYSLIP0'+newSlip.id;
-          else
-          newSlip.payslipID = 'PAYSLIP'+ newSlip.id.toString();
-          newSlip.save((err) => {
-            if (err) {
-              console.log(err)
-              res.status(500).json(err);
+  let workers = [];
+  Invoice.find({status: 'Pending'}).populate(['workers.workerId','workers.client_Id']).exec(function(err, invoices) {
+    if (err) {
+      console.log('err',err);
+    } else {
+      invoices.forEach(element => {
+        workers.push(element.workers);
+      });
+      var merged = [].concat.apply([], workers);
+      rows.forEach((row, i) => {
+        // find workers and create payslips
+        User.findOne({workerId:row.empCode}).exec(function (err, user){
+          if (err) {
+            status = 'Failed';
+            return res.json(err, 400);
+          }
+          else{
+            const result = merged.filter(itm =>
+              itm.workerId.workerId == row.empCode
+            );
+            var data ={
+              workerId:user._id,
+              workerIDStr:user.workerId,
+              Names:row.name,
+              TAX:row.tax,
+              NI_EES:row.ni_ees,
+              GROSS_TO_DATE:row.gross_toDate,
+              TAX_TO_DATE:row.tax_toDate,
+              NI_TO_DATE:row.ni_toDate,
+              TOTAL_DEDUCTIONS:row.t_deductions,
+              NET_PAY:row.net_pay,
+              NI_CODE:row.ni_code,
+              PAY_DATE:row.pay_date,
+              WEEK_NO:row.week_no,
+              TAX_CODE:row.tax_code,
+              WK1M1:row.wk1m1,
+              NI_NUMBER:row.ni_number,
+              STUDENT_LOAN:row.student_loan,
+              PENSION:row.pension,
+              periodStart : now,
+              periodEnd : end,
+              work: result[0]
             }
-          });
-        });
+            const newSlip = new Payslip(data);
+            Payslip.countDocuments({}, function(err, c) {
+              newSlip.id = c + (i+1);
+              if(newSlip.id < 10)
+              newSlip.payslipID = 'PAYSLIP000' + newSlip.id;
+              else if(this.id < 100)
+              newSlip.payslipID = 'PAYSLIP00' + newSlip.id;
+              else if(this.id < 1000)
+              newSlip.payslipID = 'PAYSLIP0'+newSlip.id;
+              else
+              newSlip.payslipID = 'PAYSLIP'+ newSlip.id.toString();
+              newSlip.save((err) => {
+                if (err) {
+                  console.log(err)
+                  res.status(500).json(err);
+                }
+              });
+            });
 
-        readHTMLFile((path.join(__dirname, '../public/pages/payslip.php')), async function(err, html) {
-          const name = user.surename + ' ' + user.forename ;
-          const slipID = 'Payslip'+(i+1);
-          // data for payslip attachment
-          var data = {
-            row: row,
-            invoice: slipID,
-            type:'Payslip'
-          };
-          // data for payslip email
-          var replacements = {
-            name: name,
-          };
+            readHTMLFile((path.join(__dirname, '../public/pages/payslip.php')), async function(err, html) {
+              const name = user.surename + ' ' + user.forename ;
+              const slipID = 'Payslip'+(i+1);
+              // data for payslip attachment
+              var data = {
+                row: row,
+                invoice: slipID,
+                type:'Payslip',
+                work: result[0]
+              };
+              // data for payslip email
+              var replacements = {
+                name: name,
+              };
 
-          var mailOptions = {
-            path: path.join(__dirname, '../public/pages/'+slipID+'.pdf'),
-            from: 'my@email.com',
-            to : user.emailAddress,
-            subject : 'Your recent payslip is attached',
-            attachments: [
-              {   // file on disk as an attachment
-                filename: 'Payslip.pdf',
-                contentType: 'application/pdf',
-                path: path.join(__dirname, '../public/pages/'+slipID+'.pdf')// stream this file
-              },
-            ]
-          };
-          generatePdf(data,html,replacements,mailOptions)
+              var mailOptions = {
+                path: path.join(__dirname, '../public/pages/'+slipID+'.pdf'),
+                from: 'my@email.com',
+                to : user.emailAddress,
+                subject : 'Your recent payslip is attached',
+                attachments: [
+                  {   // file on disk as an attachment
+                    filename: 'Payslip.pdf',
+                    contentType: 'application/pdf',
+                    path: path.join(__dirname, '../public/pages/'+slipID+'.pdf')// stream this file
+                  },
+                ]
+              };
+              generatePdf(data,html,replacements,mailOptions)
+            });
+          }
         });
-      }
-    });
+      });
+    }
   });
 }
 function generateAndSendEmail(html,replacements,emailOptions) {
 
   var template = handlebars.compile(html);
-
-  console.log('replacements', replacements);
   var htmlToSend = template(replacements);
   var mailOptions = {
     from: emailOptions.from,
@@ -1092,8 +1127,7 @@ async function generatePdf(data,htmldata,replacements,mailOptions) {
       await page.setContent(inv)
       // We use pdf function to generate the pdf in the same folder as this file.
       await page.pdf({ path: path.join(__dirname, '../public/pages/'+data.invoice+'.pdf'), format: 'A4' }).then(()=>{
-        generateAndSendEmail(htmldata,replacements,mailOptions)
-        console.log("PDF Generated");
+        generateAndSendEmail(htmldata,replacements,mailOptions);
       }, function(error) {
         console.log(error);
       });

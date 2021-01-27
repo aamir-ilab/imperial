@@ -23,5 +23,13 @@ var PayslipSchema = new mongoose.Schema({
     PENSION:{type:Number},
     periodStart:{type:Date},
     periodEnd:{type:Date},
+    work:{
+      client_Id:{ type: mongoose.Schema.Types.ObjectId, ref: 'User'},
+      workerId: { type: mongoose.Schema.Types.ObjectId, ref: 'User'},
+      hours:{type:Number},
+      chargeRate:{type:Number},
+      payRate:{type:Number},
+      net:{type:Number}
+    }
 }, { toJSON: { getters: true } });
 module.exports = mongoose.model('Payslip', PayslipSchema);

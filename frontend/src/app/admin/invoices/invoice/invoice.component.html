@@ -63,18 +63,6 @@
           <div class="text-secondary">
             <p class="m-0">124 Great Portland Street</p>
             <p class="m-0">London W1W 6PP</p>
-            <!-- <p class="m-0">COMPANY_CITY</p> -->
-            <!-- <p class="m-0">COMPANY_POSTCODE</p> -->
-
-            <!-- <p class="m-0 mt-3">
-              <ic-icon [icon]="icMail" class="mr-2" inline="true" size="1.25em"></ic-icon>
-              <span>hello@example.com</span>
-            </p>
-
-            <p class="m-0">
-              <ic-icon [icon]="icPhone" class="mr-2" inline="true" size="1.25em"></ic-icon>
-              <span>+1 (961) 400-3535</span>
-            </p> -->
           </div>
         </div>
       </div>
@@ -97,7 +85,7 @@
           <td class="py-6 border-b">{{invoice.workerId.forename}} {{invoice.workerId.surename}}</td>
           <td class="py-6 border-b">{{invoiceObj.timesheetId}}</td>
           <td class="py-6 border-b">{{invoice.hours}}</td>
-          <td class="py-6 border-b">${{invoice.chargeRate}}/hr</td>
+          <td class="py-6 border-b">£{{invoice.chargeRate}}/hr</td>
           <td class="py-6 border-b font-medium text-right">{{invoice.net}}</td>
         </tr>
       </tbody>
@@ -108,15 +96,15 @@
         <tbody>
         <tr>
           <td class="text-secondary text-right">Subtotal:</td>
-          <td class="pl-12">${{getNetTotal()}}</td>
+          <td class="pl-12">£{{getNetTotal()}}</td>
         </tr>
         <tr>
           <td class="text-secondary text-right">VAT:</td>
-          <td class="pl-12">${{invoiceObj.totalVet}}</td>
+          <td class="pl-12">£{{invoiceObj.totalVat}}%</td>
         </tr>
         <tr class="bt-total">
           <td class="headline text-right pt-6">TOTAL</td>
-          <td class="headline pl-12 pt-6">${{getNetTotal()}}‬</td>
+          <td class="headline pl-12 pt-6">£{{getTotal()}}‬</td>
         </tr>
         </tbody>
       </table>

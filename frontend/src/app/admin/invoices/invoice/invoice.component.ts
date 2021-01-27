@@ -35,10 +35,19 @@ export class InvoiceComponent implements OnInit {
   }
 
   getNetTotal() {
-    let total = 0;
+    let netTotal = 0;
     this.invoiceObj.workers.forEach(element => {
-      total += element.net;
+      netTotal += element.net;
     });
+    return netTotal;
+  }
+
+  getTotal(){
+    let total = 0;
+    var net = this.getNetTotal();
+    var vat = this.invoiceObj.totalVat;
+    var perc = ((vat/100)*net).toFixed(2);
+    total = net + parseFloat(perc);
     return total;
   }
   public downloadAsPDF() {

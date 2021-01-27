@@ -23,6 +23,12 @@ export class Client {
     clientStatus:string;
     companyUrl:string;// optional
     tradingName:string;//optional
+    hk_chargerateU25:number;
+    hk_chargerateO25:number;
+    fab_chargerateU25:number;
+    fab_chargerateO25:number;
+    boh_chargerateU25:number;
+    boh_chargerateO25:number;
     clear():void{
         this.accessToken = 'access-token-' + Math.random();
         this.refreshToken = 'access-token-' + Math.random();
@@ -49,6 +55,12 @@ export class Client {
         this.clientStatus =  client.clientStatus;
         this.companyUrl = client.companyUrl;
         this.tradingName =  client.tradingName;
+        this.hk_chargerateU25 = client.hk_chargerateU25;
+        this.hk_chargerateO25 = client.hk_chargerateO25;
+        this.fab_chargerateU25 = client.fab_chargerateU25;
+        this.fab_chargerateO25 = client.fab_chargerateO25;
+        this.boh_chargerateU25 = client.boh_chargerateU25;
+        this.boh_chargerateO25 = client.boh_chargerateO25;
       }
 
       get name() {

@@ -74,21 +74,16 @@ export class PayhistoryComponent implements OnInit {
   getData() {
     this.authService.getPaySlips(this.currentUser._id).subscribe((res) => {
       console.log('Payslips',res)
-      of(res.map(client => new Payslip(client))).subscribe(clientes => {
-        console.log('clientes', clientes);
-        this.subject$.next(clientes);
+      of(res.map(client => new Payslip(client))).subscribe(clients => {
+        this.payslips = clients;
+        console.log('clientes', clients);
+        this.subject$.next(clients);
       });
     });
     // return of(statusTableData.map(customer => new Job(customer)));
   }
 
   ngOnInit() {
-    const id = JSON.parse(localStorage.getItem('userInfo'))._id;
-    this.authService.getPaySlips(id).subscribe((clients)=>{
-      this.payslips = clients;
-    });
-
-
     if (!this.authService.currenctUser) {
       this.authService.setCurrentUser();
     }
@@ -154,38 +149,38 @@ export class PayhistoryComponent implements OnInit {
               <tr>
                 <td></td>
                 <td class="row2">Value &nbsp;= &nbsp;  Hours &nbsp;X &nbsp; Rate</td>
-                <td class="row4">P.A.Y.E. &nbsp; &nbsp; &nbsp; ${this.payslipObj.NET_PAY}</td>
+                <td class="row4">P.A.Y.E. &nbsp; &nbsp; &nbsp; ${this.payslipObj.TAX}</td>
                 <td class="to-date">TAXABLE <span> &nbsp; &nbsp; &nbsp; &nbsp; ${this.payslipObj.TAX_TO_DATE}</span></td>
               </tr>
               <tr>
-                <td class="name">"belrun ltd"</td>
-                <td class="row2">"340.00" &nbsp; &nbsp;  "43.50" &nbsp; &nbsp; "8.50"</td>
+                <td class="name">${this.payslipObj.work.client_Id.companyName}</td>
+                <td class="row2">${(this.payslipObj.work.hours * this.payslipObj.work.payRate).toFixed(2)} &nbsp; &nbsp; &nbsp; &nbsp;  ${this.payslipObj.work.hours} &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; ${this.payslipObj.work.payRate}</td>
                 <td></td>
                 <td class="to-date">tax &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; <span>${this.payslipObj.TAX}</span></td>
               </tr>
               <tr>
                 <td></td>
                 <td class="row2"></td>
-                <td class="row3" >Nat.Ins &nbsp; &nbsp; &nbsp; "24.45"</td>
-                <td class="to-date" >nat.ins <span> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; "441.65"</span></td>
+                <td class="row3" >Nat.Ins &nbsp; &nbsp; &nbsp; ${this.payslipObj.NI_EES}</td>
+                <td class="to-date" >nat.ins <span> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; ${this.payslipObj.NI_TO_DATE}</span></td>
               </tr>
               <tr>
                 <td></td>
                 <td class="row2"></td>
-                <td class="row4" style="padding-top: 30px; padding-bottom: 30px; ">pansion &nbsp;  ${this.payslipObj.PENSION}</td>
+                <td class="row4" style="padding-top: 30px; padding-bottom: 30px; ">pension &nbsp;  ${this.payslipObj.PENSION}</td>
                 <td class="to-date" ></td>
               </tr>
               <tr>
                 <td></td>
                 <td class="row2"></td>
                 <td></td>
-                <td class="to-date"> <span> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;N.1.Code ${this.payslipObj.NI_CODE}</span></td>
+                <td class="to-date"> <span> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;N.I. Code ${this.payslipObj.NI_CODE}</span></td>
               </tr>
               <tr>
                 <td></td>
                 <td class="row2"></td>
                 <td></td>
-                <td class="to-date"> pay date <span> &nbsp; &nbsp; &nbsp; &nbsp; ${this.payslipObj.PAY_DATE}</span></td>
+                <td class="to-date"> pay date <span> &nbsp; &nbsp; &nbsp; &nbsp; ${this.payslipObj.PAY_DATE_Str}</span></td>
               </tr>
               <tr>
                 <td></td>
@@ -195,8 +190,8 @@ export class PayhistoryComponent implements OnInit {
               </tr>
               <tr>
                 <td class="name">Total</td>
-                <td class="row2">"369.75"</td>
-                <td class="name">total &nbsp; &nbsp; "60.32"</td>
+                <td class="row2">${(this.payslipObj.work.hours * this.payslipObj.work.payRate).toFixed(2)}</td>
+                <td class="name">total &nbsp; &nbsp; ${(this.payslipObj.TAX + this.payslipObj.NI_EES + this.payslipObj.PENSION).toFixed(2)}</td>
                 <td class="to-date">tax code <span> &nbsp; &nbsp; &nbsp; ${this.payslipObj.TAX_CODE} WK ${this.payslipObj.WK1M1} </span></td>
               </tr>
               <tr>
@@ -207,6 +202,16 @@ export class PayhistoryComponent implements OnInit {
               </tr>
             </tbody>
           </table>
+          <div class="Row">
+            <div class="Column-1"></div>
+            <div class="Column-2"></div>
+            <div class="Column-3">
+              <div class="button">
+                <a>net pay</a>
+                ${this.payslipObj.NET_PAY}
+              </div>
+            </div>
+          </div>
           <div class="note">
             please keep this pay advice in a place.it may be required for the purpose of self assessment.
           </div>
@@ -221,9 +226,7 @@ export class PayhistoryComponent implements OnInit {
         <head>
           <style>
             @media print {
-              .p-gutter {
-                padding: 0 !important;
-              }
+              @page {size: landscape}
 
               .card {
                 box-shadow: none !important;
@@ -235,6 +238,15 @@ export class PayhistoryComponent implements OnInit {
                 color: #fff!important;
               }
 
+              a {
+                color: #5D6975!important;
+                text-decoration: none!important;
+                text-transform: uppercase!important;
+                background: #000!important;
+                -webkit-print-color-adjust: exact;
+                color: #fff!important;
+                padding-bottom: 15px!important;
+              }
             }
             .table {
               td {
@@ -300,6 +312,34 @@ export class PayhistoryComponent implements OnInit {
               font-weight: 600;
               text-transform: uppercase;
               font-size: 13px;
+            }
+            .Row {
+              display: flex;
+            }
+            .Column-1 {
+              border: 2px solid #000;
+              padding: 50px 0;
+              width: 37%;
+            }
+            .Column-2 {
+              border: 2px solid #000;
+              margin: 20px 0 20px 20px;
+              width: 26%;
+            }
+              .Column-3 {
+              border: 2px solid #000;
+              margin: 25px 0 28px 14px;
+              width: 31%;
+            }
+            a {
+              color: #5D6975;
+              text-decoration: none;
+              text-transform: uppercase;
+              background: #000;
+              color: #fff;
+              padding: 17px 5px;
+              font-size: 12px;
+              font-weight: 600;
             }
             .button {
               margin-top: 14px;

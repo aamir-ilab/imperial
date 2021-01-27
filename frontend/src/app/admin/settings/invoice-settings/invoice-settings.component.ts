@@ -71,6 +71,12 @@ export class InvoiceSettingsComponent implements OnInit {
       vat: '',
       payrateU25:'',
       payrateO25: '',
+      hk_chargerateU25:'',
+      hk_chargerateO25: '',
+      fab_chargerateU25:'',
+      fab_chargerateO25: '',
+      boh_chargerateU25:'',
+      boh_chargerateO25: '',
       footer: '',
       logo: '',
     });

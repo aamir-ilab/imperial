@@ -1,13 +1,11 @@
 import { AfterViewInit, Component, Input, OnInit, ViewChild } from '@angular/core';
 import { Observable, of, ReplaySubject } from 'rxjs';
 import { filter } from 'rxjs/operators';
-import { Customer } from './interfaces/customer.model';
 import { MatTableDataSource } from '@angular/material/table';
 import { MatPaginator } from '@angular/material/paginator';
 import { MatSort } from '@angular/material/sort';
 import { MatDialog } from '@angular/material/dialog';
 import { TableColumn } from '../../../@vex/interfaces/table-column.interface';
-import { aioTableData, aioTableLabels } from '../../../static-data/aio-table-data';
 import { CustomerCreateUpdateComponent } from './customer-create-update/customer-create-update.component';
 import icEdit from '@iconify/icons-ic/twotone-edit';
 import icDelete from '@iconify/icons-ic/twotone-delete';
@@ -32,7 +30,7 @@ import icMail from '@iconify/icons-ic/twotone-mail';
 import icMap from '@iconify/icons-ic/twotone-map';
 import { Worker } from 'src/app/models/worker.model';
 import { AuthService } from 'src/app/services/auth.service';
-import { ActivatedRoute, Router } from '@angular/router';
+import {  Router } from '@angular/router';
 
 
 @UntilDestroy()
@@ -255,11 +253,5 @@ export class WorkersComponent implements OnInit, AfterViewInit {
 
   trackByProperty<T>(index: number, column: TableColumn<T>) {
     return column.property;
-  }
-
-  onLabelChange(change: MatSelectChange, row: Customer) {
-    // const index = this.customers.findIndex(c => c === row);
-    // this.customers[index].labels = change.value;
-    this.subject$.next(this.customers);
   }
 }

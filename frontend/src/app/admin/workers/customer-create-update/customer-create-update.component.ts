@@ -1,7 +1,6 @@
 import { Component, Inject, OnInit, ChangeDetectorRef } from '@angular/core';
 import { FormBuilder, FormGroup } from '@angular/forms';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
-import { Customer } from '../interfaces/customer.model';
 import icMoreVert from '@iconify/icons-ic/twotone-more-vert';
 import icClose from '@iconify/icons-ic/twotone-close';
 import icPrint from '@iconify/icons-ic/twotone-print';
@@ -86,18 +85,6 @@ fileName: string = "No file selected";
     } else {
       this.defaults = {} as Worker;
     }
-
-    // this.form = this.fb.group({
-    //   id: [CustomerCreateUpdateComponent.id++],
-    //   _id:[this.defaults._id],
-    //   workerId:[this.defaults.workerId || ''],
-    //   createdDate:[this.defaults.createdDate ||  new Date()],
-    //   profilePhoto: this.defaults.profilePhoto,
-    //   forename: [this.defaults.forename || ''],
-    //   surename: [this.defaults.surename || ''],
-    //   emailAddress: this.defaults.emailAddress || '',
-    //   mobileNumber: this.defaults.mobileNumber || '',
-    // });
     this.workerForm = this.fb.group({
       id: [CustomerCreateUpdateComponent.id++],
       _id:[this.defaults._id],
@@ -275,10 +262,10 @@ fileName: string = "No file selected";
               return;
             }
         }else if(this.step == 6){
-         
+
         }else if(this.step == 7){
         }else if(this.step == 8){
-       
+
         }else if (this.step == 9){
           if(controls.criminalRecords.value == ''){
             alert('Please complete all the required fields');
@@ -337,7 +324,7 @@ fileName: string = "No file selected";
     }
     if(i == 2){
       this.Postgraduate2 = !this.Postgraduate2;
-    } 
+    }
   }
   addQualifacation(){
     // this.qualificationNames.push(new FormControl(''));
@@ -392,11 +379,11 @@ fileName: string = "No file selected";
   checkAccept(ev){
     if(this.acceptCheckVal == false)
       this.acceptCheckVal = true;
-    else  
+    else
       this.acceptCheckVal = false;
   }
    isControlHasError(controlName: string, validationType: string): boolean
-    {	
+    {
         const control = this.workerForm.controls[controlName];
         if (!control) {
           return false;

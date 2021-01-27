@@ -30,7 +30,6 @@ import icMail from '@iconify/icons-ic/twotone-mail';
 import icMap from '@iconify/icons-ic/twotone-map';
 import { Client } from 'src/app/models/client.model';
 import { AuthService } from 'src/app/services/auth.service';
-import { User } from 'src/app/models/user.model';
 
 
 @UntilDestroy()

@@ -13,13 +13,14 @@ export class Invoice {
   workers:[
     {
       workerId: any;
+      client_Id: any;
       hours:number;
       chargeRate:number;
       net:number;
     }
   ];
   totalNet:number;
-  totalVet:number;
+  totalVat:number;
   constructor(client) {
     this._id = client._id;
     this.invoiceId = client.invoiceId;
@@ -32,7 +33,7 @@ export class Invoice {
     this.client_Id = client.client_Id;
     this.workers = client.workers;
     this.totalNet= client.totalNet;
-    this.totalVet= client.totalVet;
+    this.totalVat= client.totalVat;
   }
   get name() {
     let clientname = '';

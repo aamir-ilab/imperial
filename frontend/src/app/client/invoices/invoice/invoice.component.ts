@@ -42,6 +42,17 @@ export class InvoiceComponent implements OnInit {
     });
     return total;
   }
+
+  getTotal(){
+    let total = 0;
+    var net = this.getNetTotal();
+    var vat = this.invoiceObj.totalVat;
+    var perc = ((vat/100)*net).toFixed(2);
+    total = net + parseFloat(perc);
+    console.log('total', total);
+    return total;
+  }
+
   public downloadAsPDF() {
     // const doc = new jsPDF();
     let doc = new jsPDF('p','pt', 'a4');

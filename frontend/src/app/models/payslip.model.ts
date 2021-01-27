@@ -15,6 +15,7 @@ export class Payslip {
   NET_PAY:number;
   NI_CODE:string;
   PAY_DATE:Date;
+  PAY_DATE_Str:string;
   WEEK_NO:number;
   TAX_CODE:string;
   WK1M1:string;
@@ -23,6 +24,14 @@ export class Payslip {
   PENSION:number;
   periodStart:Date;
   periodEnd:Date;
+  work:{
+    client_Id:any,
+    workerId: any,
+    hours:number,
+    chargeRate:number,
+    payRate:number,
+    net:number
+  }
   constructor(payslip) {
     this._id = payslip._id;
     this.workerId = payslip.workerId;
@@ -36,6 +45,7 @@ export class Payslip {
     this.NET_PAY = payslip.NET_PAY;
     this.NI_CODE = payslip.NI_CODE;
     this.PAY_DATE = moment(payslip.PAY_DATE, "DD/M/YYYY").toDate();
+    this.PAY_DATE_Str = payslip.PAY_DATE
     this.WEEK_NO = payslip.WEEK_NO;
     this.TAX_CODE = payslip.TAX_CODE;
     this.WK1M1 = payslip.WK1M1;
@@ -44,6 +54,7 @@ export class Payslip {
     this.PENSION = payslip.PENSION;
     this.periodStart = payslip.periodStart;
     this.periodEnd = payslip.periodEnd;
+    this.work = payslip.work
   }
 
   get period(){

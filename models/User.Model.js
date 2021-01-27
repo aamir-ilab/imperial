@@ -4,8 +4,16 @@ jwt = require('jsonwebtoken'),
 
 var UserSchema = new mongoose.Schema({
     id:{type:Number},
-    workerId:{type:String, default:''},
     accountType: { type: String },
+    emailAddress: { type: String },
+    Password: { type: String },
+    hash: { type: String },
+    salt: { type: String },
+    createdDate:{type:Date},
+    accessToken:{ type: String },
+    refreshToken:{ type: String },
+    // worker specific feilds
+    workerId:{type:String, default:''},
     title: { type: String },
     forename: { type: String },
     surename: { type: String },
@@ -18,7 +26,6 @@ var UserSchema = new mongoose.Schema({
     // country:{ type: String,default:''},
     mobileNumber: { type: String }, // UKONLY
     homeNumber: { type: String },
-    emailAddress: { type: String },
     dateBirth: { type: Date },
     nationalInsuranceNumber: { type: String }, //Optional
     currentDrivingLicense: { type: String }, // YES/NO
@@ -32,157 +39,80 @@ var UserSchema = new mongoose.Schema({
     bankAccountNumber: { type: Number },
     bankBranchSortCode: { type: Number },
     buildingSocietyReference: { type: Number }, //optional
-    // emergencyContactNextKin: {
-        relationship: { type: String }, //optional
-        emergencyRelationship:{type:String},
-        nextKinAddress: { type: String },
-        nextKinPhoneNumberMobile: { type: String },
-        nextKinPhoneNumberHome: { type: String }, //optional
-    // },
+    emergencyRelationship:{type:String},
+    relationship: { type: String }, //optional
+    nextKinAddress: { type: String },
+    nextKinPhoneNumberMobile: { type: String },
+    nextKinPhoneNumberHome: { type: String }, //optional
     employeeStatement: { type: String },
+    // ==educationHistory== //
     studentLoan: { type: String },
     postgraduateLoan: { type: Boolean },
-    // educationHistory: [{
-        qualificationName: { type: String },
-        qualificationYear: { type: Number },
-    // }],
-    // employmentHistroy: [{
-        employmentHistroyFrom: { type: Number },
-        employmentHistroyTo: { type: Number },
-        employmentHistroyName: { type: String },
-        employmentHistroyAddressEmployer: { type: String },
-        employmentHistroyJobTitle: { type: String },
-        employmentHistroyDuties: { type: String },
-        employmentHistroyRatePay: { type: Number },
-        employmentHistroyReasonLeaving: { type: String },
-        employmentHistroyNoticeRequiredCurrentPosition: { type: String },
-    // }],
-    // otherEmployment: [{
-        otherEmploymentName: { type: String },
-        otherEmploymentAddressEmployer: { type: String },
-        otherEmploymentJobTitle: { type: String },
-    // }],
-    // references: [{
-        referenceCompanyName: { type: String },
-        referenceAddress: { type: String },
-        referenceEmail: { type: String },
-        referenceContactPerson: { type: String },
-    // }],
+    qualificationName: { type: String },
+    qualificationYear: { type: Number },
+    // ==employmentHistroy== //
+    employmentHistroyFrom: { type: Number },
+    employmentHistroyTo: { type: Number },
+    employmentHistroyName: { type: String },
+    employmentHistroyAddressEmployer: { type: String },
+    employmentHistroyJobTitle: { type: String },
+    employmentHistroyDuties: { type: String },
+    employmentHistroyRatePay: { type: Number },
+    employmentHistroyReasonLeaving: { type: String },
+    employmentHistroyNoticeRequiredCurrentPosition: { type: String },
+    // ==otherEmployment== //
+    otherEmploymentName: { type: String },
+    otherEmploymentAddressEmployer: { type: String },
+    otherEmploymentJobTitle: { type: String },
+    // ==references== //
+    referenceCompanyName: { type: String },
+    referenceAddress: { type: String },
+    referenceEmail: { type: String },
+    referenceContactPerson: { type: String },
     criminalRecords: { type: String },
-    // healthDetails: {
-        doPhysicalMentalImpairment: { type: Boolean },
-        specialArrangementImpairment: { type: String },
-        specialArrangementAttendInterview: { type: String },
-        listAnyDiseases: { type: String },
-        medicineDrugsTreatment: { type: String },
-        allAbsencesWordPast12Month: { type: String },
-    // },
-    // agreement: {
-        agreementDate: { type: String }, //non-editable, pre-fille
-        eSignature: { type: String },
-    // },
     profilePhoto: { type: String , default:'assets/img/0.jpg'},
-    Password: { type: String },
-    phoneNumber: { type: String },
+    // ==healthDetails== //
+    specialArrangementImpairment: { type: String },
+    doPhysicalMentalImpairment: { type: Boolean },
+    specialArrangementAttendInterview: { type: String },
+    listAnyDiseases: { type: String },
+    medicineDrugsTreatment: { type: String },
+    allAbsencesWordPast12Month: { type: String },
+    // ==agreement== //
+    agreementDate: { type: String }, //non-editable, pre-fille
+    eSignature: { type: String },
+
+    // client specific feilds
+    firstName: { type: String },
+    lastName: { type: String },
     companyName: { type: String },
     companyAddress: { type: String },
     companyPhoneNumber: { type: String },
+    phoneNumber: { type: String },
     emailAddressAccountsTeam: { type: String },
     VATNumber: { type: String }, //optional
     companyRegNumber: { type: String },
-    companyUrl:{type:String},// optional
-    tradingName:{type:String},//optional
     position: { type: String },
-    firstName: { type: String },
-    lastName: { type: String },
-    // subaccount
-    // subaccount: [{
-    //     subId: { type: mongoose.Schema.Types.ObjectId, ref: 'Sub', required: true }
-    // }],
-    hash: { type: String },
-    salt: { type: String },
-    createdDate:{type:Date},
-    accessToken:{ type: String },
-    refreshToken:{ type: String },
-    companyLogo:{type:String},
-    clientType:{type:String},
-    parentId:{type:String, default:''},
     clientStatus:{type:String, default:'Pending'},
+    companyLogo:{type:String},
+    companyUrl:{type:String}, // optional
+    tradingName:{type:String}, //optional
+    hk_chargerateU25:{type:Number, default:0},
+    hk_chargerateO25: {type:Number, default:0},
+    fab_chargerateU25:{type:Number, default:0},
+    fab_chargerateO25: {type:Number, default:0},
+    boh_chargerateU25:{type:Number, default:0},
+    boh_chargerateO25: {type:Number, default:0},
+    parentId:{type:String, default:''},
 
-
-// admin-setting
+    // admin specific feilds
     fromEmailAddress: { type: String },
     SMTPHost: { type: String },
     SMTPUser: { type: String },
     SMTPPassword: { type: String },
     SMPTPort: { type: String },
     Encryption: { type: String },
-    generalTemplates: {
-        workerEmailVerification:{type:String},
-        workerWelcomeEmail:{type:String},
-        workerChangeEmailVerificaion:{type:String},
-        workerResetPassword:{type:String},
-        workerPayslipEmail:{type:String},
-        workerShiftDetails:{type:String},
-        workerShiftAmended:{type:String},
-        workerShiftCancelled:{type:String},
-        clientWelcomeEmail:{type:String},
-        clientSubAccountInvitationEmail:{type:String},
-        clientNewInvoice:{type:String},
-        clientNewTimesheet:{type:String},
-        adminPayslipsSent:{type:String},
-        adminNewJobApplicant:{type:String},
-        adminNewClientRegistered:{type:String},
-        adminPossibleAWRNotification:{type:String}
-    },
     verify:{type:Boolean, default:false}
-    // id:{ type: Number,required: true,},
-    // accountType : { type: String,default:'Individual Account'},
-    // companyDirector :{ type: String,default:''},
-    // natureBusiness : { type: String,default:''},
-    // nameCompany : { type: String,default:''},
-    // accessToken: { type: String},
-    // refreshToken: { type: String},
-    // firstName: { type: String,default:''},
-    // lastName: { type: String,default:''},
-    // firstNameTwo: { type: String,default:''},
-    // lastNameTwo: { type: String,default:''},
-    // emailAddress: { type: String, required: true },
-    // phoneNumber: { type: String, required: true },
-    // providerUserID: { type: String, default: 'xxx' },
-    // countryCitizenship:{type:String},
-    // countryResidence:{type:String},
-    // uploadFiles:{type:String},
-    // addFileds:[{type:String}],
-    // addField1:{type:String},
-    // addField2:{type:String},
-    // addField3:{type:String},
-    // addField4:{type:String},
-    // password: {
-    //     type: String,default:'123456'
-    // },
-    // logtype: {
-    //     type: Number,
-    //     default: 0
-    // },
-
-    // // verifyStatus: {
-    // //     phoneVerify: { type: Boolean, default: false },
-    // //     emailVerify: { type: Boolean, default: false },
-    // //     addressVerify: { type: Boolean, default: false },
-    // // },
-    // userType:{type:Number, default:0},
-    // roles:[{type:Number, default:2}],
-    // totalEquity:{type:Number, default:0},
-    // userStatus:{type:String, default:'Unverified'},
-    // date:{type:Date,default:new Date()},
-    // modifyDate:{type:String},
-
-    // employmentStatus:{type:String, default:'Other'},
-    // nameEmployer:{type:String,default:''},
-    // nameCompanyEm:{type:String, default:''},
-    // investmentKnowledge:{type:String, default:'Beginner'},
-    // netWorth:{type:String, default:'£25,000 - £50,000'}
 }, { toJSON: { getters: true } });
 
 UserSchema.methods.setPassword = function(password) {

@@ -101,7 +101,7 @@ export class CompanydetailsComponent implements OnInit {
     if(!this.authService.currenctUser)
       this.authService.setCurrentUser();
     if(!this.authService.currentParent)
-      this.authService.setCurrentParent(); 
+      this.authService.setCurrentParent();
     this.currentUser = this.authService.currenctUser;
     this.currentParent = this.authService.currentParent;
     if(this.currentUser.companyLogo != '')
@@ -144,7 +144,7 @@ export class CompanydetailsComponent implements OnInit {
       });
       this.formCompany.disable();
     }
-  
+
   }
 
   togglePassword() {
@@ -163,7 +163,7 @@ export class CompanydetailsComponent implements OnInit {
     return this.states.filter(state => state.name.toLowerCase().indexOf(name.toLowerCase()) === 0);
   }
   isControlHasError(controlName: string, validationType: string): boolean
-  {	
+  {
       const control = this.formCompany.controls[controlName];
       if (!control) {
         return false;

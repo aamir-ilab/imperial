@@ -115,6 +115,7 @@ export class AuthService {
     return this.http.post<any>(`${USERS_URL}getExportTimesheets`, {});
   }
   getImportPayroll(rows: any, name: String): Observable<any>{
+    console.log('rows', rows);
     return this.http.post<any>(`${USERS_URL}getImportPayroll`, {rows:rows, user:name});
   }
   getAllPayroll(): Observable<any>{

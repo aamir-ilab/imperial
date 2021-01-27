@@ -6,6 +6,7 @@
   </head>
   <body>
     <style type="text/css">
+      @page {size: landscape}
        body {
         padding: 30px 0 0 0;
         position: relative;
@@ -77,8 +78,7 @@
         font-size: 13px;
       }
       .Row {
-          display: flex;
-
+        display: flex;
       }
       .Column-1 {
         border: 2px solid #000;
@@ -146,9 +146,6 @@
         font-size: 12px;
         font-weight: 600;
       }
-
-
-
       header {
         padding: 10px 0;
         margin-bottom: -16px;
@@ -212,32 +209,34 @@
           <tr>
             <td></td>
             <td class="row2">Value &nbsp;= &nbsp;  Hours &nbsp;X &nbsp; Rate</td>
-            <td class="row4">P.A.Y.E. &nbsp; &nbsp; &nbsp; <%= data.row.net_pay %></td>
-            <td class="to-date">TAXABLE <span> &nbsp; &nbsp; &nbsp; &nbsp; {5352.80}</span></td>
+            <td class="row4">P.A.Y.E. &nbsp; &nbsp; &nbsp; <%= data.row.tax %></td>
+            <td class="to-date">TAXABLE <span> &nbsp; &nbsp; &nbsp; &nbsp; <%= data.row.tax_toDate %></span></td>
           </tr>
           <tr>
-            <td class="name">belrun ltd</td>
-            <td class="row2">{340.00} &nbsp; &nbsp;  {43.50} &nbsp; &nbsp; {8.50}</td>
+            <% var w_total = 0;  w_total = data.work.hours * data.work.payRate; w_total = w_total.toFixed(2); %>
+            <td class="name"><%= data.work.client_Id.companyName %></td>
+            <td class="row2">&nbsp; &nbsp;<%= w_total %>&nbsp; &nbsp; &nbsp; &nbsp;  <%= data.work.hours %> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; <%= data.work.payRate %></td>
             <td></td>
-            <td class="to-date">tax &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; <span>258.20</span></td>
-          </tr>
-          <tr>
-            <td></td>
-            <td class="row2"></td>
-            <td class="row3" >Nat.Ins &nbsp; &nbsp; &nbsp; {24.45}</td>
-            <td class="to-date" >nat.ins <span> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; {441.65}</span></td>
+            <td class="to-date">tax &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; <span><%= data.row.tax %></span></td>
           </tr>
           <tr>
             <td></td>
             <td class="row2"></td>
-            <td class="row4" style="padding-top: 30px; padding-bottom: 30px; ">pansion &nbsp;  <%= data.row.pension %></td>
+            <td class="row3" >Nat.Ins &nbsp; &nbsp; &nbsp; <%= data.row.ni_ees %></td>
+            <td class="to-date" >nat.ins <span> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; <%= data.row.ni_toDate %></span></td>
+          </tr>
+          <tr>
+            <td></td>
+            <td class="row2"></td>
+            <td class="row4" style="padding-top: 30px; padding-bottom: 30px; ">pension &nbsp;  <%= data.row.pension %></td>
             <td class="to-date" ></td>
           </tr>
           <tr>
             <td></td>
             <td class="row2"></td>
             <td></td>
-            <td class="to-date"> <span> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;N.1.Code <%= data.row.ni_code %></span></td>
+            <td class="to-date"> <span> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;
+              N.I. Code <%= data.row.ni_code %></span></td>
           </tr>
           <tr>
             <td></td>
@@ -251,10 +250,14 @@
             <td></td>
             <td class="to-date">tax period <span> &nbsp; &nbsp; WEEK <%= data.row.week_no %> </span></td>
           </tr>
+          <% var total = 0;
+            total = parseFloat(data.row.tax) + parseFloat(data.row.pension) + parseFloat(data.row.ni_ees);
+            total = total.toFixed(2);
+          %>
           <tr>
             <td class="name">Total</td>
-            <td class="row2">{369.75}</td>
-            <td class="name">total &nbsp; &nbsp; {60.32}</td>
+            <td class="row2"><%= w_total %></td>
+            <td class="name">total &nbsp; &nbsp; <%= total %></td>
             <td class="to-date">tax code <span> &nbsp; &nbsp; &nbsp; <%= data.row.tax_code %> WK <%= data.row.wk1m1 %> </span></td>
           </tr>
           <tr>
@@ -270,10 +273,11 @@
         <div class="Column-2"></div>
         <div class="Column-3">
           <div class="button">
-            <a href="">next pay</a>
+            <a href="">net pay</a>
+            <%= data.row.net_pay %>
           </div>
         </div>
-    </div>
+      </div>
     <div class="note">
       please keep this pay advice in a place.it may be required for the purpose of self assessment.
     </div>

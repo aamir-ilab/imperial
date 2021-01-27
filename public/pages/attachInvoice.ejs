@@ -156,7 +156,7 @@
           Employee No.
         </td>
 
-        <td>
+        <td style="text-align: left;">
           Employee Name
         </td>
 
@@ -182,10 +182,10 @@
           <% NetSum += worker.net %>
           <tr>
             <td><%= worker.workerId.workerId %></td>
-            <td><%= worker.workerId.forename %> <%= worker.workerId.surename %></td>
+            <td style="text-align: left;"><%= worker.workerId.forename %> <%= worker.workerId.surename %></td>
             <td><%= data.TS_ID %></td>
             <td><%= worker.hours %></td>
-            <td>$<%= worker.chargeRate %>/hr</td>
+            <td>£<%= worker.chargeRate %>/hr</td>
             <td><%= worker.net %></td>
           </tr>
         <% }) %>
@@ -198,7 +198,7 @@
         <td></td>
         <td>Subtotal:</td>
 
-        <td>$<%= NetSum %></td>
+        <td>£<%= NetSum %></td>
       </tr>
 
       <tr class="total">
@@ -207,9 +207,8 @@
         <td></td>
         <td></td>
         <td>VAT:</td>
-
         <td>
-          ${TAX_RATE}
+          £<%= data.vat %>
         </td>
 
       <tr class="total last">
@@ -218,8 +217,10 @@
         <td></td>
         <td></td>
         <td>Total:</td>
-
-        <td>$<%= NetSum %></td>
+        <% var vat = data.vat %>
+        <% var perc = ((vat/100)*NetSum).toFixed(2) %>
+        <% var total = NetSum + parseFloat(perc) %>
+        <td>£<%= total %></td>
       </tr>
 
       <tr class="footer">
