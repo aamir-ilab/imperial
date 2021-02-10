@@ -175,7 +175,10 @@ fileName: string = "No file selected";
     this.auth.updateUser(this.workerForm.value).subscribe((res =>{
       if(res){
         this.auth.openSnackbar('Updated Successfully!')
-        this.router.navigate(['/admin/workers']);
+        if(localStorage.getItem('loggedIn') === 'Admin')
+          this.router.navigate(['/admin/workers']);
+        else
+          this.router.navigate(['/team/workers']);
       }
       else{
         console.log('res', res)
@@ -204,7 +207,10 @@ fileName: string = "No file selected";
     console.log('=====================')
             this.auth.updateUser(this.workerForm.value).subscribe((res =>{
             this.auth.openSnackbar('Updated Successfully!')
-      this.router.navigate(['/admin/workers']);
+            if(localStorage.getItem('loggedIn') === 'Admin')
+              this.router.navigate(['/admin/workers']);
+            else
+              this.router.navigate(['/team/workers']);
   }))
     // this.authService.register(this.form.value).subscribe((res)=>{
     //   console.log('XXXXXXXXXXXXXXXXXXXXXXXX');
@@ -384,6 +390,9 @@ fileName: string = "No file selected";
       return result;
   }
   cancelBtn(){
-    this.router.navigate(['/admin/workers'])
+    if(localStorage.getItem('loggedIn') === 'Admin')
+          this.router.navigate(['/admin/workers']);
+        else
+          this.router.navigate(['/team/workers']);
   }
 }

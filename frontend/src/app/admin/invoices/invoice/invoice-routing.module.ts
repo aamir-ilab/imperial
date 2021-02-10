@@ -6,10 +6,6 @@ import { VexRoutes } from '../../../../@vex/interfaces/vex-route.interface';
 
 const routes: VexRoutes = [
   {
-    path: '',
-    redirectTo: '1'
-  },
-  {
     path: ':invoice_Id',
     component: InvoiceComponent,
     data: {

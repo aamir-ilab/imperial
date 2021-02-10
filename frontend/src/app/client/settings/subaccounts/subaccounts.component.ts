@@ -115,8 +115,8 @@ export class SubaccountsComponent implements OnInit, AfterViewInit {
   getData() {
     this.authService.getTypeSubUsers(this.currentUser._id).subscribe((clients)=>{
       of(clients.map(client =>new Client(client))).subscribe(clientes =>{
-        console.log('123213123')  
-        console.log(clientes)  
+        console.log('123213123')
+        console.log(clientes)
         this.subject$.next(clientes)
       });
     })// return of(aioTableData.map(customer => new Client(customer)));
@@ -126,11 +126,11 @@ export class SubaccountsComponent implements OnInit, AfterViewInit {
     if(!this.authService.currenctUser)
     this.authService.setCurrentUser();
     this.currentUser = this.authService.currenctUser;
-    if(this.currentUser.clientType != 'Master Admin')
-      {
-        alert("You can't access into the this page ");
-        this.router.navigate(['/client/companydetails']);
-      }
+    // if(this.currentUser.clientType != 'Master Admin')
+    //   {
+    //     alert("You can't access into the this page ");
+    //     this.router.navigate(['/client/companydetails']);
+    //   }
     this.getData();
     // this.getData().subscribe(customers => {
     //   this.subject$.next(customers);

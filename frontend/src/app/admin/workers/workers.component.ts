@@ -184,7 +184,11 @@ export class WorkersComponent implements OnInit, AfterViewInit {
     //   }
     // });
     localStorage.setItem('editCustomer', JSON.stringify(customer));
-    this.router.navigate(['/admin/workers/edit']);
+    if(localStorage.getItem('loggedIn') === 'Admin')
+      this.router.navigate(['/admin/workers/edit']);
+    else
+      this.router.navigate(['/team/workers/edit']);
+
   }
 
   deleteCustomer(customer: Worker) {

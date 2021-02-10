@@ -137,19 +137,12 @@ export class InvoicesComponent implements OnInit, AfterViewInit {
     return column.property;
   }
 
-  // [
-  //   {
-  //     client_id: 2
-  //     invoices: [{w0001},{D0000}]
-  //   },
-  //   {
-  //     client_id: 6,
-  //     invoices: [{w0001}]
-  //   }
-  // ]
-
   pdfCustomer(user:Invoice){
-    console.log('view invoice', user)
-    this.route.navigate(['/admin/invoices/pdf',user.invoiceId]);
+    console.log('view invoice', user);
+    console.log('loggedIn', localStorage.getItem('loggedIn'));
+    if(localStorage.getItem('loggedIn') === 'Admin')
+      this.route.navigate(['/admin/invoices/pdf',user.invoiceId]);
+    else
+      this.route.navigate(['/team/invoices/pdf',user.invoiceId]);
   }
 }
