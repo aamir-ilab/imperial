@@ -25,7 +25,7 @@ export class AppInterceptor implements HttpInterceptor {
         return next.handle(req).pipe(
           map((res: any) => {
             if (res && res.status === 401) {
-              this.showSnackBar(res.message);
+              this.showSnackBar(res.message, 401);
             }
             return res;
           }),
@@ -42,20 +42,27 @@ export class AppInterceptor implements HttpInterceptor {
       console.log(`throw errors response ===> status === ${status} error === `, "error ", error, " e === ", e);
       switch (status) {
         case 401:
-          this.showSnackBar(error.message);
+          this.showSnackBar(error.message, status);
+          break;
+        case 400:
+          this.showSnackBar('Something went wrong!', status);
+          break;
+        case 500:
+          this.showSnackBar('Something went wrong!', status);
           break;
         default:
       }
     }
 
 
-    showSnackBar(message: string){
+    showSnackBar(message: string, status: number){
       let config = new MatSnackBarConfig();
       config.verticalPosition = 'top';
       config.horizontalPosition = 'right';
       config.duration = 3000;
       let snackBarRef = this.snackBar.open(message, 'Cancel', config);
-      this.router.navigateByUrl('/login');
+      if(status === 401)
+        this.router.navigateByUrl('/login');
       // snackBarRef.onAction().subscribe(() => {
       //   this.router.navigateByUrl('/login');
       // });

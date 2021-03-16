@@ -24,7 +24,7 @@ let transporter = nodemailer.createTransport({
     }
 });
 exports.register = (req, res) => {
-    console.log('aaaa');
+    console.log('register user');
     console.log(req.body)
     if (!req.body.emailAddress) {
         return res.status(400).json({ message: "All fields required" });
@@ -34,7 +34,6 @@ exports.register = (req, res) => {
         if (client) {
             return res.status(400).json({ fullname: "User already exists" });
         } else {
-            console.log('cccc');
             const client = new User(req.body);
             client.roles = [2];
             client.accessToken = 'access-token-' + Math.random();
@@ -83,7 +82,11 @@ exports.register = (req, res) => {
                     } else {
                         console.log(client);
                         // const token = client.generateJwt();
-                        res.status(200).json(client)
+                        User.findOne({id:client.id}).exec(function (err, client){
+                          if (err) return res.json({error: err, status:400});
+                          res.status(200).json(client);
+                        });
+                        // res.status(200).json(client)
                             // res.status(200).json("Registered successfully");
                     }
                 });
@@ -445,12 +448,11 @@ exports.delete = (req, res) => {
 exports.removeUser = (req, res) =>{
   console.log('--removeUserReq--', req.body._id)
   User.findOneAndDelete({ _id: req.body._id }, function(err, city) {
-    if (err) res.json(err);
+    if (err)
+    return res.json(err);
     else {
       console.log('remove')
-      console.log(city)
-      console.log(req.body)
-      res.status(200);
+      return res.status(200);
     }
   });
 }

@@ -147,7 +147,7 @@ exports.register = (req, res) => {
               }
             })
           }
-          res.status(200).json(newClient);
+          // res.status(200).json(newClient);
           Job.findOne({id:newClient.id}).populate('clientId').exec(function (err, client){
             if (err) return res.json(err, 400);
             res.status(200).json(client);

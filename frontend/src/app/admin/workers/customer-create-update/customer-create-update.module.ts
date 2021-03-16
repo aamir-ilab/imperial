@@ -23,6 +23,8 @@ import { MatCardModule } from '@angular/material/card';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { MatNativeDateModule } from '@angular/material/core';
 import { MatDatepickerModule } from '@angular/material/datepicker';
+import { TextMaskModule } from 'angular2-text-mask';
+import { ImageCropperModule } from 'ngx-image-cropper';
 
 @NgModule({
   imports: [
@@ -48,6 +50,8 @@ import { MatDatepickerModule } from '@angular/material/datepicker';
     AngularFireModule.initializeApp(environment.firebaseConfig),
     AngularFireDatabaseModule,
     AngularFireStorageModule,
+    TextMaskModule,
+    ImageCropperModule
   ],
   declarations: [CustomerCreateUpdateComponent],
   entryComponents: [CustomerCreateUpdateComponent],

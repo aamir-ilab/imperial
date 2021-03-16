@@ -30,6 +30,8 @@ import { MatRadioModule } from '@angular/material/radio';
 import { MatInputModule } from '@angular/material/input';
 import { MatDialogModule } from '@angular/material/dialog';
 import { ReactiveFormsModule } from '@angular/forms';
+import { TextMaskModule } from 'angular2-text-mask';
+import { ImageCropperModule } from 'ngx-image-cropper';
 
 
 @NgModule({
@@ -68,6 +70,8 @@ import { ReactiveFormsModule } from '@angular/forms';
     AngularFireModule.initializeApp(environment.firebaseConfig),
     AngularFireDatabaseModule,
     AngularFireStorageModule,
+    TextMaskModule,
+    ImageCropperModule
   ]
 })
 export class EditWorkerModule {

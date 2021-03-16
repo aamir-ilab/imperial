@@ -24,7 +24,7 @@ import {NgxMaterialTimepickerModule} from 'ngx-material-timepicker';
     FlexLayoutModule,
     MatDialogModule,
     MatFormFieldModule,
-     MatInputModule,
+    MatInputModule,
     MatButtonModule,
     MatIconModule,
     MatRadioModule,

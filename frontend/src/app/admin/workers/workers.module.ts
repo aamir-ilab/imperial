@@ -21,7 +21,6 @@ import { ContainerModule } from '../../../@vex/directives/container/container.mo
 import { MatSelectModule } from '@angular/material/select';
 import { MatButtonToggleModule } from '@angular/material/button-toggle';
 
-
 @NgModule({
   declarations: [WorkersComponent],
   imports: [
@@ -44,7 +43,7 @@ import { MatButtonToggleModule } from '@angular/material/button-toggle';
     ReactiveFormsModule,
     ContainerModule,
     MatSelectModule,
-    MatButtonToggleModule
+    MatButtonToggleModule,
   ]
 })
 export class WorkersModule {

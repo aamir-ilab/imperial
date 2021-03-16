@@ -31,6 +31,7 @@ import icMap from '@iconify/icons-ic/twotone-map';
 import { Worker } from 'src/app/models/worker.model';
 import { AuthService } from 'src/app/services/auth.service';
 import {  Router } from '@angular/router';
+import { AngularFireStorage } from '@angular/fire/storage';
 
 
 @UntilDestroy()
@@ -105,7 +106,8 @@ export class WorkersComponent implements OnInit, AfterViewInit {
 
   constructor(private dialog: MatDialog,
               private authService: AuthService,
-              private router: Router) {
+              private router: Router,
+              private storage:AngularFireStorage,) {
   }
 
   get visibleColumns() {
@@ -159,11 +161,17 @@ export class WorkersComponent implements OnInit, AfterViewInit {
          * You would probably make an HTTP request here.
          */
         this.authService.register(customer, 'Worker').subscribe((res) => {
-          console.log('new created client');
-          this.authService.openSnackbar('New Worker Added!');
+          if(res)
+          {
+            console.log('new created client');
+            this.authService.openSnackbar('New Worker Added!');
+            this.customers.unshift(new Worker(res));
+            this.subject$.next(this.customers);
+          }
+          else{
+            console.log('worker error', res.status);
+          }
         });
-        this.customers.unshift(new Worker(customer));
-        this.subject$.next(this.customers);
       }
     });
   }
@@ -196,6 +204,9 @@ export class WorkersComponent implements OnInit, AfterViewInit {
      * Here we are updating our local array.
      * You would probably make an HTTP request here.
      */
+     if(customer.profilePhoto != 'assets/img/0.jpg'){
+      this.storage.storage.refFromURL(customer.profilePhoto).delete();
+    }
     this.authService.deleteUser(customer, 'Worker').subscribe((res => {
       this.authService.openSnackbar('Removed Successfully!');
   }));

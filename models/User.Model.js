@@ -12,7 +12,7 @@ var UserSchema = new mongoose.Schema({
     createdDate:{type:Date},
     accessToken:{ type: String },
     refreshToken:{ type: String },
-    // worker specific feilds
+    // worker specific feilds starts
     workerId:{type:String, default:''},
     title: { type: String },
     forename: { type: String },
@@ -23,7 +23,6 @@ var UserSchema = new mongoose.Schema({
     addressLine2: { type: String },
     city: { type: String },
     postcode: { type: String },
-    // country:{ type: String,default:''},
     mobileNumber: { type: String }, // UKONLY
     homeNumber: { type: String },
     dateBirth: { type: Date },
@@ -37,7 +36,7 @@ var UserSchema = new mongoose.Schema({
     bankBranch: { type: String },
     accountNameHolder: { type: String },
     bankAccountNumber: { type: Number },
-    bankBranchSortCode: { type: Number },
+    bankBranchSortCode: { type: String },
     buildingSocietyReference: { type: Number }, //optional
     emergencyRelationship:{type:String},
     relationship: { type: String }, //optional
@@ -46,8 +45,13 @@ var UserSchema = new mongoose.Schema({
     nextKinPhoneNumberHome: { type: String }, //optional
     employeeStatement: { type: String },
     // ==educationHistory== //
-    studentLoan: { type: String },
+    studentLoan: { type: Boolean },
+    studentloanPlan: { type: String },
+    leaveStudiesBefore6: { type: Boolean },
+    payingStudentLoanDirctly: { type: Boolean },
     postgraduateLoan: { type: Boolean },
+    leavePostStudiesBefore6: { type: Boolean },
+    payingPostLoanDirctly: { type: Boolean },
     qualificationName: { type: String },
     qualificationYear: { type: Number },
     // ==employmentHistroy== //
@@ -69,7 +73,8 @@ var UserSchema = new mongoose.Schema({
     referenceAddress: { type: String },
     referenceEmail: { type: String },
     referenceContactPerson: { type: String },
-    criminalRecords: { type: String },
+    criminalRecords: { type: Boolean },
+    criminalRecordDetail: { type: String },
     profilePhoto: { type: String , default:'assets/img/0.jpg'},
     // ==healthDetails== //
     specialArrangementImpairment: { type: String },
@@ -81,8 +86,8 @@ var UserSchema = new mongoose.Schema({
     // ==agreement== //
     agreementDate: { type: String }, //non-editable, pre-fille
     eSignature: { type: String },
-
-    // client specific feilds
+    // worker specific feilds ends
+    // client specific feilds starts
     firstName: { type: String },
     lastName: { type: String },
     companyName: { type: String },
@@ -104,8 +109,8 @@ var UserSchema = new mongoose.Schema({
     boh_chargerateU25:{type:Number, default:0},
     boh_chargerateO25: {type:Number, default:0},
     parentId:{type:String, default:''},
-
-    // admin specific feilds
+    // client specific feilds ends
+    // admin specific feilds starts
     fromEmailAddress: { type: String },
     SMTPHost: { type: String },
     SMTPUser: { type: String },
@@ -113,6 +118,7 @@ var UserSchema = new mongoose.Schema({
     SMPTPort: { type: String },
     Encryption: { type: String },
     verify:{type:Boolean, default:false}
+    // admin specific feilds ends
 }, { toJSON: { getters: true } });
 
 UserSchema.methods.setPassword = function(password) {
