@@ -75,7 +75,7 @@
         <td class="body-2 text-secondary">Employee Name	</td>
         <td class="body-2 text-secondary">Timesheet No.</td>
         <td class="body-2 text-secondary">Hours</td>
-        <td class="body-2 text-secondary">Charge Rate	</td>
+        <td class="body-2 text-secondary">Hourly Rate</td>
         <td class="body-2 text-secondary text-right">NET</td>
       </tr>
       </thead>
@@ -84,9 +84,9 @@
           <td class="py-6 border-b">{{invoice.workerId.workerId}}</td>
           <td class="py-6 border-b">{{invoice.workerId.forename}} {{invoice.workerId.surename}}</td>
           <td class="py-6 border-b">{{invoiceObj.timesheetId}}</td>
-          <td class="py-6 border-b">{{invoice.hours}}</td>
-          <td class="py-6 border-b">£{{invoice.chargeRate}}/hr</td>
-          <td class="py-6 border-b font-medium text-right">{{invoice.net}}</td>
+          <td class="py-6 border-b">{{invoice.hours.toFixed(2)}}</td>
+          <td class="py-6 border-b">£{{invoice.chargeRate.toFixed(2)}}</td>
+          <td class="py-6 border-b font-medium text-right">{{invoice.net.toFixed(2)}}</td>
         </tr>
       </tbody>
     </table>
@@ -96,7 +96,7 @@
         <tbody>
         <tr>
           <td class="text-secondary text-right">Subtotal:</td>
-          <td class="pl-12">£{{getNetTotal()}}</td>
+          <td class="pl-12">£{{getNetTotal().toFixed(2)}}</td>
         </tr>
         <tr>
           <td class="text-secondary text-right">VAT:</td>

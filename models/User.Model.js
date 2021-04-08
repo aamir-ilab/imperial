@@ -86,6 +86,14 @@ var UserSchema = new mongoose.Schema({
     // ==agreement== //
     agreementDate: { type: String }, //non-editable, pre-fille
     eSignature: { type: String },
+    workerdocuments: [
+      {
+        url: {type:String},
+        title: {type:String},
+        dateUpload: {type:Date},
+        fileType: {type:String}
+      }
+    ],
     // worker specific feilds ends
     // client specific feilds starts
     firstName: { type: String },

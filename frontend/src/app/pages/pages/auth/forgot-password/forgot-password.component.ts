@@ -42,7 +42,7 @@ export class ForgotPasswordComponent implements OnInit {
       link:''
     };
     if(controls.email.value != ''){
-      this.auth.sendEmail(obj).subscribe((res)=>{
+      this.auth.requestPassword(controls.email.value).subscribe((res)=>{
         console.log('return send email')
         console.log(res)
         this.auth.openSnackbar('Sucessfully Send Email');

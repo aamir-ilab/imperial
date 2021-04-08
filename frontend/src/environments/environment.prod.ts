@@ -2,11 +2,15 @@
 // `ng build --prod` replaces `environment.ts` with `environment.prod.ts`.
 // The list of file replacements can be found in `angular.json`.
 
+//////////////////////////////////////////////////////////////////
+// TODO CHANGE DB FROM CONFIF/MONGOOSE.JS BEFORE CREATING BUILD //
+//////////////////////////////////////////////////////////////////
+
 export const environment = {
   production: false,
   authTokenKey: 'authce9d77b308c149d5992a80073637e4d5',
   baseUrl: 'http://imperial-recruitment.herokuapp.com/',
-  authURL: 'http://stagings.tk:5500/',
+  authURL: 'http://localhost:5000/',
    firebaseConfig : {
     apiKey: "AIzaSyBn3Qgdeotyhwqvi3D_PzZBhXspA0HG1-s",
     authDomain: "crud-1054b.firebaseapp.com",

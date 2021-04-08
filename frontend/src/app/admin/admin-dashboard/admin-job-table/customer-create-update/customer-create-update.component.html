@@ -19,7 +19,7 @@
       <mat-form-field class="mt-6 flex-auto">
         <mat-label>Client</mat-label>
         <mat-select formControlName="client" [(ngModel)]="selectedClient" >
-          <mat-option *ngFor="let subclient of AllClients" [value]="subclient.firstName + ' ' + subclient.lastName">{{subclient.firstName + ' ' + subclient.lastName}}</mat-option>
+          <mat-option *ngFor="let subclient of AllClients" [value]="subclient.firstName + ' ' + subclient.lastName">{{subclient.companyName}}</mat-option>
        </mat-select>
         <mat-icon [icIcon]="icPerson" class="mr-3" matPrefix></mat-icon>
 

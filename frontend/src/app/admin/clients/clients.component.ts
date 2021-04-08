@@ -72,7 +72,7 @@ export class ClientsComponent implements OnInit, AfterViewInit {
     { label: 'Email Address', property: 'emailAddress', type: 'text', visible: true },
     { label: 'First Name', property: 'firstName', type: 'text', visible: false },
     { label: 'Last Name', property: 'lastName', type: 'text', visible: false },
-    { label: 'Company Address', property: 'companyAddress', type: 'text', visible: true },
+    // { label: 'Company Address', property: 'companyAddress', type: 'text', visible: true },
     { label: 'Phone Number', property: 'companyPhoneNumber', type: 'text', visible: true },
     { label: 'Email Address AccountsTeam', property: 'emailAddressAccountsTeam', type: 'text', visible: false },
     { label: 'VATNumber', property: 'VATNumber', type: 'text', visible: false },

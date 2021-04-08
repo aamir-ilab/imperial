@@ -39,10 +39,20 @@ exports.register = (req, res) => {
             client.accessToken = 'access-token-' + Math.random();
             client.refreshToken = 'access-token-' + Math.random();
             client.pic = './assets/media/users/default.jpg';
-            if (req.body.hash) {
-                client.setPassword(req.body.hash);
-            } else {
-                client.setPassword('123456');
+            tempPass = client.hash;
+            // if (req.body.hash) {
+            //     client.setPassword(req.body.hash);
+            // } else {
+            //     client.setPassword('123456');
+            // }
+            if(req.body.Password && req.body.Password != ''){
+              console.log('assign new password');
+              client.setPassword(req.body.Password);
+            }
+            else if (req.body.hash && req.body.hash != '')
+              client.setPassword(req.body.hash);
+            else {
+              client.hash = tempPass;
             }
             User.countDocuments({}, function(err, c) {
                 console.log('location count document')
@@ -364,7 +374,7 @@ exports.updateProfile = (req, res) => {
         console.log('hash',req.body.hash)
         console.log('hash client',client)
         if(req.body.Password && req.body.Password != ''){
-          console.log('assign new password');
+          console.log('assign new password', req.body.Password);
           client.setPassword(req.body.Password);
         }
         else if (req.body.hash && req.body.hash != '')
@@ -1385,6 +1395,7 @@ exports.getAllFiles = (req, res) => {
     }).populate(['userId']).exec();
 }
 exports.forgotPassword = (req, res) => {
+  console.log('forgotPassword', req.body.email);
     User.findOne({ 'emailAddress': req.params.email }).then(client => {
         if (!client) {
             return res.status(200).json(false)

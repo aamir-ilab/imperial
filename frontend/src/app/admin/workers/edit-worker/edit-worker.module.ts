@@ -32,10 +32,13 @@ import { MatDialogModule } from '@angular/material/dialog';
 import { ReactiveFormsModule } from '@angular/forms';
 import { TextMaskModule } from 'angular2-text-mask';
 import { ImageCropperModule } from 'ngx-image-cropper';
-
+import { MatPaginatorModule } from '@angular/material/paginator';
+import { MatTableModule } from '@angular/material/table';
+import { MatSortModule } from '@angular/material/sort';
+import { UploadWorkerDocumentComponent } from './upload-worker-document/upload-worker-document.component';
 
 @NgModule({
-  declarations: [EditWorkerComponent],
+  declarations: [EditWorkerComponent, UploadWorkerDocumentComponent],
   imports: [
     CommonModule,
     EditWorkerRoutingModule,
@@ -48,7 +51,7 @@ import { ImageCropperModule } from 'ngx-image-cropper';
     IconModule,
     MatIconModule,
     ContainerModule,
-        CommonModule,
+    CommonModule,
     ReactiveFormsModule,
     FlexLayoutModule,
     MatDialogModule,
@@ -71,7 +74,10 @@ import { ImageCropperModule } from 'ngx-image-cropper';
     AngularFireDatabaseModule,
     AngularFireStorageModule,
     TextMaskModule,
-    ImageCropperModule
+    ImageCropperModule,
+    MatPaginatorModule,
+    MatTableModule,
+    MatSortModule,
   ]
 })
 export class EditWorkerModule {

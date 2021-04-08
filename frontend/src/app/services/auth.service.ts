@@ -161,7 +161,7 @@ export class AuthService {
     );
   }
   public requestPassword(email: string): Observable<any>{
-    return this.http.post(`${USERS_URL}` + 'forgot/' + email, {})
+    return this.http.post(`${USERS_URL}` + 'forgot-password', {email})
       .pipe(catchError(this.handleError('forgot-password', [])));
   }
 

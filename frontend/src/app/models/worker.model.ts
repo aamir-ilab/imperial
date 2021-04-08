@@ -100,6 +100,14 @@ export class Worker {
     Password: string;
     // page13 ends //
     // doPhysicalMentalImpairment: boolean;
+    workerdocuments: [
+      {
+        url: {type:String},
+        title: {type:String},
+        dateUpload: {type:Date},
+        fileType: {type:String}
+      }
+    ];
     createdDate: Date;
     createdDateStr: string;
     salt: string;
@@ -207,6 +215,7 @@ export class Worker {
       this.agreementDate = worker.agreementDate;
       this.emailAddress = worker.emailAddress;
       // page13 ends //
+      this.workerdocuments = worker.workerdocuments;
     }
     get name() {
         let name = '';

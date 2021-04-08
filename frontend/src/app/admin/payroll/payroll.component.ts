@@ -8,7 +8,6 @@ import { MatSort } from '@angular/material/sort';
 import { MatDialog } from '@angular/material/dialog';
 import { TableColumn } from '../../../@vex/interfaces/table-column.interface';
 import { aioTableData1,aioTableData, aioTableLabels,aioTableLabelsPayroll } from '../../../static-data/aio-table-data';
-import { ClientCreateUpdateComponent } from './client-create-update/client-create-update.component';
 import icEdit from '@iconify/icons-ic/twotone-edit';
 import icDelete from '@iconify/icons-ic/twotone-delete';
 import icSearch from '@iconify/icons-ic/twotone-search';
@@ -22,14 +21,11 @@ import { MAT_FORM_FIELD_DEFAULT_OPTIONS, MatFormFieldDefaultOptions } from '@ang
 import { stagger40ms } from '../../../@vex/animations/stagger.animation';
 import { FormControl } from '@angular/forms';
 import { UntilDestroy, untilDestroyed } from '@ngneat/until-destroy';
-import { MatSelectChange } from '@angular/material/select';
 import icPhone from '@iconify/icons-ic/twotone-phone';
 import icMail from '@iconify/icons-ic/twotone-mail';
 import icMap from '@iconify/icons-ic/twotone-map';
-import { Client } from 'src/app/models/client.model';
 import { AuthService } from 'src/app/services/auth.service';
 import { ExportService } from 'src/app/services/export.service';
-import { User } from 'src/app/models/user.model';
 
 import roundImportExport from '@iconify/icons-ic/round-import-export';
 import { Payroll } from 'src/app/models/payroll.model';
@@ -194,7 +190,7 @@ export class PayrollComponent implements OnInit, AfterViewInit {
       console.log('res')
       console.log(res)
       if(res.fullname){
-        this.authService.openSnackbar('Alrady Gnerated');
+        this.authService.openSnackbar('Already Generated');
 
       }else{
           if(res.length  == 0){

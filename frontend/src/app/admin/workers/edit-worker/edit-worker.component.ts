@@ -1,18 +1,18 @@
-import { Component, ElementRef, OnInit, ViewChild } from '@angular/core';
+import { Component, ElementRef, Input, OnInit, ViewChild } from '@angular/core';
 import icMoreVert from '@iconify/icons-ic/twotone-more-vert';
 import { AngularFireStorage, AngularFireStorageReference, AngularFireUploadTask } from '@angular/fire/storage';
 import {ChangeDetectorRef } from '@angular/core';
 import { FormBuilder, FormGroup } from '@angular/forms';
 import icClose from '@iconify/icons-ic/twotone-close';
 import icPrint from '@iconify/icons-ic/twotone-print';
-import icDownload from '@iconify/icons-ic/twotone-cloud-download';
-import icDelete from '@iconify/icons-ic/twotone-delete';
+import icUpload from '@iconify/icons-ic/twotone-cloud-upload';
+import icFileDownload from '@iconify/icons-fa-solid/download';
+import icDelete from '@iconify/icons-ic/round-close';
 import icPhone from '@iconify/icons-ic/twotone-phone';
 import icPerson from '@iconify/icons-ic/twotone-person';
 import icMyLocation from '@iconify/icons-ic/twotone-my-location';
 import icLocationCity from '@iconify/icons-ic/twotone-location-city';
 import icEditLocation from '@iconify/icons-ic/twotone-edit-location';
-import { formatDate } from '@angular/common';
 import icVisibility from '@iconify/icons-ic/twotone-visibility';
 import icVisibilityOff from '@iconify/icons-ic/twotone-visibility-off';
 import { finalize } from 'rxjs/operators';
@@ -20,11 +20,36 @@ import { Worker } from 'src/app/models/worker.model';
 import { Router } from '@angular/router';
 import { AuthService } from 'src/app/services/auth.service';
 import { base64ToFile, ImageCroppedEvent } from 'ngx-image-cropper';
+import { MatTableDataSource } from '@angular/material/table';
+import { TableColumn } from 'src/@vex/interfaces/table-column.interface';
+import { MatPaginator } from '@angular/material/paginator';
+import { MatSort } from '@angular/material/sort';
+import { fadeInUp400ms } from '../../../../@vex/animations/fade-in-up.animation';
+import { MAT_FORM_FIELD_DEFAULT_OPTIONS, MatFormFieldDefaultOptions } from '@angular/material/form-field';
+import { stagger40ms } from '../../../../@vex/animations/stagger.animation';
+import { MatDialog } from '@angular/material/dialog';
+import { UploadWorkerDocumentComponent } from './upload-worker-document/upload-worker-document.component';
+import icExcel from '@iconify/icons-fa-solid/file-excel';
+import icPDF from '@iconify/icons-fa-solid/file-pdf';
+import icImage from '@iconify/icons-fa-solid/file-image';
+import icWord from '@iconify/icons-fa-solid/file-word';
 
 @Component({
   selector: 'vex-edit-worker',
   templateUrl: './edit-worker.component.html',
-  styleUrls: ['./edit-worker.component.scss']
+  styleUrls: ['./edit-worker.component.scss'],
+  animations: [
+    fadeInUp400ms,
+    stagger40ms
+  ],
+  providers: [
+    {
+      provide: MAT_FORM_FIELD_DEFAULT_OPTIONS,
+      useValue: {
+        appearance: 'standard'
+      } as MatFormFieldDefaultOptions
+    }
+  ]
 })
 export class EditWorkerComponent implements OnInit {
   @ViewChild('cropper') private cropper: ElementRef;
@@ -46,12 +71,12 @@ export class EditWorkerComponent implements OnInit {
   picRemove = false;
   btnTxt : string = "";
   mode: 'update';
-
+  files;
   icMoreVert = icMoreVert;
   icClose = icClose;
-
   icPrint = icPrint;
-  icDownload = icDownload;
+  icUpload = icUpload;
+  icFileDownload = icFileDownload;
   icDelete = icDelete;
   editCustomer:Worker;
   icPerson = icPerson;
@@ -80,13 +105,45 @@ export class EditWorkerComponent implements OnInit {
   selectedDepartment;
   selectedStatus;
   defaults;
+  iconList = [ // array of icon class list based on type
+    { type: "xlsx", icon: icExcel },
+    { type: "pdf", icon: icPDF },
+    { type: "jpg", icon: icImage },
+    { type: "jpeg", icon: icImage },
+    { type: "png", icon: icImage },
+    { type: "doc", icon: icWord },
+    { type: "docx", icon: icWord },
+    { type: "rtf", icon: icWord },
+  ];
+
+  @Input()
+  columns: TableColumn<any>[] = [
+    { label: 'File Type', property: 'fileType', type: 'image', visible: true },
+    { label: 'Title', property: 'title', type: 'text', visible: true, cssClasses: ['font-medium'] },
+    { label: 'Date Uploaded', property: 'dateUpload', type: 'text', visible: true, cssClasses: ['font-medium'] },
+    { label: 'Actions', property: 'actions', type: 'button', visible: true },
+    { label: 'ID', property: '_id', type: 'text', visible: false }
+  ];
+  pageSize = 10;
+  pageSizeOptions: number[] = [5, 10, 20, 50];
+  dataSource: MatTableDataSource<Worker> | null;
+  @ViewChild(MatPaginator, { static: true }) paginator: MatPaginator;
+  @ViewChild(MatSort, { static: true }) sort: MatSort;
+
   constructor(
     private cd: ChangeDetectorRef,
     private storage:AngularFireStorage,
     private router:Router,
     public auth:AuthService,
-    private fb: FormBuilder) {}
+    private fb: FormBuilder,
+    private dialog: MatDialog,
+  ) {}
+
+  get visibleColumns() {
+    return this.columns.filter(column => column.visible).map(column => column.property);
+  }
   ngOnInit() {
+    this.dataSource = new MatTableDataSource();
     this.step = 0;
 
     this.editCustomer = JSON.parse(localStorage.getItem('editCustomer'));
@@ -94,6 +151,8 @@ export class EditWorkerComponent implements OnInit {
     this.selectedStatus = this.editCustomer.clientStatus;
     this.selectedType = 'Worker';
     this.defaults = this.editCustomer as Worker;
+    this.dataSource.data = this.defaults.workerdocuments || [];
+    console.log('dataSource', this.dataSource.data)
     this.workerForm = this.fb.group({
       id: [0],
       _id:[this.defaults._id],
@@ -199,10 +258,11 @@ export class EditWorkerComponent implements OnInit {
     console.log('criminalRecords', this._criminalRecord);
   }
   save() {
-    console.log('save', this.workerForm.value)
     const customer = this.workerForm.value;
+    customer.workerdocuments = this.files;
+    console.log('customer', customer)
     customer.id = this.defaults.id;
-    this.auth.updateUser(this.workerForm.value).subscribe((res =>{
+    this.auth.updateUser(customer).subscribe((res =>{
       if(res){
         this.auth.openSnackbar('Updated Successfully!')
         if(localStorage.getItem('loggedIn') === 'Admin')
@@ -214,6 +274,10 @@ export class EditWorkerComponent implements OnInit {
         console.log('res', res)
       }
     }));
+  }
+  ngAfterViewInit() {
+    this.dataSource.paginator = this.paginator;
+    this.dataSource.sort = this.sort;
   }
   changeDepartment(ev){
     this.selectedDepartment = ev.value;
@@ -382,5 +446,71 @@ export class EditWorkerComponent implements OnInit {
       }
     }
 
+  }
+
+  uploadFile(){
+    this.dialog.open(UploadWorkerDocumentComponent, {
+    }).afterClosed().subscribe(uploadFiles => {
+      if (uploadFiles) {
+        this.files = uploadFiles;
+        this.files.push(...this.defaults.workerdocuments);
+        this.refresh(this.files);
+      }
+    });
+  }
+
+  getFileExtension(element) {
+    // this will give you icon class name
+    let ext = element.fileType;
+    let obj = this.iconList.filter(row => {
+      if (row.type === ext) {
+        return true;
+      }
+    });
+    if (obj.length > 0) {
+      let icon = obj[0].icon;
+      return icon;
+    } else {
+      return "";
+    }
+  }
+
+  refresh(data) {
+    console.log('refresh', data)
+    this.dataSource.data = data;
+  }
+
+  download(row){
+    var link = document.createElement("a");
+    document.body.appendChild(link);
+    link.download = row.title+'.'+row.fileType
+    link.href = row.url;
+    link.target = "_blank";
+    link.click();
+  }
+
+  delete(row){
+    console.log('delete', row)
+    console.log('files', this.defaults.workerdocuments);
+    this.storage.storage.refFromURL(row.url).delete();
+    var removeIndex = this.defaults.workerdocuments.map(item => item._id).indexOf(row._id);
+    removeIndex && this.defaults.workerdocuments.splice(removeIndex, 1);
+    const customer = this.workerForm.value;
+    customer.workerdocuments = this.defaults.workerdocuments;
+    console.log('customer', customer)
+    customer.id = this.defaults.id;
+    this.auth.updateUser(customer).subscribe((res =>{
+      if(res){
+        this.refresh(res.workerdocuments);
+        this.auth.openSnackbar('Deleted Successfully!')
+      }
+    }));
+
+  }
+
+  editTitle($event, element){
+    let objIndex = this.defaults.workerdocuments.findIndex((obj => obj._id == element._id));
+    this.defaults.workerdocuments[objIndex].title = $event.target.textContent;
+    this.files = this.defaults.workerdocuments;
   }
 }
