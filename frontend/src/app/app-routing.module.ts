@@ -126,6 +126,10 @@ const routes: VexRoutes = [
                 loadChildren: () => import('./admin/settings/companydetails/companydetails.module').then(m => m.CompanydetailsModule),
               },
               {
+                path: 'defaultrates',
+                loadChildren: () => import('./admin/settings/default-rates/default-rates.module').then(m => m.DefaultRatesModule),
+              },
+              {
                 path: 'emailsettings',
                 loadChildren: () => import('./admin/settings/email-settings/email-settings.module').then(m => m.EmailSettingsModule),
               },

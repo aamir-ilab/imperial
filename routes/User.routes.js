@@ -20,7 +20,7 @@ module.exports = (app) => {
   app.post('/addFile', client.addFiles)
   app.post('/getFiles', client.getFiles)
   app.post('/getAllFiles', client.getAllFiles)
-  app.post('/forgot/:email', client.forgotPassword)
+  app.post('/forgot-password', client.forgotPassword)
   app.post('/delFile', client.delFile);
 
   app.post('/removeUser',VerifyToken,authRole([ROLE.ADMIN,ROLE.TEAM]),client.removeUser);

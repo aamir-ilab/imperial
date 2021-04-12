@@ -354,7 +354,7 @@
                     <tr>
                       <td>
                         <p>Hi {{name}},</p>
-                        <p>Please find attached the new invoice for period [{{periodStart}} – {{periodEnd}}] due {{{dueDate}}}.</p>
+                        <p>Please find the attached new invoice for period [{{periodStart}} – {{periodEnd}}] due {{{dueDate}}}.</p>
                         <p>If you have any issues, please feel free to contact our accounts department.</p>
                         <table role="presentation" border="0" cellpadding="0" cellspacing="0" class="btn btn-primary">
                           <tbody>

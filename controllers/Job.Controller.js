@@ -1,6 +1,7 @@
 var mongoose = require('mongoose'),
 passport = require('passport');
 const Job = mongoose.model('Job');
+const DefaultRates = mongoose.model('DefaultRates');
 const Timesheet = mongoose.model('Timesheet');
 const User = mongoose.model('User');
 const Invoice = mongoose.model('Invoice');
@@ -35,7 +36,6 @@ var readHTMLFile = function(path, callback) {
       }
   });
 };
-
 exports.register = (req, res) => {
   let job_id, timesheet_id;
   Job.findOne({}).then(client => {
@@ -211,9 +211,10 @@ exports.updateJob = (req, res) => {
           })
           Job.findOne({id:client.id}).populate('clientId').exec(function (err, client){
             if (err) return res.json(err, 400);
-            res.status(200).json(client);
+            else
+              res.status(200).json(client);
           });
-          res.status(200).json(client);
+          // res.status(200).json(client);
         })
         .catch(err => {
           res.status(400).send(err);
@@ -425,16 +426,48 @@ exports.emailshiftDetail = (req, res) => {
                   console.log('==found==', user)
                   const name = user.forename + ' ' + user.surename ;
                   const shiftdate = dateFormat(req.body.data.shiftDate, "fullDate").toString();
-                  console.log('==shiftdate==', shiftdate)
                   var template = handlebars.compile(html);
-                  var replacements = {
-                    name: name,
-                    shiftdate:shiftdate,
-                    worker: worker,
-                    data: req.body.data,
-                    location:job.locationShift ? job.locationShift : '',
-                    comments:job.additionalInformation ? job.additionalInformation : '',
-                  };
+                  var replacements = {};
+                  if(job.additionalInformation !== '' && job.locationShift !== ''){
+                    replacements = {
+                      name: name,
+                      shiftdate:shiftdate,
+                      worker: worker,
+                      data: req.body.data,
+                      location:job.locationShift ? job.locationShift : '',
+                      comments:job.additionalInformation ? job.additionalInformation : '',
+                      commentString:'Comments:',
+                      locationString:'Location:',
+                    };
+                  }
+                  else if(job.additionalInformation !== '' && job.locationShift === '') {
+                    replacements = {
+                      name: name,
+                      shiftdate:shiftdate,
+                      worker: worker,
+                      data: req.body.data,
+                      comments:job.additionalInformation,
+                      commentString:'Comments:',
+                    };
+                  }
+                  else if(job.additionalInformation === '' && job.locationShift !== '') {
+                    replacements = {
+                      name: name,
+                      shiftdate:shiftdate,
+                      worker: worker,
+                      data: req.body.data,
+                      location:job.locationShift,
+                      locationString:'Location:',
+                    };
+                  }
+                  else{
+                    replacements = {
+                      name: name,
+                      shiftdate:shiftdate,
+                      worker: worker,
+                      data: req.body.data
+                    };
+                  }
                   var htmlToSend = template(replacements);
                   var mailOptions = {
                       from: 'my@email.com',
@@ -612,88 +645,85 @@ exports.getExportTimesheets = (req, res) => {
     } else {
       console.log('==timesheet==', timesheet)
       InvoiceInfo.findOne({id:1}, function(err, invoiceinfo) {
-        if (invoiceinfo)
-        {
-          timesheet.forEach(timesheet => {
-            console.log('element', timesheet.workers);
-            var inv_workers = [];var invoiceWorkers = [];
-            timesheet.workers.forEach(worker => {
-              let tempRate = 0;  let chargeRate = 0;
-              let age = getAge(worker.workerId.dateBirth);
-              // worker pay rate
-              tempRate = age < 25 ? invoiceinfo.payrateU25 : invoiceinfo.payrateO25;
-              // worker net
-              let WR_UNITS = parseFloat(worker.hours.replace(':','.'))*tempRate;
-              // client charge rate
-              let chargerateU25 = 0 ; let chargerateO25 = 0;
-              if(timesheet.departments == 'Housekeeping'){
-                console.log('==department==', timesheet.departments);
+        DefaultRates.find({}, function(err, defaultRates) {
+          if (defaultRates)
+          {
+            // console.log('defaultRates', defaultRates);
+            timesheet.forEach(timesheet => {
+              console.log('element', timesheet.workers);
+              var inv_workers = [];var invoiceWorkers = [];
+              timesheet.workers.forEach(worker => {
+                let tempRate = 0;  let chargeRate = 0;
+                let age = getAge(worker.workerId.dateBirth);
+
+                // client charge rate
+                let chargerateU25 = 0 ; let chargerateO25 = 0;
+                let defaultRate = defaultRates.filter(x => x.role === worker.role);
+                defaultRate = defaultRate[0];
+                console.log('defaultRate', defaultRate)
                 chargerateU25 = timesheet.clientId.hk_chargerateU25 > 0 ?
-                timesheet.clientId.hk_chargerateU25 : invoiceinfo.hk_chargerateU25;
+                timesheet.clientId.hk_chargerateU25 : defaultRate['chargerateU25'];
+                console.log('chargerateU25', chargerateU25);
                 chargerateO25 = timesheet.clientId.hk_chargerateO25 > 0 ?
-                timesheet.clientId.hk_chargerateO25 : invoiceinfo.hk_chargerateO25;
-              }
-              else if(timesheet.departments == 'Back of House'){
-                chargerateU25 = timesheet.clientId.boh_chargerateU25 > 0 ?
-                timesheet.clientId.boh_chargerateU25 : invoiceinfo.boh_chargerateU25;
-                chargerateO25 = timesheet.clientId.boh_chargerateO25 > 0 ?
-                timesheet.clientId.boh_chargerateO25 : invoiceinfo.boh_chargerateO25;
-              }
-              else{
-                chargerateU25 = 0; chargerateO25 = 0;
-                console.log('==department==', timesheet.departments);
-                chargerateU25 = timesheet.clientId.fab_chargerateU25 > 0 ?
-                timesheet.clientId.fab_chargerateU25 : invoiceinfo.fab_chargerateU25;
-                chargerateO25 = timesheet.clientId.fab_chargerateO25 > 0 ?
-                timesheet.clientId.fab_chargerateO25 : invoiceinfo.fab_chargerateO25;
-              }
-              chargeRate = age < 25 ? chargerateU25 : chargerateO25;
-              let inv_WR_net = parseFloat(worker.hours.replace(':','.'))*chargeRate;
-              WR_UNITS = WR_UNITS.toFixed(2);
-              inv_WR_net = inv_WR_net.toFixed(2);
-              var obj ={
-                timesheet_id: timesheet.timesheetId,
-                WR_REF : worker.workerId.workerId,
-                WR_UNITS: WR_UNITS,
-                WR_TRNCDE :'p001',
-                WR_RATE : tempRate,
-                type : "Export Timesheets",
-                response : "Successful"
-              }
-              timesheetData.push(obj);
-              var inv_worker = {
-                workerId: worker.workerId._id,
-                chargeRate: chargeRate,
-                payRate: tempRate,
-                hours: parseFloat(worker.hours.replace(':','.')),
-                net: inv_WR_net,
-                client_Id: timesheet.clientId
-              }
-              inv_workers.push(inv_worker)
-              console.log('inv_worker', inv_worker)
+                timesheet.clientId.hk_chargerateO25 : defaultRate['chargerateO25'];
+                console.log('chargerateO25', chargerateO25);
+                // worker pay rate
+                tempRate = age < 25 ? defaultRate['payrateU25'] : defaultRate['payrateO25'];
+                console.log('tempRate', tempRate);
+                // worker net
+                let WR_UNITS = parseFloat(worker.hours.replace(':','.'))*tempRate;
+                console.log('WR_UNITS', WR_UNITS);
+
+                chargeRate = age < 25 ? chargerateU25 : chargerateO25;
+                console.log('chargeRate', chargeRate);
+                let inv_WR_net = parseFloat(worker.hours.replace(':','.'))*chargeRate;
+                console.log('inv_WR_net', inv_WR_net);
+                WR_UNITS = WR_UNITS.toFixed(2);
+                inv_WR_net = inv_WR_net.toFixed(2);
+                var obj ={
+                  timesheet_id: timesheet.timesheetId,
+                  WR_REF : worker.workerId.workerId,
+                  WR_UNITS: WR_UNITS,
+                  WR_TRNCDE :'p001',
+                  WR_RATE : tempRate,
+                  type : "Export Timesheets",
+                  response : "Successful"
+                }
+                timesheetData.push(obj);
+                var inv_worker = {
+                  workerId: worker.workerId._id,
+                  chargeRate: chargeRate,
+                  payRate: tempRate,
+                  hours: parseFloat(worker.hours.replace(':','.')),
+                  net: inv_WR_net,
+                  client_Id: timesheet.clientId
+                }
+                inv_workers.push(inv_worker)
+                console.log('inv_worker', inv_worker)
+              });
+              invoiceWorkers.push(inv_workers);
+              console.log('invoiceWorkers', invoiceWorkers)
+              const invoice = new Invoice();
+              invoice.invoiceDate = new Date();
+              invoice.invoiceDueDate =  moment().add(invoiceinfo.dueDate, 'd').format('dddd, MMMM DD,YYYY');
+              invoice.workers = invoiceWorkers[0];
+              invoice.client_Id = timesheet.clientId
+              invoice.timesheetId = timesheet.timesheetId;
+              invoice.timesheetId_id = timesheet._id;
+              invoice.invoiceId = timesheet.timesheetId.replace(/TS/g, "INV");
+              invoice.totalVat = invoiceinfo.vat;
+              invoice.save().then(inv => {
+                console.log("invoice", inv);
+              })
+              .catch(err => {
+                console.log("invoice not created", err);
+              });
+              Timesheet.updateMany({exportStatus: false, statusStr:'Completed'}, {"$set":{"exportStatus": true}}, {"multi": true}, (err, writeResult) => {});
             });
-            invoiceWorkers.push(inv_workers);
-            console.log('invoiceWorkers', invoiceWorkers)
-            const invoice = new Invoice();
-            invoice.invoiceDate = new Date();
-            invoice.invoiceDueDate =  moment().add(invoiceinfo.dueDate, 'd').format('dddd, MMMM DD,YYYY');
-            invoice.workers = invoiceWorkers[0];
-            invoice.client_Id = timesheet.clientId
-            invoice.timesheetId = timesheet.timesheetId;
-            invoice.timesheetId_id = timesheet._id;
-            invoice.invoiceId = timesheet.timesheetId.replace(/TS/g, "INV");
-            invoice.totalVat = invoiceinfo.vat;
-            invoice.save().then(inv => {
-              console.log("invoice", inv);
-            })
-            .catch(err => {
-              console.log("invoice not created", err);
-            });
-            Timesheet.updateMany({exportStatus: false, statusStr:'Completed'}, {"$set":{"exportStatus": true}}, {"multi": true}, (err, writeResult) => {});
-          });
-        }
-        res.json(timesheetData);
-      });
+          }
+          res.json(timesheetData);
+        });
+      })
     }
   })
 }
@@ -1135,6 +1165,58 @@ async function generatePdf(data,htmldata,replacements,mailOptions) {
     }
   })
 
+}
+
+exports.defaultRates = (req, res) => {
+  DefaultRates.find({}).exec(function(err, rates) {
+    if (err) {
+      console.log(err);
+    } else {
+      res.json(rates);
+    }
+  })
+
+  // DefaultRates.findOne({}).then(obj => {
+  //   const data = {
+  //     department: 'Food and Beverage',
+  //     role: req.body.data,
+  //     payrateU25: 0,
+  //     chargerateU25: 0,
+  //     payrateO25: 0,
+  //     chargerateO25: 0
+  //   };
+  //   const newObj = new DefaultRates(data);
+  //   newObj.save((err) => {
+  //     if (err) {
+  //       console.log(err)
+  //       res.status(500).json(err);
+  //     } else {
+  //       console.log('added')
+  //     }
+  //   });
+  // });
+}
+
+exports.setDefaultRates = (req, res) => {
+  console.log('setDefaultRates', req.body)
+  req.body.data.forEach(element => {
+    DefaultRates.findOne({_id:element._id}, function(err, obj) {
+      if (!obj)
+        res.status(404).send("data is not found");
+      else {
+          Object.assign(obj, element);
+          // client.statusStr = req.body.str;
+          obj.save().then(obj => {
+              // res.status(200).json(client);
+          })
+          .catch(err => {
+              // res.status(400).send("Update not possible");
+          });
+      }
+
+    });
+  });
+  res.json('Updated')
 }
 
 

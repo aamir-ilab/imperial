@@ -8,4 +8,5 @@ module.exports = () => {
     require('../models/Payroll.Model');
     require('../models/Payslip.Model');
     require('../models/InvoiceInfo.Model');
+    require('../models/DefaultRates.Model');
 };

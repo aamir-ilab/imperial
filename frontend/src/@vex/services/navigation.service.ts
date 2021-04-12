@@ -181,6 +181,11 @@ export class NavigationService {
              route: '/admin/settings/companydetails'
            },
            {
+            type: 'link',
+            label: 'Default Rates',
+            route: '/admin/settings/defaultrates'
+          },
+           {
              type: 'link',
              label: 'Invoice Settings',
              route: '/admin/settings/invoicesettings'

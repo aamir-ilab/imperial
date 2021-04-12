@@ -356,13 +356,12 @@
                         <p>Hi {{name}},</p>
                         <p>You have been assigned a shift with {{data.clientId.firstName}} {{data.clientId.lastName
                         }}. Please read the shift details carefully below. If you have any questions relating to the shift, or if you’re unable to attend this shift, please contact Imperial Recruitment as soon as possible on 020 7436 7424.</p>
-                        <p><span class="bold">Shift Date:</span> {{shiftDate}}</p>
+                        <p><span class="bold">Shift Date:</span>
+                        {{shiftdate}}</p>
                         <p><span class="bold">Shift start time:</span> {{worker.startTime}} – {{worker.endTime}}</p>
                         <p><span class="bold">Role:</span> {{worker.role}}</p>
-                        <p><span class="bold">Location:</span> {{location}}</p>
-                        <?php if ($comments != ''): ?>
-                        <p><span class="bold">Comments:</span> {{comments}}</p>
-                        <?php endif; ?>
+                        <p><span class="bold">{{locationString}}</span> {{location}}</p>
+                        <p><span class="bold">{{commentString}}</span> {{comments}}</p>
                         <table role="presentation" border="0" cellpadding="0" cellspacing="0" class="btn btn-primary">
                           <tbody>
                             <tr>
