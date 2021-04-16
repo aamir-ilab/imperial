@@ -1,0 +1,512 @@
+<vex-page-layout mode="card">
+
+  <vex-secondary-toolbar *ngIf="clientForm.get('companyName').value" [current]="[clientForm.get('companyName').value]">
+    <div fxFlex="auto">
+      <span style="color:darkgray" *ngIf="clientForm.get('createdDate').value">Date Registered: {{clientForm.get('createdDate').value| date:'dd MMM yyyy' }}</span>
+    </div>
+  </vex-secondary-toolbar>
+
+  <vex-page-layout-content class="vex-tabs p-0 card" vexContainer>
+    <form (ngSubmit)="submit()" [formGroup]="clientForm">
+      <mat-tab-group>
+        <mat-tab label="Client Details">
+          <div class="p-6 ml-8">
+            <h3>Client Information</h3>
+          </div>
+          <mat-divider></mat-divider>
+          <div class="p-6">
+            <div class="px-6 py-4 border-b" fxLayout="row" fxLayout.lt-md="column" fxLayoutGap="20px">
+              <div fxFlex="auto">
+                <div fxLayout="row" fxLayoutAlign="start center">
+                  <h2 class="py-2 title m-0">Company Logo</h2>
+                </div>
+                <div fxLayout="column">
+                  <div fxLayout="row"  fxLayout.lt-sm="column" fxLayoutGap="16px" fxLayoutGap.lt-sm="0">
+                    <div fxFlex="auto">
+                      <img [src]="croppedImage" style="width:200px;height:200px">
+                      <image-cropper
+                        [imageChangedEvent]="imageChangedEvent"
+                        [maintainAspectRatio]="true"
+                        [aspectRatio]="1 / 1"
+                        format="png"
+                        #cropper
+                        (imageCropped)="imageCropped($event)"
+                      ></image-cropper>
+                    </div>
+                    <div fxFlex="auto">
+                      <label class="file-label inline-block">
+                        <input
+                          class="file-input"
+                          type="file"
+                          accept=".png,.jpg,.jpeg"
+                          name="file"
+                          #fileInput
+                          (change)="fileChangeEvent($event)"
+                          style="opacity: 0;line-height: 0; width: 20px;"
+                        />
+                        <span *ngIf="!isUploading" class="file-label mat-stroked-button" color="secondary">
+                          {{ btnTxt }}
+                        </span>
+                        <span class="file-name block">
+                          {{ fileName }}
+                        </span>
+                        <button *ngIf="isUploading" type="button" mat-button style="margin-left: 128px;background: #5c77ff;color: white;" color="primary" (click)="onUpload()">Upload</button>
+                      </label>
+                      <button *ngIf="!isUploading && picRemove" type="button" mat-stroked-button mat-button color="accent" (click)="removePicture('remove')">Remove</button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="px-6 py-4 border-b" fxLayout="row" fxLayout.lt-md="column" fxLayoutGap="20px">
+              <div fxFlex="50">
+                <div fxLayout="row" fxLayoutAlign="start center">
+                  <h2 class="py-2 title m-0">Company Address</h2>
+                </div>
+                <div fxLayout="column">
+                  <div fxLayout="row"  fxLayout.lt-sm="column" fxLayoutGap="16px" fxLayoutGap.lt-sm="0">
+                    <mat-form-field fxFlex="auto">
+                      <mat-label>Company Address</mat-label>
+                      <input formControlName="companyAddress" matInput >
+                    </mat-form-field>
+                  </div>
+                </div>
+                <div fxLayout="column">
+                  <div fxLayout="row"  fxLayout.lt-sm="column" fxLayoutGap="16px" fxLayoutGap.lt-sm="0">
+                    <mat-form-field fxFlex="auto">
+                      <mat-label>Address Line 1</mat-label>
+                      <input formControlName="addressLine1"  matInput >
+                    </mat-form-field>
+                  </div>
+                </div>
+                <div fxLayout="column">
+                  <div fxLayout="row"  fxLayout.lt-sm="column" fxLayoutGap="16px" fxLayoutGap.lt-sm="0">
+                    <mat-form-field fxFlex="auto">
+                      <mat-label>Town / City</mat-label>
+                      <input formControlName="city" matInput >
+                    </mat-form-field>
+                  </div>
+                </div>
+                <div fxLayout="column">
+                  <div fxLayout="row"  fxLayout.lt-sm="column" fxLayoutGap="16px" fxLayoutGap.lt-sm="0">
+                    <mat-form-field fxFlex="auto">
+                      <mat-label>Postcode</mat-label>
+                      <input formControlName="postcode"  matInput >
+                    </mat-form-field>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="px-6 py-4 border-b" fxLayout="row" fxLayout.lt-md="column" fxLayoutGap="20px">
+              <div fxFlex="auto">
+                <div fxLayout="row" fxLayoutAlign="start center">
+                  <h2 class="py-2 title m-0">Business Information</h2>
+                </div>
+                <div fxLayout="column">
+                  <div fxLayout="row"  fxLayout.lt-sm="column" fxLayoutGap="16px" fxLayoutGap.lt-sm="0">
+                    <mat-form-field fxFlex="auto">
+                      <mat-label>Phone Number</mat-label>
+                      <input formControlName="phoneNumber"  pattern="[0-9]*" minlength="10"maxlength="14"onkeypress="return event.charCode >= 48 && event.charCode <= 57" matInput >
+                    </mat-form-field>
+                    <mat-form-field fxFlex="auto">
+                      <mat-label>VAT Registration Number</mat-label>
+                      <input formControlName="VATNumber" pattern="[0-9]*" minlength="10"maxlength="14"onkeypress="return event.charCode >= 48 && event.charCode <= 57"  matInput >
+                    </mat-form-field>
+                  </div>
+                </div>
+                <div fxLayout="column">
+                  <div fxLayout="row"  fxLayout.lt-sm="column" fxLayoutGap="16px" fxLayoutGap.lt-sm="0">
+                    <mat-form-field fxFlex="auto">
+                      <mat-label>Company Registration Number</mat-label>
+                      <input formControlName="companyRegNumber"  pattern="[0-9]*" minlength="10"maxlength="14"onkeypress="return event.charCode >= 48 && event.charCode <= 57" matInput >
+                    </mat-form-field>
+                    <mat-form-field fxFlex="auto">
+                      <mat-label>Company Email Address</mat-label>
+                      <input formControlName="emailAddress"  matInput >
+                    </mat-form-field>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div fxLayout="row" fxLayoutAlign="end center" fxLayoutGap="8px">
+              <button mat-button (click)="cancelBtn()"type="button">CANCEL</button>
+              <button color="primary" mat-raised-button type="submit">SAVE CHANGES</button>
+            </div>
+          </div>
+        </mat-tab>
+        <mat-tab label="Sub Accounts">
+          <!-- <div class="p-6">
+            <div class="px-6 py-4 border-b" fxLayout="row" fxLayout.lt-md="column" fxLayoutGap="20px">
+              <div fxFlex="auto">
+                <div fxLayout="row" fxLayoutAlign="start center">
+                  <h2 class="py-2 title m-0">Restrictions</h2>
+                </div>
+                <div fxLayout="column" fxLayoutGap="8px">
+                  <mat-checkbox color="primary" formControlName="restrictionEmployment" (change)="checkrestrictionEmployment($event)">Are there any restrictions on you taking up employment in the UK?</mat-checkbox>
+                  <div class="p-3"fxLayout="column" *ngIf="restrictionEmploymentVal">
+                    <mat-form-field fxFlex="auto">
+                      <textarea matInput rows="2" formControlName="restrictionEmploymentDetail" cols="40" value=""></textarea>
+                    </mat-form-field>
+                  </div>
+                </div>
+                <div fxLayout="row" fxLayoutAlign="start center">
+                  <h2 class="py-2 title m-0">Employee Statement</h2>
+                </div>
+                <div fxLayout="column" fxLayoutGap="16px">
+                  <mat-radio-group formControlName="employeeStatement" class="mat-form-field-wrapper" fxLayout="column" fxLayoutGap="16px">
+                    <mat-radio-button value="This is my first job since 6 April and I’ve not been receiving taxable Jobseeker’s Allowance, Employment and Support Allowance, taxable Incapacity Benefit, State or Occupational Pension." color="primary">
+                      <span style="white-space: normal;">This is my first job since 6 April and I’ve not been receiving taxable Jobseeker’s Allowance, Employment and Support Allowance, taxable Incapacity Benefit, State or Occupational Pension.</span>
+                    </mat-radio-button>
+                    <mat-radio-button value="This is now my only job but since 6 April I’ve had another job, or received taxable Jobseeker’s Allowance, Employment and Support Allowance or taxable Incapacity Benefit. I do not receive a State or Occupational Pension." color="primary">
+                      <span style="white-space: normal;">This is now my only job but since 6 April I’ve had another job, or received taxable Jobseeker’s Allowance, Employment and Support Allowance or taxable Incapacity Benefit. I do not receive a State or Occupational Pension.
+                      </span>
+                    </mat-radio-button>
+                    <mat-radio-button value="As well as my new job, I have another job or receive State or Occupational Pension." color="primary">
+                      As well as my new job, I have another job or receive State or Occupational Pension.
+                    </mat-radio-button>
+                  </mat-radio-group>
+                 </div>
+              </div>
+            </div>
+            <div class="px-6 py-4 border-b" fxLayout="row" fxLayout.lt-md="column" fxLayoutGap="20px">
+              <div fxFlex="auto">
+                <div fxLayout="row" fxLayoutAlign="start center">
+                  <h2 class="py-2 title m-0">Student Loan</h2>
+                </div>
+                <div>
+                  <h5 class="mt-2 mb-2 text-secondary">
+                    You’ll have a Plan 1 Student Loan if:
+                  </h5>
+                  <p>1. you lived in Scotland or Northern Ireland when you started your course (undergraduate or postgraduate)</p>
+                  <p>2. you lived in England or Wales and started your undergraduate course before 1 September 2012 </p>
+                  <h5 class="mt-2 mb-2 text-secondary">
+                    You’ll have a Plan 2 Student Loan if:
+                  </h5>
+                  <p>3. you lived in England or Wales and started your undergraduate course on or after 1 September 2012</p>
+                  <p>4. your loan is a Part Time Maintenance Loan </p>
+                  <p>5. your loan is an Advanced Learner Loan </p>
+                  <p>6. your loan is a Postgraduate Healthcare Loan </p>
+                </div>
+                <div fxLayout="column" fxLayoutGap="8px">
+                  <h5 class="mt-2 mb-2 text-secondary">
+                    Do you have one of the Student Loan Plans described which is not fully repaid?
+                  </h5>
+                  <div class="p-3" fxLayout="column" fxLayoutGap="16px">
+                    <mat-radio-group formControlName="studentLoan" (change)="checkStudentLoan($event, 1)" class="mat-form-field-wrapper" fxLayout="column" fxLayoutGap="16px">
+                      <mat-radio-button [value]="true" color="primary">Yes</mat-radio-button>
+                      <mat-radio-button [value]="false" color="primary">No</mat-radio-button>
+                    </mat-radio-group>
+                  </div>
+                  <div *ngIf="_studentloan">
+                    <h5 class="mt-2 mb-2 text-secondary">
+                      What type of Student Loan do you have?
+                    </h5>
+                    <div class="p-3" fxLayout="column" fxLayoutGap="16px">
+                      <mat-radio-group formControlName="studentloanPlan" class="mat-form-field-wrapper" fxLayout="column" fxLayoutGap="16px" class="p-0">
+                        <mat-radio-button value="Plan 1" color="primary">Plan 1</mat-radio-button>
+                        <mat-radio-button value="Plan 2" color="primary">Plan 2</mat-radio-button>
+                        <mat-radio-button value="Both" color="primary">Both</mat-radio-button>
+                      </mat-radio-group>
+                    </div>
+                    <h5 class="mt-2 mb-2 text-secondary">
+                      Did you complete or leave your studies before 6th April?
+                    </h5>
+                    <div class="p-3" fxLayout="column" fxLayoutGap="16px">
+                      <mat-radio-group formControlName="leaveStudiesBefore6" (change)="checkStudentLoan($event, 2)" class="mat-form-field-wrapper" fxLayout="column" fxLayoutGap="16px">
+                        <mat-radio-button [value]="true" color="primary">Yes</mat-radio-button>
+                        <mat-radio-button [value]="false" color="primary">No</mat-radio-button>
+                      </mat-radio-group>
+                    </div>
+                  </div>
+                  <div *ngIf="_studentloan && _leaveStudiesBefore6">
+                    <h5 class="mt-2 mb-2 text-secondary">
+                      Are you repaying your Student Loan directly to the Student Loans Company by direct debit?
+                    </h5>
+                    <div class="p-3" fxLayout="column" fxLayoutGap="16px">
+                      <mat-radio-group formControlName="payingStudentLoanDirctly" class="mat-form-field-wrapper" fxLayout="column" fxLayoutGap="16px" (change)="checkStudentLoan($event, 3)">
+                        <mat-radio-button [value]="true" color="primary">Yes</mat-radio-button>
+                        <mat-radio-button [value]="false" color="primary">No</mat-radio-button>
+                      </mat-radio-group>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="px-6 py-4 border-b" fxLayout="row" fxLayout.lt-md="column" fxLayoutGap="20px">
+              <div fxFlex="auto">
+                <div fxLayout="row" fxLayoutAlign="start center">
+                  <h2 class="py-2 title m-0">Postgraduate Loan</h2>
+                </div>
+                <div fxLayout="column" fxLayoutGap="8px">
+                  <h5 class="mt-2 mb-2 text-secondary">
+                    Do you have a Postgraduate Loan which is not fully repaid?
+                  </h5>
+                  <div class="p-3" fxLayout="column" fxLayoutGap="16px">
+                    <mat-radio-group formControlName="postgraduateLoan" class="mat-form-field-wrapper" fxLayout="column" fxLayoutGap="16px" (change)="checkPostgraduate($event, 1)">
+                      <mat-radio-button [value]="true" color="primary">Yes</mat-radio-button>
+                      <mat-radio-button [value]="false" color="primary">No</mat-radio-button>
+                    </mat-radio-group>
+                  </div>
+                  <div *ngIf="_postloan">
+                    <h5 class="mt-2 mb-2 text-secondary">
+                      Did you complete or leave your Postgraduate studies before 6th April?
+                    </h5>
+                    <div class="p-3" fxLayout="column" fxLayoutGap="16px">
+                      <mat-radio-group formControlName="leavePostStudiesBefore6" class="mat-form-field-wrapper" fxLayout="column" fxLayoutGap="16px" (change)="checkPostgraduate($event, 2)">
+                        <mat-radio-button [value]="true" color="primary">Yes</mat-radio-button>
+                        <mat-radio-button [value]="false" color="primary">No</mat-radio-button>
+                      </mat-radio-group>
+                    </div>
+                  </div>
+                  <div *ngIf="_postloan && _leavePostStudiesBefore6">
+                    <h5 class="mt-2 mb-2 text-secondary">
+                      Are you repaying your Postgraduate Loan direct to the Student Loans Company by direct debit?
+                    </h5>
+                    <div class="p-3" fxLayout="column" fxLayoutGap="16px">
+                      <mat-radio-group formControlName="payingPostLoanDirctly" class="mat-form-field-wrapper" fxLayout="column" fxLayoutGap="16px"class="p-0">
+                        <mat-radio-button [value]="true" color="primary">Yes</mat-radio-button>
+                        <mat-radio-button [value]="false" color="primary">No</mat-radio-button>
+                      </mat-radio-group>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="px-6 py-4 border-b" fxLayout="row" fxLayout.lt-md="column" fxLayoutGap="20px">
+              <div fxFlex="auto">
+                <div fxLayout="row" fxLayoutAlign="start center">
+                  <h2 class="py-2 title m-0">Qualifications</h2>
+                </div>
+                <div fxLayout="column" fxLayoutGap="8px">
+                  <div fxLayout="row" fxLayout.lt-sm="column" fxLayoutGap="16px" fxLayoutGap.lt-sm="0">
+                    <mat-form-field fxFlex="auto">
+                      <mat-label>Qualification Name </mat-label>
+                      <input formControlName="qualificationName" matInput>
+                    </mat-form-field>
+                    <mat-form-field fxFlex="auto">
+                      <mat-label>Qualification Year </mat-label>
+                      <input formControlName="qualificationYear" type="number" matInput >
+                    </mat-form-field>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div fxLayout="row" fxLayoutAlign="end center" fxLayoutGap="8px">
+              <button mat-button (click)="cancelBtn()"type="button">CANCEL</button>
+              <button color="primary" mat-raised-button type="submit">SAVE CHANGES</button>
+            </div>
+          </div> -->
+        </mat-tab>
+        <mat-tab label="Custom Rates">
+          <div class="p-6">
+            <form (ngSubmit)="save()" [formGroup]="defaultRatesForm">
+              <ng-template matTabContent>
+                <div class="p-6 ml-8">
+                  <h3>Custom Rates</h3>
+                  <p>You'll be able to manually override the default pay and charge rates for this client.<br/> If You have a field blank, it will use the default rate as set in Admin settings.</p>
+                </div>
+                <mat-divider></mat-divider>
+                <mat-tab-group [(selectedIndex)]="innerSelectedTabIndex" (selectedTabChange)="onTabChanged($event);">
+                  <mat-tab label="Housekeeping">
+                    <div class="p-6">
+                      <div class="py-4">
+                        <table @stagger [dataSource]="dataSource" class="w-full" mat-table matSort>
+
+                          <ng-container matColumnDef="role">
+                            <th *matHeaderCellDef mat-header-cell>Role</th>
+                            <td mat-cell *matCellDef="let element">{{element.role}}
+                            </td>
+                          </ng-container>
+
+                          <ng-container matColumnDef="payrateU25">
+                            <th *matHeaderCellDef class="uppercase" mat-header-cell mat-sort-header> Pay Rate (Under 25)
+                            </th>
+                            <td mat-cell *matCellDef="let element">
+                              <mat-icon class="currency">£</mat-icon>
+                              <div class="inline-block p-2" [attr.contenteditable]="true" (blur)="editDefaultRates('payrateU25', $event, element)">
+                                {{element.payrateU25.toFixed(2)}}
+                              </div>
+                            </td>
+                          </ng-container>
+
+                          <ng-container matColumnDef="chargerateU25">
+                            <th *matHeaderCellDef class="uppercase" mat-header-cell mat-sort-header> Charge Rate (Under 25)
+                            </th>
+                            <td mat-cell *matCellDef="let element">
+                              <mat-icon class="currency">£</mat-icon>
+                              <div class="inline-block p-2" [attr.contenteditable]="true" (blur)="editDefaultRates('chargerateU25', $event, element)">
+                                {{element.chargerateU25.toFixed(2)}}
+                              </div>
+                            </td>
+                          </ng-container>
+
+                          <ng-container matColumnDef="payrateO25">
+                            <th *matHeaderCellDef class="uppercase" mat-header-cell mat-sort-header> Pay Rate (Over 25)
+                            </th>
+                            <td mat-cell *matCellDef="let element">
+                              <mat-icon class="currency">£</mat-icon>
+                              <div class="inline-block p-2" [attr.contenteditable]="true" (blur)="editDefaultRates('payrateO25', $event, element)">
+                                {{element.payrateO25.toFixed(2)}}
+                              </div>
+                            </td>
+                          </ng-container>
+
+                          <ng-container matColumnDef="chargerateO25">
+                            <th *matHeaderCellDef class="uppercase" mat-header-cell mat-sort-header> Charge Rate (Over 25)
+                            </th>
+                            <td mat-cell *matCellDef="let element">
+                              <mat-icon class="currency">£</mat-icon>
+                              <div class="inline-block p-2" [attr.contenteditable]="true" (blur)="editDefaultRates('chargerateO25', $event, element)">
+                                {{element.chargerateO25.toFixed(2)}}
+                              </div>
+                            </td>
+                          </ng-container>
+
+                          <tr *matHeaderRowDef="visibleColumns" mat-header-row></tr>
+                          <tr *matRowDef="let row; columns: visibleColumns;" @fadeInUp class="hover:bg-hover trans-ease-out cursor-pointer" mat-row></tr>
+                        </table>
+                      </div>
+                      <div fxLayout="row" fxLayoutAlign="end center" fxLayoutGap="8px">
+                        <button color="primary" mat-raised-button type="submit">Update</button>
+                      </div>
+                    </div>
+                  </mat-tab>
+                  <mat-tab label="Food and Beverage">
+                    <div class="p-6">
+                      <div class="py-4">
+                        <table @stagger [dataSource]="dataSource" class="w-full" mat-table matSort>
+
+                          <ng-container matColumnDef="role">
+                            <th *matHeaderCellDef mat-header-cell>Role</th>
+                            <td mat-cell *matCellDef="let element">{{element.role}}
+                            </td>
+                          </ng-container>
+
+                          <ng-container matColumnDef="payrateU25">
+                            <th *matHeaderCellDef class="uppercase" mat-header-cell mat-sort-header> Pay Rate (Under 25)
+                            </th>
+                            <td mat-cell *matCellDef="let element">
+                              <mat-icon class="currency">£</mat-icon>
+                              <div class="inline-block p-2" [attr.contenteditable]="true" (blur)="editDefaultRates('payrateU25', $event, element)">
+                                {{element.payrateU25.toFixed(2)}}
+                              </div>
+                            </td>
+                          </ng-container>
+
+                          <ng-container matColumnDef="chargerateU25">
+                            <th *matHeaderCellDef class="uppercase" mat-header-cell mat-sort-header> Charge Rate (Under 25)
+                            </th>
+                            <td mat-cell *matCellDef="let element">
+                              <mat-icon class="currency">£</mat-icon>
+                              <div class="inline-block p-2" [attr.contenteditable]="true" (blur)="editDefaultRates('chargerateU25', $event, element)">
+                                {{element.chargerateU25.toFixed(2)}}
+                              </div>
+                            </td>
+                          </ng-container>
+
+                          <ng-container matColumnDef="payrateO25">
+                            <th *matHeaderCellDef class="uppercase" mat-header-cell mat-sort-header> Pay Rate (Over 25)
+                            </th>
+                            <td mat-cell *matCellDef="let element">
+                              <mat-icon class="currency">£</mat-icon>
+                              <div class="inline-block p-2" [attr.contenteditable]="true" (blur)="editDefaultRates('payrateO25', $event, element)">
+                                {{element.payrateO25.toFixed(2)}}
+                              </div>
+                            </td>
+                          </ng-container>
+
+                          <ng-container matColumnDef="chargerateO25">
+                            <th *matHeaderCellDef class="uppercase" mat-header-cell mat-sort-header> Charge Rate (Over 25)
+                            </th>
+                            <td mat-cell *matCellDef="let element">
+                              <mat-icon class="currency">£</mat-icon>
+                              <div class="inline-block p-2" [attr.contenteditable]="true" (blur)="editDefaultRates('chargerateO25', $event, element)">
+                                {{element.chargerateO25.toFixed(2)}}
+                              </div>
+                            </td>
+                          </ng-container>
+
+                          <tr *matHeaderRowDef="visibleColumns" mat-header-row></tr>
+                          <tr *matRowDef="let row; columns: visibleColumns;" @fadeInUp class="hover:bg-hover trans-ease-out cursor-pointer" mat-row></tr>
+                        </table>
+                      </div>
+                      <div fxLayout="row" fxLayoutAlign="end center" fxLayoutGap="8px">
+                        <button color="primary" mat-raised-button type="submit">Update</button>
+                      </div>
+                    </div>
+                  </mat-tab>
+                  <mat-tab label="Back of House">
+                    <div class="p-6">
+                      <div class="py-4">
+                        <table @stagger [dataSource]="dataSource" class="w-full" mat-table matSort>
+
+                          <ng-container matColumnDef="role">
+                            <th *matHeaderCellDef mat-header-cell>Role</th>
+                            <td mat-cell *matCellDef="let element">{{element.role}}
+                            </td>
+                          </ng-container>
+
+                          <ng-container matColumnDef="payrateU25">
+                            <th *matHeaderCellDef class="uppercase" mat-header-cell mat-sort-header> Pay Rate (Under 25)
+                            </th>
+                            <td mat-cell *matCellDef="let element">
+                              <mat-icon class="currency">£</mat-icon>
+                              <div class="inline-block p-2" [attr.contenteditable]="true" (blur)="editDefaultRates('payrateU25', $event, element)">
+                                {{element.payrateU25.toFixed(2)}}
+                              </div>
+                            </td>
+                          </ng-container>
+
+                          <ng-container matColumnDef="chargerateU25">
+                            <th *matHeaderCellDef class="uppercase" mat-header-cell mat-sort-header> Charge Rate (Under 25)
+                            </th>
+                            <td mat-cell *matCellDef="let element">
+                              <mat-icon class="currency">£</mat-icon>
+                              <div class="inline-block p-2" [attr.contenteditable]="true" (blur)="editDefaultRates('chargerateU25', $event, element)">
+                                {{element.chargerateU25.toFixed(2)}}
+                              </div>
+                            </td>
+                          </ng-container>
+
+                          <ng-container matColumnDef="payrateO25">
+                            <th *matHeaderCellDef class="uppercase" mat-header-cell mat-sort-header> Pay Rate (Over 25)
+                            </th>
+                            <td mat-cell *matCellDef="let element">
+                              <mat-icon class="currency">£</mat-icon>
+                              <div class="inline-block p-2" [attr.contenteditable]="true" (blur)="editDefaultRates('payrateO25', $event, element)">
+                                {{element.payrateO25.toFixed(2)}}
+                              </div>
+                            </td>
+                          </ng-container>
+
+                          <ng-container matColumnDef="chargerateO25">
+                            <th *matHeaderCellDef class="uppercase" mat-header-cell mat-sort-header> Charge Rate (Over 25)
+                            </th>
+                            <td mat-cell *matCellDef="let element">
+                              <mat-icon class="currency">£</mat-icon>
+                              <div class="inline-block p-2" [attr.contenteditable]="true" (blur)="editDefaultRates('chargerateO25', $event, element)">
+                                {{element.chargerateO25.toFixed(2)}}
+                              </div>
+                            </td>
+                          </ng-container>
+
+                          <tr *matHeaderRowDef="visibleColumns" mat-header-row></tr>
+                          <tr *matRowDef="let row; columns: visibleColumns;" @fadeInUp class="hover:bg-hover trans-ease-out cursor-pointer" mat-row></tr>
+                        </table>
+                      </div>
+                      <div fxLayout="row" fxLayoutAlign="end center" fxLayoutGap="8px">
+                        <button color="primary" mat-raised-button type="submit">Update</button>
+                      </div>
+                    </div>
+                  </mat-tab>
+                </mat-tab-group>
+              </ng-template>
+            </form>
+
+          </div>
+        </mat-tab>
+      </mat-tab-group>
+    </form>
+  </vex-page-layout-content>
+
+</vex-page-layout>

@@ -30,6 +30,7 @@ import icMail from '@iconify/icons-ic/twotone-mail';
 import icMap from '@iconify/icons-ic/twotone-map';
 import { Client } from 'src/app/models/client.model';
 import { AuthService } from 'src/app/services/auth.service';
+import { Router } from '@angular/router';
 
 
 @UntilDestroy()
@@ -105,7 +106,8 @@ export class ClientsComponent implements OnInit, AfterViewInit {
   @ViewChild(MatSort, { static: true }) sort: MatSort;
 
   constructor(private dialog: MatDialog,
-              private authService: AuthService) {
+              private authService: AuthService,
+              private router: Router,) {
   }
 
   get visibleColumns() {
@@ -192,6 +194,14 @@ export class ClientsComponent implements OnInit, AfterViewInit {
         this.subject$.next(this.clients);
       }
     });
+  }
+
+  updateCustomer(customer: Client) {
+    localStorage.setItem('editCustomer', JSON.stringify(customer));
+    if(localStorage.getItem('loggedIn') === 'Admin')
+      this.router.navigate(['/admin/clients/edit']);
+    else
+      this.router.navigate(['/team/clients/edit']);
   }
 
   deleteClient(client: Client) {

@@ -2,7 +2,12 @@ var mongoose = require('mongoose');
 
 module.exports = async() => {
     // return mongoose.connect('mongodb+srv://xxxxxxxxx/xxxx', { useNewUrlParser: true, useUnifiedTopology: true })
-    return mongoose.connect('mongodb+srv://pixify:BHtw6eyV9buRlkxK@imperialrecruitment.afyiy.mongodb.net/Portal', { useNewUrlParser: true, useUnifiedTopology: true })
+    // staging database
+    // return mongoose.connect('mongodb+srv://pixify:BHtw6eyV9buRlkxK@imperialrecruitment.afyiy.mongodb.net/Portal', { useNewUrlParser: true, useUnifiedTopology: true })
+    //     .then(() => console.log("MongoDB successfully connected"))
+    //     .catch(err => console.log(err));
+    // local database
+    return mongoose.connect('mongodb+srv://asmakhan:ctechsol2020@cluster0.k80an.mongodb.net/Portal', { useNewUrlParser: true, useUnifiedTopology: true })
         .then(() => console.log("MongoDB successfully connected"))
         .catch(err => console.log(err));
 };

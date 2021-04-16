@@ -71,7 +71,16 @@ const routes: VexRoutes = [
           },
           {
             path: 'clients',
-            loadChildren: () => import('./admin/clients/clients.module').then(m => m.ClientsModule),
+            children: [
+              {
+                path: '',
+                loadChildren: () => import('./admin/clients/clients.module').then(m => m.ClientsModule),
+              },
+              {
+                path: 'edit',
+                loadChildren: () => import('./admin/clients/edit-client/edit-client.module').then(m => m.EditClientModule),
+              }
+            ]
           },
           {
             path: 'workers',
@@ -171,7 +180,16 @@ const routes: VexRoutes = [
           },
           {
             path: 'clients',
-            loadChildren: () => import('./admin/clients/clients.module').then(m => m.ClientsModule),
+            children: [
+              {
+                path: '',
+                loadChildren: () => import('./admin/clients/clients.module').then(m => m.ClientsModule),
+              },
+              {
+                path: 'edit',
+                loadChildren: () => import('./admin/clients/edit-client/edit-client.module').then(m => m.EditClientModule),
+              }
+            ]
           },
           {
             path: 'workers',

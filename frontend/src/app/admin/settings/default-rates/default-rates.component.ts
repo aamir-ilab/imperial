@@ -81,10 +81,6 @@ export class DefaultRatesComponent implements OnInit {
     this.authService.setDefaultRates(defaultRates).subscribe((res =>{
       if(res){
         this.authService.openSnackbar('Updated Successfully!')
-        // if(localStorage.getItem('loggedIn') === 'Admin')
-        //   this.router.navigate(['/admin/workers']);
-        // else
-        //   this.router.navigate(['/team/workers']);
       }
     }));
   }

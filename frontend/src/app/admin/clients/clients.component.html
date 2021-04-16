@@ -218,7 +218,7 @@
 
 <mat-menu #actionsMenu="matMenu" xPosition="before" yPosition="below">
   <ng-template let-client="client" matMenuContent>
-    <button (click)="updateClient(client, 'client')" mat-menu-item>
+    <button (click)="updateCustomer(client)" mat-menu-item>
       <mat-icon [icIcon]="icEdit"></mat-icon>
       <span>Edit Client</span>
     </button>
