@@ -2,6 +2,7 @@ var mongoose = require('mongoose'),
     passport = require('passport');
 const User = mongoose.model('User');
 const Message = mongoose.model('Message');
+const CustomRates = mongoose.model('CustomRates');
 var jwt = require('jsonwebtoken');
 var randtoken = require('rand-token')
 // const Bank = mongoose.model('Bank');
@@ -84,6 +85,97 @@ exports.register = (req, res) => {
                             }
                         });
                     })
+                }
+                else if (client.accountType == 'Client') {
+                  // add entries of custom rates for this client
+                  client.save((err) => {
+                    if (err) {
+                      res.status(500).json(err);
+                    } else {
+                      console.log(client);
+                      // const token = client.generateJwt();
+                      User.findOne({id:client.id}).exec(function (err, client){
+                        if (err) return res.json({error: err, status:400});
+                        else {
+                          const departments = ['Housekeeping', 'Back of House', 'Food and Beverage'];
+                          const rolesHK = ['Linen Porter', 'Floor Porter', 'Floor Supervisor', 'Room Supervisor', 'Evening Room Attendant', 'Public Area Attendant', 'Spa Attendant', 'Valet', 'Housekeeper'];
+                          const rolesBOH = ['Kitchen Porter', 'Night Kitchen Porter', 'Night Cleaners', 'Supervisor BOH (Back of House)', 'Food Runners', 'Breakfast Runners', 'Commis Chef', 'Breakfast Chef', 'Chef De Partie', 'Pastry Chef', 'Banqueting Porter'];
+                          const rolesFAB = ['Waiters', 'Night Waiters', 'Night Room Service', 'Supervisor Banqueting', 'Team Leader', 'Silver Service Waiters', 'Bar Staff', 'Cloakroom', 'Concierge', 'Hostess'];
+                          CustomRates.findOne({}).then(obj => {
+                            departments.forEach(element => {
+                              if(element === 'Housekeeping') {
+                                rolesHK.forEach(role => {
+                                  const data = {
+                                    department: 'Housekeeping',
+                                    clientId:client._id,
+                                    role: role,
+                                    payrateU25: 0,
+                                    chargerateU25: 0,
+                                    payrateO25: 0,
+                                    chargerateO25: 0
+                                  };
+                                  const newObj = new CustomRates(data);
+                                  newObj.save((err) => {
+                                    if (err) {
+                                      console.log(err)
+                                      res.status(500).json(err);
+                                    } else {
+                                      console.log('added')
+                                    }
+                                  });
+                                });
+                              }
+                              else if(element === 'Back of House') {
+                                rolesBOH.forEach(role => {
+                                  const data = {
+                                    department: 'Back of House',
+                                    clientId:client._id,
+                                    role: role,
+                                    payrateU25: 0,
+                                    chargerateU25: 0,
+                                    payrateO25: 0,
+                                    chargerateO25: 0
+                                  };
+                                  const newObj = new CustomRates(data);
+                                  newObj.save((err) => {
+                                    if (err) {
+                                      console.log(err)
+                                      res.status(500).json(err);
+                                    } else {
+                                      console.log('added')
+                                    }
+                                  });
+                                });
+                              }
+                              else {
+                                rolesFAB.forEach(role => {
+                                  const data = {
+                                    department: 'Food and Beverage',
+                                    clientId:client._id,
+                                    role: role,
+                                    payrateU25: 0,
+                                    chargerateU25: 0,
+                                    payrateO25: 0,
+                                    chargerateO25: 0
+                                  };
+                                  const newObj = new CustomRates(data);
+                                  newObj.save((err) => {
+                                    if (err) {
+                                      console.log(err)
+                                      res.status(500).json(err);
+                                    } else {
+                                      console.log('added')
+                                    }
+                                  });
+                                });
+                              }
+                            });
+                          });
+                          res.status(200).json(client);
+                        }
+                      });
+                    }
+                  });
                 }
                 else{
                     client.save((err) => {
@@ -359,36 +451,112 @@ exports.getParent = (req, res) =>{
     })
 }
 exports.updateProfile = (req, res) => {
-    // var role = req.type;
-    console.log('updateProfile')
-    console.log(req.body)
-        // var clientId = req.clientId;
-        // if (role == 0){
-    User.findById(req.body._id, function(err, client) {
-        if (!client)
-          res.status(404).send("data is not found");
-        else {
-          tempPass = client.hash;
-          Object.assign(client, req.body);
-        }
-        console.log('hash',req.body.hash)
-        console.log('hash client',client)
-        if(req.body.Password && req.body.Password != ''){
-          console.log('assign new password', req.body.Password);
-          client.setPassword(req.body.Password);
-        }
-        else if (req.body.hash && req.body.hash != '')
-            client.setPassword(req.body.hash);
-        else {
-            client.hash = tempPass;
-        }
-        client.save().then(client => {
-          res.status(200).json(client);
-        })
-        .catch(err => {
-          res.status(400).send(err);
-        });
-    });
+  // var role = req.type;
+  console.log('updateProfile')
+  console.log(req.body)
+      // var clientId = req.clientId;
+      // if (role == 0){
+  User.findById(req.body._id, function(err, client) {
+      if (!client)
+        res.status(404).send("data is not found");
+      else {
+        tempPass = client.hash;
+        Object.assign(client, req.body);
+      }
+      console.log('hash',req.body.hash)
+      console.log('hash client',client)
+      if(req.body.Password && req.body.Password != ''){
+        console.log('assign new password', req.body.Password);
+        client.setPassword(req.body.Password);
+      }
+      else if (req.body.hash && req.body.hash != '')
+          client.setPassword(req.body.hash);
+      else {
+          client.hash = tempPass;
+      }
+      client.save().then(client => {
+        ///////////////////
+        // const departments = ['Housekeeping', 'Back of House', 'Food and Beverage'];
+        // const rolesHK = ['Linen Porter', 'Floor Porter', 'Floor Supervisor', 'Room Supervisor', 'Evening Room Attendant', 'Public Area Attendant', 'Spa Attendant', 'Valet', 'Housekeeper'];
+        // const rolesBOH = ['Kitchen Porter', 'Night Kitchen Porter', 'Night Cleaners', 'Supervisor BOH (Back of House)', 'Food Runners', 'Breakfast Runners', 'Commis Chef', 'Breakfast Chef', 'Chef De Partie', 'Pastry Chef', 'Banqueting Porter'];
+        // const rolesFAB = ['Waiters', 'Night Waiters', 'Night Room Service', 'Supervisor Banqueting', 'Team Leader', 'Silver Service Waiters', 'Bar Staff', 'Cloakroom', 'Concierge', 'Hostess'];
+        // CustomRates.findOne({}).then(obj => {
+        //   departments.forEach(element => {
+        //     if(element === 'Housekeeping') {
+        //       rolesHK.forEach(role => {
+        //         const data = {
+        //           department: 'Housekeeping',
+        //           clientId: client._id,
+        //           role: role,
+        //           payrateU25: 0,
+        //           chargerateU25: 0,
+        //           payrateO25: 0,
+        //           chargerateO25: 0
+        //         };
+        //         const newObj = new CustomRates(data);
+        //         newObj.save((err) => {
+        //           if (err) {
+        //             console.log(err)
+        //             res.status(500).json(err);
+        //           } else {
+        //             console.log('added')
+        //           }
+        //         });
+        //       });
+        //     }
+        //     else if(element === 'Back of House') {
+        //       rolesBOH.forEach(role => {
+        //         const data = {
+        //           department: 'Back of House',
+        //           clientId: client._id,
+        //           role: role,
+        //           payrateU25: 0,
+        //           chargerateU25: 0,
+        //           payrateO25: 0,
+        //           chargerateO25: 0
+        //         };
+        //         const newObj = new CustomRates(data);
+        //         newObj.save((err) => {
+        //           if (err) {
+        //             console.log(err)
+        //             res.status(500).json(err);
+        //           } else {
+        //             console.log('added')
+        //           }
+        //         });
+        //       });
+        //     }
+        //     else {
+        //       rolesFAB.forEach(role => {
+        //         const data = {
+        //           department: 'Food and Beverage',
+        //           clientId: client._id,
+        //           role: role,
+        //           payrateU25: 0,
+        //           chargerateU25: 0,
+        //           payrateO25: 0,
+        //           chargerateO25: 0
+        //         };
+        //         const newObj = new CustomRates(data);
+        //         newObj.save((err) => {
+        //           if (err) {
+        //             console.log(err)
+        //             res.status(500).json(err);
+        //           } else {
+        //             console.log('added')
+        //           }
+        //         });
+        //       });
+        //     }
+        //   });
+        // });
+        //////////////////
+        res.status(200).json(client);
+      })
+      .catch(err => {
+        res.status(400).send(err);
+      });
+  });
 };
 exports.updateClientStatus = (req, res) => {
   console.log('updateClientStatus', req.body);
@@ -506,11 +674,8 @@ exports.getAll = (req, res) => {
   })
 }
 exports.getAllType = (req, res) => {
-    User.find({accountType: req.body.accountType})
-    // .populate({
-    //   path: 'parentId',
-    //   model: 'User'
-    // })
+    User.find({accountType: req.body.accountType, parentId: ""
+    })
   .exec(function(err, client) {
         if (err) {
             console.log(err);

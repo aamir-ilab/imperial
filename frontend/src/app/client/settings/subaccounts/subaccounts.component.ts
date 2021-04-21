@@ -115,11 +115,10 @@ export class SubaccountsComponent implements OnInit, AfterViewInit {
   getData() {
     this.authService.getTypeSubUsers(this.currentUser._id).subscribe((clients)=>{
       of(clients.map(client =>new Client(client))).subscribe(clientes =>{
-        console.log('123213123')
-        console.log(clientes)
+        console.log('SubUsers',clientes)
         this.subject$.next(clientes)
       });
-    })// return of(aioTableData.map(customer => new Client(customer)));
+    })
   }
 
   ngOnInit() {

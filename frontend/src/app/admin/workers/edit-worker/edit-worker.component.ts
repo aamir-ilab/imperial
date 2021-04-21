@@ -421,7 +421,7 @@ export class EditWorkerComponent implements OnInit {
       fileRef.getDownloadURL().subscribe((url)=>{
         console.log('upload-c', url);
         this.workerForm.controls.profilePhoto.setValue(url);
-        // this.showSnackBar('Image Uploaded Successfully');
+        this.auth.openSnackbar('Image Uploaded Successfully');
         this.isUploading = true;
       })
     })).subscribe();

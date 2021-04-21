@@ -82,10 +82,6 @@
       </div>
 
       <table @stagger [dataSource]="dataSource" class="w-full" mat-table matSort>
-
-        <!--- Note that these columns can be defined in any order.
-              The actual rendered columns are set as a property on the row definition" -->
-
         <!-- Checkbox Column -->
         <ng-container matColumnDef="checkbox">
           <th *matHeaderCellDef mat-header-cell>
@@ -103,14 +99,6 @@
             </mat-checkbox>
           </td>
         </ng-container>
-
-        <!-- Image Column -->
-        <!-- <ng-container matColumnDef="image">
-          <th *matHeaderCellDef mat-header-cell></th>
-          <td *matCellDef="let row" class="w-8 min-w-8 pr-0" mat-cell>
-            <img [src]="row['imageSrc']" class="avatar h-8 w-8 align-middle">
-          </td>
-        </ng-container> -->
 
         <!-- Text Columns -->
         <ng-container *ngFor="let column of columns; trackBy: trackByProperty">
@@ -151,13 +139,13 @@
           <th *matHeaderCellDef class="uppercase" mat-header-cell mat-sort-header>Status</th>
           <td *matCellDef="let row" mat-cell>
             <div fxLayoutAlign="start center" fxLayoutGap="4px">
-              <div *ngIf="row.clientStatus == 'Active'" 
+              <div *ngIf="row.clientStatus == 'Active'"
                    [ngClass]="['text-green  ', 'bg-green-light']"
                    class="rounded px-2 py-1 font-medium text-xs"
                    fxFlex="none">
                    Active
               </div>
-              <div *ngIf="row.clientStatus == 'Suspended'" 
+              <div *ngIf="row.clientStatus == 'Suspended'"
                    [ngClass]="['text-purple', 'bg-purple-light']"
                    class="rounded px-2 py-1 font-medium text-xs"
                    fxFlex="none">
@@ -188,7 +176,7 @@
 
         <!-- Action Column -->
         <ng-container matColumnDef="actions">
-          <th *matHeaderCellDef mat-header-cell mat-sort-header></th>
+          <th *matHeaderCellDef mat-header-cell mat-sort-header>ACTIONS</th>
           <td *matCellDef="let row" class="w-10 text-secondary" mat-cell>
             <button (click)="$event.stopPropagation()"
                     [matMenuTriggerData]="{ customer: row }"
@@ -202,10 +190,11 @@
 
         <tr *matHeaderRowDef="visibleColumns" mat-header-row></tr>
         <tr (click)="updateCustomer(row)"
-            *matRowDef="let row; columns: visibleColumns;"
-            @fadeInUp
-            class="hover:bg-hover trans-ease-out cursor-pointer"
-            mat-row></tr>
+          *matRowDef="let row; columns: visibleColumns;"
+          @fadeInUp
+          class="hover:bg-hover trans-ease-out cursor-pointer"
+          mat-row>
+        </tr>
       </table>
 
       <mat-paginator [pageSizeOptions]="pageSizeOptions" [pageSize]="pageSize" class="sticky left-0"></mat-paginator>

@@ -35,6 +35,8 @@ module.exports = (app) => {
   app.post('/getGenerateWorkerID',VerifyToken, authRole([ROLE.ADMIN,ROLE.TEAM]),client.getGenerateWorkerID);
   app.get("/defaultRates", VerifyToken, authRole([ROLE.ADMIN,ROLE.TEAM]), client.defaultRates);
   app.post("/defaultRates", VerifyToken, authRole([ROLE.ADMIN,ROLE.TEAM]), client.setDefaultRates);
+  app.post("/customRates", VerifyToken, authRole([ROLE.ADMIN,ROLE.TEAM]), client.customRates);
+  app.post("/setcustomRates", VerifyToken, authRole([ROLE.ADMIN,ROLE.TEAM]), client.setCustomRates);
 
 
   ////////// Not in use by Muzz dev //////////

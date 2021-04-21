@@ -9,4 +9,5 @@ module.exports = () => {
     require('../models/Payslip.Model');
     require('../models/InvoiceInfo.Model');
     require('../models/DefaultRates.Model');
+    require('../models/CustomRates.Model');
 };

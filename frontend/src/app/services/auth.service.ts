@@ -43,6 +43,14 @@ export class AuthService {
       return this.http.post<any>(`${USERS_URL}defaultRates`, {data});
     }
 
+    getCustomRates(id): Observable<any>{
+      return this.http.post<any>(`${USERS_URL}customRates`, {id});
+    }
+
+    setCustomRates(data): Observable<any>{
+      return this.http.post<any>(`${USERS_URL}setcustomRates`, {data});
+    }
+
     setCurrentUser(){
       this.currenctUser = JSON.parse(localStorage.getItem('userInfo'));
     }
