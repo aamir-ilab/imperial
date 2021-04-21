@@ -685,6 +685,209 @@
             </div>
           </div>
         </mat-tab>
+        <mat-tab label="Default Rates">
+          <div class="p-6">
+            <form (ngSubmit)="submit()" [formGroup]="defaultRatesForm">
+              <ng-template matTabContent>
+                <mat-tab-group [(selectedIndex)]="innerSelectedTabIndex" (selectedTabChange)="onTabChanged($event);">
+                  <mat-tab label="Housekeeping">
+                    <div class="p-6">
+                      <div class="py-4">
+                        <table @stagger [dataSource]="ratesdataSource" class="w-full" mat-table matSort>
+
+                          <ng-container matColumnDef="role">
+                            <th *matHeaderCellDef mat-header-cell>Role</th>
+                            <td mat-cell *matCellDef="let element">{{element.role}}
+                            </td>
+                          </ng-container>
+
+                          <ng-container matColumnDef="payrateU25">
+                            <th *matHeaderCellDef class="uppercase" mat-header-cell mat-sort-header> Pay Rate (Under 25)
+                            </th>
+                            <td mat-cell *matCellDef="let element">
+                              <mat-icon class="currency">£</mat-icon>
+                              <div class="inline-block p-2" [attr.contenteditable]="true" (blur)="editDefaultRates('payrateU25', $event, element)">
+                                {{element.payrateU25.toFixed(2)}}
+                              </div>
+                            </td>
+                          </ng-container>
+
+                          <ng-container matColumnDef="chargerateU25">
+                            <th *matHeaderCellDef class="uppercase" mat-header-cell mat-sort-header> Charge Rate (Under 25)
+                            </th>
+                            <td mat-cell *matCellDef="let element">
+                              <mat-icon class="currency">£</mat-icon>
+                              <div class="inline-block p-2" [attr.contenteditable]="true" (blur)="editDefaultRates('chargerateU25', $event, element)">
+                                {{element.chargerateU25.toFixed(2)}}
+                              </div>
+                            </td>
+                          </ng-container>
+
+                          <ng-container matColumnDef="payrateO25">
+                            <th *matHeaderCellDef class="uppercase" mat-header-cell mat-sort-header> Pay Rate (Over 25)
+                            </th>
+                            <td mat-cell *matCellDef="let element">
+                              <mat-icon class="currency">£</mat-icon>
+                              <div class="inline-block p-2" [attr.contenteditable]="true" (blur)="editDefaultRates('payrateO25', $event, element)">
+                                {{element.payrateO25.toFixed(2)}}
+                              </div>
+                            </td>
+                          </ng-container>
+
+                          <ng-container matColumnDef="chargerateO25">
+                            <th *matHeaderCellDef class="uppercase" mat-header-cell mat-sort-header> Charge Rate (Over 25)
+                            </th>
+                            <td mat-cell *matCellDef="let element">
+                              <mat-icon class="currency">£</mat-icon>
+                              <div class="inline-block p-2" [attr.contenteditable]="true" (blur)="editDefaultRates('chargerateO25', $event, element)">
+                                {{element.chargerateO25.toFixed(2)}}
+                              </div>
+                            </td>
+                          </ng-container>
+
+                          <tr *matHeaderRowDef="visibleRateColumns" mat-header-row></tr>
+                          <tr *matRowDef="let row; columns: visibleRateColumns;" @fadeInUp class="hover:bg-hover trans-ease-out cursor-pointer" mat-row></tr>
+                        </table>
+                      </div>
+                      <div fxLayout="row" fxLayoutAlign="end center" fxLayoutGap="8px">
+                        <button color="primary" mat-raised-button type="submit">Update</button>
+                      </div>
+                    </div>
+                  </mat-tab>
+                  <mat-tab label="Food and Beverage">
+                    <div class="p-6">
+                      <div class="py-4">
+                        <table @stagger [dataSource]="ratesdataSource" class="w-full" mat-table matSort>
+
+                          <ng-container matColumnDef="role">
+                            <th *matHeaderCellDef mat-header-cell>Role</th>
+                            <td mat-cell *matCellDef="let element">{{element.role}}
+                            </td>
+                          </ng-container>
+
+                          <ng-container matColumnDef="payrateU25">
+                            <th *matHeaderCellDef class="uppercase" mat-header-cell mat-sort-header> Pay Rate (Under 25)
+                            </th>
+                            <td mat-cell *matCellDef="let element">
+                              <mat-icon class="currency">£</mat-icon>
+                              <div class="inline-block p-2" [attr.contenteditable]="true" (blur)="editDefaultRates('payrateU25', $event, element)">
+                                {{element.payrateU25.toFixed(2)}}
+                              </div>
+                            </td>
+                          </ng-container>
+
+                          <ng-container matColumnDef="chargerateU25">
+                            <th *matHeaderCellDef class="uppercase" mat-header-cell mat-sort-header> Charge Rate (Under 25)
+                            </th>
+                            <td mat-cell *matCellDef="let element">
+                              <mat-icon class="currency">£</mat-icon>
+                              <div class="inline-block p-2" [attr.contenteditable]="true" (blur)="editDefaultRates('chargerateU25', $event, element)">
+                                {{element.chargerateU25.toFixed(2)}}
+                              </div>
+                            </td>
+                          </ng-container>
+
+                          <ng-container matColumnDef="payrateO25">
+                            <th *matHeaderCellDef class="uppercase" mat-header-cell mat-sort-header> Pay Rate (Over 25)
+                            </th>
+                            <td mat-cell *matCellDef="let element">
+                              <mat-icon class="currency">£</mat-icon>
+                              <div class="inline-block p-2" [attr.contenteditable]="true" (blur)="editDefaultRates('payrateO25', $event, element)">
+                                {{element.payrateO25.toFixed(2)}}
+                              </div>
+                            </td>
+                          </ng-container>
+
+                          <ng-container matColumnDef="chargerateO25">
+                            <th *matHeaderCellDef class="uppercase" mat-header-cell mat-sort-header> Charge Rate (Over 25)
+                            </th>
+                            <td mat-cell *matCellDef="let element">
+                              <mat-icon class="currency">£</mat-icon>
+                              <div class="inline-block p-2" [attr.contenteditable]="true" (blur)="editDefaultRates('chargerateO25', $event, element)">
+                                {{element.chargerateO25.toFixed(2)}}
+                              </div>
+                            </td>
+                          </ng-container>
+
+                          <tr *matHeaderRowDef="visibleRateColumns" mat-header-row></tr>
+                          <tr *matRowDef="let row; columns: visibleRateColumns;" @fadeInUp class="hover:bg-hover trans-ease-out cursor-pointer" mat-row></tr>
+                        </table>
+                      </div>
+                      <div fxLayout="row" fxLayoutAlign="end center" fxLayoutGap="8px">
+                        <button color="primary" mat-raised-button type="submit">Update</button>
+                      </div>
+                    </div>
+                  </mat-tab>
+                  <mat-tab label="Back of House">
+                    <div class="p-6">
+                      <div class="py-4">
+                        <table @stagger [dataSource]="ratesdataSource" class="w-full" mat-table matSort>
+
+                          <ng-container matColumnDef="role">
+                            <th *matHeaderCellDef mat-header-cell>Role</th>
+                            <td mat-cell *matCellDef="let element">{{element.role}}
+                            </td>
+                          </ng-container>
+
+                          <ng-container matColumnDef="payrateU25">
+                            <th *matHeaderCellDef class="uppercase" mat-header-cell mat-sort-header> Pay Rate (Under 25)
+                            </th>
+                            <td mat-cell *matCellDef="let element">
+                              <mat-icon class="currency">£</mat-icon>
+                              <div class="inline-block p-2" [attr.contenteditable]="true" (blur)="editDefaultRates('payrateU25', $event, element)">
+                                {{element.payrateU25.toFixed(2)}}
+                              </div>
+                            </td>
+                          </ng-container>
+
+                          <ng-container matColumnDef="chargerateU25">
+                            <th *matHeaderCellDef class="uppercase" mat-header-cell mat-sort-header> Charge Rate (Under 25)
+                            </th>
+                            <td mat-cell *matCellDef="let element">
+                              <mat-icon class="currency">£</mat-icon>
+                              <div class="inline-block p-2" [attr.contenteditable]="true" (blur)="editDefaultRates('chargerateU25', $event, element)">
+                                {{element.chargerateU25.toFixed(2)}}
+                              </div>
+                            </td>
+                          </ng-container>
+
+                          <ng-container matColumnDef="payrateO25">
+                            <th *matHeaderCellDef class="uppercase" mat-header-cell mat-sort-header> Pay Rate (Over 25)
+                            </th>
+                            <td mat-cell *matCellDef="let element">
+                              <mat-icon class="currency">£</mat-icon>
+                              <div class="inline-block p-2" [attr.contenteditable]="true" (blur)="editDefaultRates('payrateO25', $event, element)">
+                                {{element.payrateO25.toFixed(2)}}
+                              </div>
+                            </td>
+                          </ng-container>
+
+                          <ng-container matColumnDef="chargerateO25">
+                            <th *matHeaderCellDef class="uppercase" mat-header-cell mat-sort-header> Charge Rate (Over 25)
+                            </th>
+                            <td mat-cell *matCellDef="let element">
+                              <mat-icon class="currency">£</mat-icon>
+                              <div class="inline-block p-2" [attr.contenteditable]="true" (blur)="editDefaultRates('chargerateO25', $event, element)">
+                                {{element.chargerateO25.toFixed(2)}}
+                              </div>
+                            </td>
+                          </ng-container>
+
+                          <tr *matHeaderRowDef="visibleRateColumns" mat-header-row></tr>
+                          <tr *matRowDef="let row; columns: visibleRateColumns;" @fadeInUp class="hover:bg-hover trans-ease-out cursor-pointer" mat-row></tr>
+                        </table>
+                      </div>
+                      <div fxLayout="row" fxLayoutAlign="end center" fxLayoutGap="8px">
+                        <button color="primary" mat-raised-button type="submit">Update</button>
+                      </div>
+                    </div>
+                  </mat-tab>
+                </mat-tab-group>
+              </ng-template>
+            </form>
+
+          </div>
+        </mat-tab>
       </mat-tab-group>
     </form>
   </vex-page-layout-content>

@@ -33,6 +33,8 @@ import icExcel from '@iconify/icons-fa-solid/file-excel';
 import icPDF from '@iconify/icons-fa-solid/file-pdf';
 import icImage from '@iconify/icons-fa-solid/file-image';
 import icWord from '@iconify/icons-fa-solid/file-word';
+import { DefaultRates } from 'src/app/models/defaultRates.model';
+import { of } from 'rxjs';
 
 @Component({
   selector: 'vex-edit-worker',
@@ -53,6 +55,19 @@ import icWord from '@iconify/icons-fa-solid/file-word';
 })
 export class EditWorkerComponent implements OnInit {
   @ViewChild('cropper') private cropper: ElementRef;
+  defaultRatesForm: FormGroup;
+
+  @Input()
+  rateColumns: TableColumn<any>[] = [
+    { label: 'Department', property: 'department', type: 'image', visible: false },
+    { label: 'Role', property: 'role', type: 'text', visible: true},
+    { label: 'payrateU25', property: 'payrateU25', type: 'text', visible: true },
+    { label: 'chargerateU25', property: 'chargerateU25', type: 'text', visible: true },
+    { label: 'payrateO25', property: 'payrateO25', type: 'text', visible: true },
+    { label: 'chargerateO25', property: 'chargerateO25', type: 'text', visible: true },
+  ];
+  ratesdataSource: MatTableDataSource<DefaultRates> | null;
+
   ref:AngularFireStorageReference;
   task:AngularFireUploadTask;
   progress: number;
@@ -61,6 +76,11 @@ export class EditWorkerComponent implements OnInit {
   isUploading: boolean = false;
   file: File;
   workerForm: FormGroup;
+  defaultRates: DefaultRates[];
+  filterDefaultRates: DefaultRates[];
+  eitedDefaultRates: DefaultRates[] = [];
+  selectedTabIndex = 0;
+  innerSelectedTabIndex = 0;
   imageUrl: string | ArrayBuffer =
   "https://bulma.io/images/placeholders/480x480.png";
   croppedImage: any = 'assets/img/0.jpg';
@@ -142,6 +162,11 @@ export class EditWorkerComponent implements OnInit {
   get visibleColumns() {
     return this.columns.filter(column => column.visible).map(column => column.property);
   }
+
+  get visibleRateColumns() {
+    return this.rateColumns.filter(column => column.visible).map(column => column.property);
+  }
+
   ngOnInit() {
     this.dataSource = new MatTableDataSource();
     this.step = 0;
@@ -256,12 +281,27 @@ export class EditWorkerComponent implements OnInit {
     console.log('leavePostStudiesBefore6', this._leavePostStudiesBefore6);
     this._criminalRecord = this.defaults.criminalRecords || false;
     console.log('criminalRecords', this._criminalRecord);
+
+    this.ratesdataSource = new MatTableDataSource();
+    this.auth.getDefaultRates().subscribe((rates) => {
+      of(rates.map(rates => new DefaultRates(rates))).subscribe(rates => {
+        this.defaultRates = rates;
+        this.filterDefaultRates = this.defaultRates.filter(x => x.department === 'Housekeeping');
+        this.ratesdataSource.data = this.filterDefaultRates;
+      });
+    });
+
+    this.defaultRatesForm = this.fb.group({})
   }
   save() {
+    const defaultRates = this.eitedDefaultRates;
+    this.auth.setDefaultRates(defaultRates).subscribe((res =>{
+      if(res){
+        this.auth.openSnackbar('Updated Successfully!')
+      }
+    }));
     const customer = this.workerForm.value;
     customer.workerdocuments = this.files;
-    console.log('customer', customer)
-    customer.id = this.defaults.id;
     this.auth.updateUser(customer).subscribe((res =>{
       if(res){
         this.auth.openSnackbar('Updated Successfully!')
@@ -275,6 +315,38 @@ export class EditWorkerComponent implements OnInit {
       }
     }));
   }
+
+  submit(){
+
+  }
+
+  editDefaultRates(property: string, $event, element){
+    console.log('editDefaultRates ', property, $event.target.textContent, element)
+    element[property] = parseFloat($event.target.textContent);
+    const index = this.eitedDefaultRates.findIndex((e) => e._id === element._id);
+    if (index === -1) {
+      this.eitedDefaultRates.push(element);
+    } else {
+      this.eitedDefaultRates[index] = element;
+    }
+  }
+
+  onTabChanged(event){
+    console.log('event', event)
+    if(event.index === 0){
+      this.filterDefaultRates = this.defaultRates.filter(x => x.department === 'Housekeeping');
+      this.ratesdataSource.data = this.filterDefaultRates;
+    }
+    else if(event.index === 1){
+      this.filterDefaultRates = this.defaultRates.filter(x => x.department === 'Food and Beverage');
+      this.ratesdataSource.data = this.filterDefaultRates;
+    }
+    else {
+      this.filterDefaultRates = this.defaultRates.filter(x => x.department === 'Back of House');
+      this.ratesdataSource.data = this.filterDefaultRates;
+    }
+  }
+
   ngAfterViewInit() {
     this.dataSource.paginator = this.paginator;
     this.dataSource.sort = this.sort;
