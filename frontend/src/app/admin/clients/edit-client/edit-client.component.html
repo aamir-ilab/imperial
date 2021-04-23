@@ -70,6 +70,14 @@
                 <div fxLayout="column">
                   <div fxLayout="row"  fxLayout.lt-sm="column" fxLayoutGap="16px" fxLayoutGap.lt-sm="0">
                     <mat-form-field fxFlex="auto">
+                      <mat-label>Company Phone Number</mat-label>
+                      <input formControlName="companyPhoneNumber"  pattern="[+0-9]*" minlength="10" maxlength="14" onkeypress="return event.charCode >= 48 && event.charCode <= 57 || event.charCode == 43" matInput >
+                    </mat-form-field>
+                  </div>
+                </div>
+                <div fxLayout="column">
+                  <div fxLayout="row"  fxLayout.lt-sm="column" fxLayoutGap="16px" fxLayoutGap.lt-sm="0">
+                    <mat-form-field fxFlex="auto">
                       <mat-label>Address Line 1</mat-label>
                       <input formControlName="addressLine1"  matInput >
                     </mat-form-field>
@@ -101,8 +109,12 @@
                 <div fxLayout="column">
                   <div fxLayout="row"  fxLayout.lt-sm="column" fxLayoutGap="16px" fxLayoutGap.lt-sm="0">
                     <mat-form-field fxFlex="auto">
+                      <mat-label>Business Name</mat-label>
+                      <input formControlName="companyName" matInput >
+                    </mat-form-field>
+                    <mat-form-field fxFlex="auto">
                       <mat-label>Phone Number</mat-label>
-                      <input formControlName="phoneNumber"  pattern="[0-9]*" minlength="10" maxlength="14" onkeypress="return event.charCode >= 48 && event.charCode <= 57" matInput >
+                      <input formControlName="phoneNumber"  pattern="[+0-9]*" minlength="10" maxlength="14" onkeypress="return event.charCode >= 48 && event.charCode <= 57 || event.charCode == 43" matInput >
                     </mat-form-field>
                     <mat-form-field fxFlex="auto">
                       <mat-label>VAT Registration Number</mat-label>
@@ -114,11 +126,15 @@
                   <div fxLayout="row"  fxLayout.lt-sm="column" fxLayoutGap="16px" fxLayoutGap.lt-sm="0">
                     <mat-form-field fxFlex="auto">
                       <mat-label>Company Registration Number</mat-label>
-                      <input formControlName="companyRegNumber"  pattern="[0-9]*" minlength="10"maxlength="14"onkeypress="return event.charCode >= 48 && event.charCode <= 57" matInput >
+                      <input formControlName="companyRegNumber" matInput >
                     </mat-form-field>
                     <mat-form-field fxFlex="auto">
                       <mat-label>Company Email Address</mat-label>
                       <input formControlName="emailAddress"  matInput >
+                    </mat-form-field>
+                    <mat-form-field fxFlex="auto">
+                      <mat-label>Email Address Accounts Team</mat-label>
+                      <input formControlName="emailAddressAccountsTeam"  matInput >
                     </mat-form-field>
                   </div>
                 </div>
@@ -250,6 +266,7 @@
                       </table>
                     </div>
                     <div fxLayout="row" fxLayoutAlign="end center" fxLayoutGap="8px">
+                      <button mat-button (click)="cancelBtn()"type="button">CANCEL</button>
                       <button color="primary" mat-raised-button type="button" (click)="save()">Update</button>
                     </div>
                   </div>
@@ -314,6 +331,7 @@
                       </table>
                     </div>
                     <div fxLayout="row" fxLayoutAlign="end center" fxLayoutGap="8px">
+                      <button mat-button (click)="cancelBtn()"type="button">CANCEL</button>
                       <button color="primary" mat-raised-button type="button" (click)="save()">Update</button>
                     </div>
                   </div>
@@ -378,6 +396,7 @@
                       </table>
                     </div>
                     <div fxLayout="row" fxLayoutAlign="end center" fxLayoutGap="8px">
+                      <button mat-button (click)="cancelBtn()"type="button">CANCEL</button>
                       <button color="primary" mat-raised-button type="button" (click)="save()">Update</button>
                     </div>
                   </div>

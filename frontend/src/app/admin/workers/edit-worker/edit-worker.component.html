@@ -129,11 +129,11 @@
                     </mat-form-field>
                     <mat-form-field fxFlex="auto">
                       <mat-label>Mobile Number</mat-label>
-                      <input formControlName="mobileNumber"  pattern="[0-9]*" minlength="10"maxlength="14"onkeypress="return event.charCode >= 48 && event.charCode <= 57" matInput >
+                      <input formControlName="mobileNumber"  pattern="[+0-9]*" minlength="10"maxlength="14"onkeypress="return event.charCode >= 48 && event.charCode <= 57 || event.charCode == 43" matInput >
                     </mat-form-field>
                     <mat-form-field fxFlex="auto">
                         <mat-label>Home Number</mat-label>
-                        <input formControlName="homeNumber" pattern="[0-9]*" minlength="10"maxlength="14"onkeypress="return event.charCode >= 48 && event.charCode <= 57"  matInput >
+                        <input formControlName="homeNumber" pattern="[+0-9]*" minlength="10"maxlength="14"onkeypress="return event.charCode >= 48 && event.charCode <= 57 || event.charCode == 43"  matInput >
                     </mat-form-field>
                   </div>
                   <div fxLayout="row"  fxLayout.lt-sm="column" fxLayoutGap="16px" fxLayoutGap.lt-sm="0">
