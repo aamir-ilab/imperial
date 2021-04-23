@@ -34,8 +34,8 @@ export class ResetPasswordComponent implements OnInit {
   ) { }
 
   ngOnInit() {
-    this.sub = this.activeRoute.params.subscribe(params => {
-       this.token = params['tokenId']; // (+) converts string 'id' to a number
+    this.sub = this.activeRoute.queryParams.subscribe(params => {
+       this.token = params['accessToken']; // (+) converts string 'id' to a number
     });
   }
   checkPassword(pass, confirmPass){
@@ -58,13 +58,12 @@ export class ResetPasswordComponent implements OnInit {
     const controls = this.form.controls;
     var hash = controls.hash.value
     if(hash.length < 8){
-      alert('Please choose a stronger password. Minimum 8 characters.');
+      this.auth.openSnackbar('Please choose a stronger password. Minimum 8 characters.');
       return ;
     }
     if(this.checkPassword(controls.passwordConfirm.value , controls.hash.value) == false)
       {
-      alert('Please Input Password & Password Confirm Correctly !');
-      
+      this.auth.openSnackbar('Input Password & Confirm Password Do Not Match');
       return ;
       }
     var obj = {
@@ -73,13 +72,12 @@ export class ResetPasswordComponent implements OnInit {
     };
     if(controls.hash.value != ''){
       this.auth.resetPassword(obj).subscribe((res)=>{
-        console.log('resetPassword')
-        console.log(res)
         this.auth.openSnackbar('Sucessfully Changed Password');
+        this.router.navigate(['/login']);
       })
     }
     else
-      this.auth.openSnackbar('You have to Input Email');
+      this.auth.openSnackbar('You have to Input Password');
 
     this.router.navigate(['/']);
   }

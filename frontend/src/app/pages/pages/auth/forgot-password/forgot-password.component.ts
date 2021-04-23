@@ -30,6 +30,7 @@ export class ForgotPasswordComponent implements OnInit {
 
   send() {
     const controls = this.form.controls;
+    console.log('Inside send method......!')
     var obj = {
       subject : "Reset your account password",
       name : controls.email.value,
@@ -41,11 +42,10 @@ export class ForgotPasswordComponent implements OnInit {
       btn_link:'',
       link:''
     };
-    if(controls.email.value != ''){
-      this.auth.requestPassword(controls.email.value).subscribe((res)=>{
-        console.log('return send email')
-        console.log(res)
-        this.auth.openSnackbar('Sucessfully Send Email');
+    if(controls.email.value != '' && controls.email.value != null){
+      this.auth.forgotPassword(controls.email.value).subscribe((res)=>{
+        this.auth.openSnackbar('Please Check your email to reset your password!');
+        this.router.navigate(['/login']);
       })
     }
     else

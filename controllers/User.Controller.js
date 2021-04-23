@@ -9,8 +9,11 @@ var randtoken = require('rand-token')
 // const Addfiles = mongoose.model('Addfiles');
 var nodemailer = require('nodemailer');
 const { mongo } = require('mongoose');
+var fs = require('fs');
+var handlebars = require('handlebars');
 // const Nexmo = require('nexmo');
 const refreshTokens = {};
+
 let transporter = nodemailer.createTransport({
     service: 'gmail',
     secure: false,
@@ -22,6 +25,27 @@ let transporter = nodemailer.createTransport({
     tls: {
         rejectUnauthorized: false
     }
+});
+
+var readHTMLFile = function(path, callback) {
+  fs.readFile(path, {encoding: 'utf-8'}, function (err, html) {
+      if (err) {
+          throw err;
+          callback(err);
+      }
+      else {
+          callback(null, html);
+      }
+  });
+};
+
+var transport = nodemailer.createTransport({
+  host: "smtp.mailtrap.io",
+  port: 2525,
+  auth: {
+    user: "1e2f9060589485",
+    pass: "d3a29e8e580090"
+  }
 });
 exports.register = (req, res) => {
     console.log('register user');
@@ -571,34 +595,6 @@ exports. setVerify = (req, res) =>{
                 res.status(404).send("data is not found");
             else {
                 client.verify = true;
-                client.save().then(client => {
-                        res.status(200).json(client);
-                    })
-                    .catch(err => {
-                        res.status(400).send("Update not possible");
-                    });
-            }
-        });
-    });
-
-}
-exports. resetpassword = (req, res) =>{
-    console.log('resetpassword')
-    console.log(req.body)
-    jwt.verify(req.body.token, process.env.JWT_SECRET, function(err, decoded) {
-        if (err){
-            console.log(err)
-            return res.status(500).send({ auth: false, message: 'Failed to authenticate token.' });
-
-        }
-        // if everything good, save to request for use in other routes
-        console.log('resetp1assword')
-        console.log(req.body)
-        User.findOne({emailAddress:decoded.email}, function(err, client) {
-            if (!client)
-                res.status(404).send("data is not found");
-            else {
-                client.setPassword(req.body.hash);
                 client.save().then(client => {
                         res.status(200).json(client);
                     })
@@ -1395,39 +1391,61 @@ exports.getAllFiles = (req, res) => {
     }).populate(['userId']).exec();
 }
 exports.forgotPassword = (req, res) => {
-  console.log('forgotPassword', req.body.email);
-    User.findOne({ 'emailAddress': req.params.email }).then(client => {
-        if (!client) {
-            return res.status(200).json(false)
+    User.findOne({ 'emailAddress': req.body.emailAddress }).then(user => {
+        if (!user) {
+            return res.status(404).json('data not found')
         } else {
-            var newPass = Math.random().toString(20).substr(2, 6)
-            client.setPassword(newPass);
-            console.log('  sdjklfsjdklfjsadl;fjsda;fjsa;lfj;sf;js')
-            let HelperOptions = {
-                from: 'Verify Notification',
-                to: req.params.email,
-                subject: 'Password Reset',
-                html: `
-                    <h3>Hi ${client.firstName} </h3>
-                    <p>You've recently requested a new password reset.</p>
-                    <h3>  New Password: ${newPass}</h3>
-                    <p> If you do not request a password reset. please ignore this email or reply to let us know . This password is only valid for the next 30 minutes</p>`,
+          readHTMLFile((path.join(__dirname, '../public/pages/PasswordResetEmail.php')), function(err, html) {
+          const name = ' ' + user.firstName;
+          link = "http://stagings.tk:5500/#/reset-password?accessToken=" + user.accessToken
+//          link = "http://localhost:4200/#/reset-password?accessToken=" + user.accessToken
+          var template = handlebars.compile(html);
+          var replacements = {
+            name: name,
+            link: link
+          };
+          console.log('replacements', replacements);
+          var htmlToSend = template(replacements);
+          var mailOptions = {
+              from: 'info@imperial.com',
+              to : user.emailAddress,
+              subject : 'Password Reset',
+              html : htmlToSend
             };
-            transporter.sendMail(HelperOptions, (error, info) => {
-                if (error) {
-                    console.log(error);
-                    return res.status(401).json(error)
-                } else {
-                    client.save().then(user1 => {
-                            res.json('password updated!');
-                        })
-                        .catch(err => {
-                            res.status(400).send("Update not possible");
-                        });
-                    return res.status(200).json(info);
-                }
-                // console.log('bbb');
-            })
+            transport.sendMail(mailOptions, function (error, info) {
+              if (error) {
+                console.log(error);
+                return res.status(401).json(error)
+              }
+            res.status(200).json('Email sent')
+          });
+        });
+        }
+    });
+}
+exports.resetPassword = (req, res) => {
+    User.findOne({ 'accessToken': req.body['token'] }).then(client => {
+        if (!client) {
+            return res.status(404).json('data not found')
+        } else {
+            var user = {
+              email: client.emailAddress,
+              accountType: client.accountType
+            }
+            hash = req.body['hash']
+            client.setPassword(hash);
+            token = jwt.sign(user, 'secret',
+            {expiresIn: '.5h'});
+            const refreshToken = randtoken.uid(256);
+            refreshTokens[refreshToken] = client.emailAddress;
+            client.accessToken = token;
+            client.refreshToken = refreshToken;
+            client.save().then(client => {
+                    res.status(200).json(client);
+                })
+                .catch(err => {
+                    res.status(400).send("can not update user token");
+                });
         }
     });
 }
