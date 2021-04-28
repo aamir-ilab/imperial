@@ -176,9 +176,9 @@ export class AuthService {
       })
     );
   }
-  public requestPassword(email: string): Observable<any>{
-    return this.http.post(`${USERS_URL}` + 'forgot-password', {email})
-      .pipe(catchError(this.handleError('forgot-password', [])));
+
+  forgotPassword(email: string): Observable<any>{
+    return this.http.post<User>(`${USERS_URL}forgotpassword`, {emailAddress: email})
   }
 
   async getAllUsers(): Promise<User[]> {
@@ -412,6 +412,7 @@ export class AuthService {
     return this.http.post<any>(`${USERS_URL}client/shiftDetail/email`, {workers:workers, data: data, old_Data: old_Data});
   }
   resetPassword(obj): Observable<any>{
+  console.log('Object from Auth serve: ',obj)
     return this.http.post<any>(`${USERS_URL}resetpassword`, obj);
   }
   emailVerify(token): Observable<any>{

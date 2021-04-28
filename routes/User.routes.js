@@ -14,14 +14,14 @@ module.exports = (app) => {
   app.post("/client/verify/email",  VerifyToken,client.emailverify);
   app.post("/client/verify/setEmail", client.setEmail);
   app.post('/setVerify',client.setVerify);
-  app.post("/resetpassword", client.resetpassword);
 
   app.post('/upload', client.upload)
   app.post('/addFile', client.addFiles)
   app.post('/getFiles', client.getFiles)
   app.post('/getAllFiles', client.getAllFiles)
-  app.post('/forgot-password', client.forgotPassword)
+  app.post('/resetpassword', client.resetPassword)
   app.post('/delFile', client.delFile);
+  app.post('/forgotpassword', client.forgotPassword)
 
   app.post('/removeUser',VerifyToken,authRole([ROLE.ADMIN,ROLE.TEAM]),client.removeUser);
   app.post('/sendmsg',client.sendmsg);
