@@ -33,7 +33,7 @@ import icExcel from '@iconify/icons-fa-solid/file-excel';
 import icPDF from '@iconify/icons-fa-solid/file-pdf';
 import icImage from '@iconify/icons-fa-solid/file-image';
 import icWord from '@iconify/icons-fa-solid/file-word';
-import { DefaultRates } from 'src/app/models/defaultRates.model';
+import { CustomRates } from 'src/app/models/customRates.model';
 import { of } from 'rxjs';
 
 @Component({
@@ -55,18 +55,16 @@ import { of } from 'rxjs';
 })
 export class EditWorkerComponent implements OnInit {
   @ViewChild('cropper') private cropper: ElementRef;
-  defaultRatesForm: FormGroup;
+  customRatesForm: FormGroup;
 
   @Input()
   rateColumns: TableColumn<any>[] = [
     { label: 'Department', property: 'department', type: 'image', visible: false },
     { label: 'Role', property: 'role', type: 'text', visible: true},
     { label: 'payrateU25', property: 'payrateU25', type: 'text', visible: true },
-    { label: 'chargerateU25', property: 'chargerateU25', type: 'text', visible: true },
     { label: 'payrateO25', property: 'payrateO25', type: 'text', visible: true },
-    { label: 'chargerateO25', property: 'chargerateO25', type: 'text', visible: true },
   ];
-  ratesdataSource: MatTableDataSource<DefaultRates> | null;
+  ratesdataSource: MatTableDataSource<CustomRates> | null;
 
   ref:AngularFireStorageReference;
   task:AngularFireUploadTask;
@@ -76,9 +74,9 @@ export class EditWorkerComponent implements OnInit {
   isUploading: boolean = false;
   file: File;
   workerForm: FormGroup;
-  defaultRates: DefaultRates[];
-  filterDefaultRates: DefaultRates[];
-  eitedDefaultRates: DefaultRates[] = [];
+  customRates: CustomRates[];
+  filterCustomRates: CustomRates[];
+  eitedCustomRates: CustomRates[] = [];
   selectedTabIndex = 0;
   innerSelectedTabIndex = 0;
   imageUrl: string | ArrayBuffer =
@@ -283,23 +281,26 @@ export class EditWorkerComponent implements OnInit {
     console.log('criminalRecords', this._criminalRecord);
 
     this.ratesdataSource = new MatTableDataSource();
-    this.auth.getDefaultRates().subscribe((rates) => {
-      of(rates.map(rates => new DefaultRates(rates))).subscribe(rates => {
-        this.defaultRates = rates;
-        this.filterDefaultRates = this.defaultRates.filter(x => x.department === 'Housekeeping');
-        this.ratesdataSource.data = this.filterDefaultRates;
+    this.auth.getWorkerRates(this.defaults._id).subscribe((rates) => {
+      of(rates.map(rates => new CustomRates(rates))).subscribe(rates => {
+        this.customRates = rates;
+        this.filterCustomRates = this.customRates.filter(x => x.department === 'Housekeeping');
+        this.ratesdataSource.data = this.filterCustomRates;
       });
     });
 
-    this.defaultRatesForm = this.fb.group({})
+    this.customRatesForm = this.fb.group({})
   }
   save() {
-    const defaultRates = this.eitedDefaultRates;
-    this.auth.setDefaultRates(defaultRates).subscribe((res =>{
+    const customRates = this.eitedCustomRates;
+    this.auth.setWorkerRates(customRates).subscribe((res =>{
       if(res){
         this.auth.openSnackbar('Updated Successfully!')
       }
     }));
+  }
+
+  submit(){
     const customer = this.workerForm.value;
     customer.workerdocuments = this.files;
     this.auth.updateUser(customer).subscribe((res =>{
@@ -316,34 +317,30 @@ export class EditWorkerComponent implements OnInit {
     }));
   }
 
-  submit(){
-
-  }
-
-  editDefaultRates(property: string, $event, element){
-    console.log('editDefaultRates ', property, $event.target.textContent, element)
+  editCustomRates(property: string, $event, element){
+    console.log('editcustomRates ', property, $event.target.textContent, element)
     element[property] = parseFloat($event.target.textContent);
-    const index = this.eitedDefaultRates.findIndex((e) => e._id === element._id);
+    const index = this.eitedCustomRates.findIndex((e) => e._id === element._id);
     if (index === -1) {
-      this.eitedDefaultRates.push(element);
+      this.eitedCustomRates.push(element);
     } else {
-      this.eitedDefaultRates[index] = element;
+      this.eitedCustomRates[index] = element;
     }
   }
 
   onTabChanged(event){
     console.log('event', event)
     if(event.index === 0){
-      this.filterDefaultRates = this.defaultRates.filter(x => x.department === 'Housekeeping');
-      this.ratesdataSource.data = this.filterDefaultRates;
+      this.filterCustomRates = this.customRates.filter(x => x.department === 'Housekeeping');
+      this.ratesdataSource.data = this.filterCustomRates;
     }
     else if(event.index === 1){
-      this.filterDefaultRates = this.defaultRates.filter(x => x.department === 'Food and Beverage');
-      this.ratesdataSource.data = this.filterDefaultRates;
+      this.filterCustomRates = this.customRates.filter(x => x.department === 'Food and Beverage');
+      this.ratesdataSource.data = this.filterCustomRates;
     }
     else {
-      this.filterDefaultRates = this.defaultRates.filter(x => x.department === 'Back of House');
-      this.ratesdataSource.data = this.filterDefaultRates;
+      this.filterCustomRates = this.customRates.filter(x => x.department === 'Back of House');
+      this.ratesdataSource.data = this.filterCustomRates;
     }
   }
 

@@ -3,6 +3,7 @@ passport = require('passport');
 const Job = mongoose.model('Job');
 const DefaultRates = mongoose.model('DefaultRates');
 const CustomRates = mongoose.model('CustomRates');
+const WorkerRates = mongoose.model('WorkerRates');
 const Timesheet = mongoose.model('Timesheet');
 const User = mongoose.model('User');
 const Invoice = mongoose.model('Invoice');
@@ -628,115 +629,96 @@ function getAge(dateString) {
   return age;
 }
 exports.getExportTimesheets = (req, res) => {
-  ///// for current week check /////
-  // const now = moment().subtract(1, 'isoWeek').startOf('isoWeek');
-  // const end = moment().subtract(1, 'isoWeek').endOf('isoWeek');
-  // console.log('current', now,end);
-  // find({$and:
-  // [
-  //   { $and: [{exportStatus: false},{statusStr:'Completed'} ] },
-  //   {shiftDate:{ $gte: now, $lte: end}}
-  // ]})
-  ///// for current week check ends /////
   var timesheetData = [];
 
-  Timesheet.find({exportStatus: false, statusStr:'Completed'}).populate(['JobId_Id', 'workers.workerId', 'clientId']).exec(function(err, timesheet) {
+  Timesheet.find({exportStatus: false, statusStr:'Completed'}).populate(['JobId_Id', 'workers.workerId', 'clientId']).exec(function(err, timesheets) {
     if (err) {
       console.log('error', err);
     } else {
-      console.log('==timesheet==', timesheet)
+      console.log('==timesheet==', timesheets)
+
       InvoiceInfo.findOne({id:1}, function(err, invoiceinfo) {
         DefaultRates.find({}, function(err, defaultRates) {
           if (defaultRates)
           {
-            timesheet.forEach(timesheet => {
-              CustomRates.find({clientId: timesheet.clientId}, function(err, customRates) {
-                if (customRates)
-                {
-                  console.log('element', timesheet.workers);
-                  var inv_workers = [];var invoiceWorkers = [];
-                  timesheet.workers.forEach(worker => {
-                    let tempRate = 0;  let chargeRate = 0;
-                    let age = getAge(worker.workerId.dateBirth);
+            timesheets.forEach(timesheet => {
+              var inv_workers = [];var invoiceWorkers = [];
+              console.log('--customRates--')
+              console.log('element', timesheet.workers);
+              timesheet.workers.forEach((worker) => {
+                let tempRate = 0;  let chargeRate = 0;
+                let age = getAge(worker.workerId.dateBirth);
 
-                    // client charge rate
-                    let chargerateU25 = 0 ; let chargerateO25 = 0;
-                    let defaultRate = defaultRates.filter(x => x.role === worker.role);
-                    let customRate = customRates.filter(x => x.role === worker.role);
-                    defaultRate = defaultRate[0];
-                    customRate = customRate[0];
-                    console.log('defaultRate', defaultRate);
-                    console.log('customRate', customRate);
-                    // chargerateU25 = timesheet.clientId.hk_chargerateU25 > 0 ?
-                    // timesheet.clientId.hk_chargerateU25 : defaultRate['chargerateU25'];
-                    chargerateU25 = customRate['chargerateU25'] > 0 ?
-                    customRate['chargerateU25'] : defaultRate['chargerateU25'];
-                    console.log('chargerateU25', chargerateU25);
-                    chargerateO25 = customRate['chargerateO25'] > 0 ?
-                    customRate['chargerateO25'] : defaultRate['chargerateO25'];
-                    console.log('chargerateO25', chargerateO25);
-                    // worker pay rate
-                    payrateU25 = customRate['payrateU25'] > 0 ?
-                    customRate['payrateU25'] : defaultRate['payrateU25'];
-                    console.log('payrateU25', payrateU25);
-                    payrateO25 = customRate['payrateO25'] > 0 ?
-                    customRate['payrateO25'] : defaultRate['payrateO25'];
-                    console.log('payrateO25', payrateO25);
+                // client charge rate
+                let chargerateU25 = 0 ; let chargerateO25 = 0;
+                let defaultRate = defaultRates.filter(x => x.role === worker.role);
+                defaultRate = defaultRate[0];
+                console.log('defaultRate', defaultRate);
+                chargerateU25 = defaultRate['chargerateU25'];
+                console.log('chargerateU25', chargerateU25);
+                chargerateO25 = defaultRate['chargerateO25'];
+                console.log('chargerateO25', chargerateO25);
+                // worker pay rate
+                payrateU25 = defaultRate['payrateU25'];
+                console.log('payrateU25', payrateU25);
+                payrateO25 = defaultRate['payrateO25'];
+                console.log('payrateO25', payrateO25);
 
-                    tempRate = age < 25 ? payrateU25 : payrateO25;
-                    console.log('tempRate', tempRate);
-                    // worker net
-                    let WR_UNITS = parseFloat(worker.hours.replace(':','.'))*tempRate;
-                    console.log('WR_UNITS', WR_UNITS);
+                tempRate = age < 25 ? payrateU25 : payrateO25;
+                console.log('tempRate', tempRate);
+                // worker net
+                let WR_UNITS = parseFloat(worker.hours.replace(':','.'))*tempRate;
+                console.log('WR_UNITS', WR_UNITS);
 
-                    chargeRate = age < 25 ? chargerateU25 : chargerateO25;
-                    console.log('chargeRate', chargeRate);
-                    let inv_WR_net = parseFloat(worker.hours.replace(':','.'))*chargeRate;
-                    console.log('inv_WR_net', inv_WR_net);
-                    WR_UNITS = WR_UNITS.toFixed(2);
-                    inv_WR_net = inv_WR_net.toFixed(2);
-                    var obj ={
-                      timesheet_id: timesheet.timesheetId,
-                      WR_REF : worker.workerId.workerId,
-                      WR_UNITS: WR_UNITS,
-                      WR_TRNCDE :'p001',
-                      WR_RATE : tempRate,
-                      type : "Export Timesheets",
-                      response : "Successful"
-                    }
-                    timesheetData.push(obj);
-                    var inv_worker = {
-                      workerId: worker.workerId._id,
-                      chargeRate: chargeRate,
-                      payRate: tempRate,
-                      hours: parseFloat(worker.hours.replace(':','.')),
-                      net: inv_WR_net,
-                      client_Id: timesheet.clientId
-                    }
-                    inv_workers.push(inv_worker)
-                    console.log('inv_worker', inv_worker)
-                  });
-                  invoiceWorkers.push(inv_workers);
-                  console.log('invoiceWorkers', invoiceWorkers)
-                  const invoice = new Invoice();
-                  invoice.invoiceDate = new Date();
-                  invoice.invoiceDueDate =  moment().add(invoiceinfo.dueDate, 'd').format('dddd, MMMM DD,YYYY');
-                  invoice.workers = invoiceWorkers[0];
-                  invoice.client_Id = timesheet.clientId
-                  invoice.timesheetId = timesheet.timesheetId;
-                  invoice.timesheetId_id = timesheet._id;
-                  invoice.invoiceId = timesheet.timesheetId.replace(/TS/g, "INV");
-                  invoice.totalVat = invoiceinfo.vat;
-                  invoice.save().then(inv => {
-                    console.log("invoice", inv);
-                  })
-                  .catch(err => {
-                    console.log("invoice not created", err);
-                  });
-                  Timesheet.updateMany({exportStatus: false, statusStr:'Completed'}, {"$set":{"exportStatus": true}}, {"multi": true}, (err, writeResult) => {});
+                chargeRate = age < 25 ? chargerateU25 : chargerateO25;
+                console.log('chargeRate', chargeRate);
+                let inv_WR_net = parseFloat(worker.hours.replace(':','.'))*chargeRate;
+                console.log('inv_WR_net', inv_WR_net);
+                WR_UNITS = WR_UNITS.toFixed(2);
+                inv_WR_net = inv_WR_net.toFixed(2);
+                var obj ={
+                  timesheet_id: timesheet.timesheetId,
+                  WR_REF : worker.workerId.workerId,
+                  WR_UNITS: WR_UNITS,
+                  WR_TRNCDE :'p001',
+                  WR_RATE : tempRate,
+                  type : "Export Timesheets",
+                  response : "Successful"
                 }
+                timesheetData.push(obj);
+                var inv_worker = {
+                  workerId: worker.workerId._id,
+                  chargeRate: chargeRate,
+                  payRate: tempRate,
+                  hours: parseFloat(worker.hours.replace(':','.')),
+                  net: inv_WR_net,
+                  client_Id: timesheet.clientId
+                }
+                inv_workers.push(inv_worker);
+                console.log('inv_worker', inv_worker);
               });
+              const invoice = new Invoice();
+              console.log('All done!', inv_workers);
+              invoiceWorkers.push(inv_workers);
+              console.log('invoiceWorkers', invoiceWorkers)
+              invoice.invoiceDate = new Date();
+              invoice.invoiceDueDate =  moment().add(invoiceinfo.dueDate, 'd').format('dddd, MMMM DD,YYYY');
+              invoice.workers = invoiceWorkers[0];
+              invoice.client_Id = timesheet.clientId
+              invoice.timesheetId = timesheet.timesheetId;
+              invoice.timesheetId_id = timesheet._id;
+              invoice.invoiceId = timesheet.timesheetId.replace(/TS/g, "INV");
+              invoice.totalVat = invoiceinfo.vat;
+
+              invoice.save().then(inv => {
+                console.log("invoice", inv);
+              })
+              .catch(err => {
+                console.log("invoice not created", err);
+              });
+              // Timesheet.updateMany({exportStatus: false, statusStr:'Completed'}, {"$set":{"exportStatus": true}}, {"multi": true}, (err, writeResult) => {});
             });
+
           }
           res.json(timesheetData);
         });
@@ -744,6 +726,210 @@ exports.getExportTimesheets = (req, res) => {
     }
   })
 }
+
+exports.customRatesUpdation = (req, res) => {
+  var timesheetData = [];
+
+  Timesheet.find({exportStatus: false, statusStr:'Completed'}).populate(['JobId_Id', 'workers.workerId', 'clientId']).exec(function(err, timesheets) {
+    if (err) {
+      console.log('error', err);
+    } else {
+      console.log('==timesheet==', timesheets)
+      timesheets.forEach((timesheet,index) => {
+        CustomRates.find({clientId: timesheet.clientId}, function(err, customRates) {
+          if (customRates) {
+            var inv_workers = []; var invoiceWorkers = [];
+            console.log('--customRates--')
+            console.log('element', timesheet.workers);
+            timesheet.workers.forEach((worker, i) => {
+              let tempRate = null;  let chargeRate = null; let inv_WR_net = null; let WR_UNITS = null;
+              let age = getAge(worker.workerId.dateBirth);
+
+              // client charge rate
+              let chargerateU25 = 0 ; let chargerateO25 = 0;
+              let customRate = customRates.filter(x => x.role === worker.role);
+              customRate = customRate[0];
+              console.log('customRate', customRate);
+              chargerateU25 = customRate['chargerateU25'] > 0 ? customRate['chargerateU25'] : null;
+              console.log('chargerateU25', chargerateU25);
+              chargerateO25 = customRate['chargerateO25'] > 0 ? customRate['chargerateO25'] : null;
+              console.log('chargerateO25', chargerateO25);
+              // worker pay rate
+              payrateU25 = customRate['payrateU25'] > 0 ? customRate['payrateU25'] : null;
+              console.log('payrateU25', payrateU25);
+              payrateO25 = customRate['payrateO25'] > 0 ? customRate['payrateO25'] : null;
+              console.log('payrateO25', payrateO25);
+
+              tempRate = age < 25 ? payrateU25 : payrateO25;
+              console.log('tempRate', tempRate);
+              // worker net
+              if(tempRate !== null){
+                WR_UNITS = parseFloat(worker.hours.replace(':','.'))*tempRate;
+                console.log('WR_UNITS', WR_UNITS);
+                WR_UNITS = WR_UNITS && WR_UNITS.toFixed(2);
+              }
+
+              chargeRate = age < 25 ? chargerateU25 : chargerateO25;
+              console.log('chargeRate', chargeRate);
+              if(chargeRate !== null){
+                inv_WR_net = parseFloat(worker.hours.replace(':','.'))*chargeRate;
+                console.log('inv_WR_net', inv_WR_net);
+                inv_WR_net = inv_WR_net && inv_WR_net.toFixed(2);
+              }
+              var obj ={
+                timesheet_id: timesheet.timesheetId,
+                WR_REF : worker.workerId.workerId,
+                WR_UNITS: WR_UNITS,
+                WR_TRNCDE :'p001',
+                WR_RATE : tempRate,
+                type : "Export Timesheets",
+                response : "Successful"
+              }
+              timesheetData.push(obj);
+              var inv_worker = {
+                workerId: worker.workerId._id,
+                chargeRate: chargeRate,
+                payRate: tempRate,
+                hours: parseFloat(worker.hours.replace(':','.')),
+                net: inv_WR_net,
+                client_Id: timesheet.clientId
+              }
+              inv_workers.push(inv_worker);
+              console.log('inv_worker', inv_worker);
+
+              if(index === timesheets.length-1 && i === timesheet.workers.length-1){
+                res.json(timesheetData);
+              }
+
+            });
+            // const invoice = new Invoice();
+            let inID = timesheet.timesheetId.replace(/TS/g, "INV");
+            Invoice.findOne({invoiceId:inID}, function(err, invoice) {
+              console.log('All done!', inv_workers);
+              invoiceWorkers.push(inv_workers);
+              console.log('invoiceWorkers', invoiceWorkers)
+              invoiceWorkers = invoiceWorkers[0];
+              invoice.workers.forEach((ele, i) => {
+                let invoiceWorker = invoiceWorkers[i];
+                console.log('--invoiceWorker', invoiceWorkers[i]);
+                if(invoiceWorker.chargeRate !== null)
+                  ele.chargeRate = invoiceWorker.chargeRate;
+                if(invoiceWorker.payRate !== null)
+                  ele.payRate = invoiceWorker.payRate;
+                if(invoiceWorker.net !== null)
+                  ele.net = invoiceWorker.net;
+              });
+              invoice.save().then(inv => {
+                console.log("saved invoice", inv);
+              })
+              .catch(err => {
+                console.log("invoice not created", err);
+              });
+            })
+          }
+        });
+      });
+    }
+  })
+}
+
+exports.workerRatesUpdation = (req, res) => {
+  var timesheetData = [];
+
+  Timesheet.find({exportStatus: false, statusStr:'Completed'}).populate(['JobId_Id', 'workers.workerId', 'clientId']).exec(function(err, timesheets) {
+    if (err) {
+      console.log('error', err);
+    } else {
+      // console.log('==timesheet==', timesheets)
+
+      var bar = new Promise((resolve, reject) => {
+        timesheets.forEach((timesheet, index) => {
+          var inv_workers = [];var invoiceWorkers = [];
+          // console.log('element', timesheet.workers);
+          var innerbar = new Promise((resolves, reject) => {
+            timesheet.workers.forEach((worker, i) => {
+              inv_workers = [];
+              WorkerRates.find({clientId: worker.workerId}, function(err, workerRates) {
+                if (workerRates)
+                {
+                  console.log('--workerRates--', workerRates)
+                  let tempRate = 0;  let chargeRate = 0; let WR_UNITS = null;
+                  let age = getAge(worker.workerId.dateBirth);
+
+                  let workerRate = workerRates.filter(x => x.role === worker.role);
+                  workerRate = workerRate[0];
+                  payrateU25 = workerRate['payrateU25'] > 0 ? workerRate['payrateU25'] : null;
+                  payrateO25 = workerRate['payrateO25'] > 0 ? workerRate['payrateO25'] : null;
+
+                  tempRate = age < 25 ? payrateU25 : payrateO25;
+                  console.log('tempRate', tempRate)
+                  // worker net
+                  if(tempRate !== null){
+                    WR_UNITS = parseFloat(worker.hours.replace(':','.'))*tempRate;
+                    WR_UNITS = WR_UNITS.toFixed(2);
+                  }
+                  var obj ={
+                    timesheet_id: timesheet.timesheetId,
+                    WR_REF : worker.workerId.workerId,
+                    WR_UNITS: WR_UNITS,
+                    WR_TRNCDE :'p001',
+                    WR_RATE : tempRate,
+                    type : "Export Timesheets",
+                    response : "Successful"
+                  }
+                  timesheetData.push(obj);
+                  console.log('timesheetData', timesheetData);
+                  var inv_worker = {
+                    workerId: worker.workerId._id,
+                    payRate: tempRate,
+                    hours: parseFloat(worker.hours.replace(':','.')),
+                    client_Id: timesheet.clientId
+                  }
+                  inv_workers.push(inv_worker);
+                  if (i === timesheet.workers.length-1){
+                    resolves();
+                  }
+                }
+              });
+            });
+          });
+          innerbar.then(()=> {
+            console.log('inside inner bar')
+            let inID = timesheet.timesheetId.replace(/TS/g, "INV");
+            Invoice.findOne({invoiceId:inID}, function(err, invoice) {
+              invoiceWorkers.push(inv_workers);
+              invoiceWorkers = invoiceWorkers[0];
+
+              invoice.workers.forEach((ele, i) => {
+                let invoiceWorker = invoiceWorkers[i];
+                console.log('--invoiceWorker', invoiceWorkers[i]);
+                if (invoiceWorker.payRate !== null)
+                  ele.payRate = invoiceWorker.payRate;
+              });
+              invoice.save().then(inv => {
+                console.log("worker rates saved invoice", inv);
+                // res.send(inv);
+              })
+              .catch(err => {
+                console.log("invoice not created", err);
+              });
+            });
+          });
+          if (index === timesheets.length-1){
+            resolve();
+          }
+          Timesheet.updateMany({exportStatus: false, statusStr:'Completed'}, {"$set":{"exportStatus": true}}, {"multi": true}, (err, writeResult) => {
+          });
+        });
+      });
+      bar.then(() => {
+        console.log('timesheetData', timesheetData)
+        res.json('successfull');
+      });
+    }
+  })
+}
+
 exports.getPayslips = (req, res) => {
   console.log('===  workedId ====', req.body._id)
     Payslip.find({workerId: req.body._id}).populate(['workerId','work.client_Id']).exec(function(err, payslips) {
@@ -766,6 +952,16 @@ exports.getClientInvoices = (req, res) => {
 }
 exports.getAllInvoices = (req, res) => {
   Invoice.find({status:'Complete'}).sort({ 'invoiceDate': -1 }).populate(['client_Id','workers.workerId']).exec(function(err, client) {
+      if (err) {
+          console.log(err);
+      } else {
+          res.json(client);
+      }
+  })
+}
+exports.getSelectedInvoices = (req, res) => {
+  console.log('req', req.body)
+  Invoice.find({ timesheetId : { $in : req.body.inv_ids } }).sort({ 'timesheetId': 1 }).populate(['client_Id','workers.workerId']).exec(function(err, client) {
       if (err) {
           console.log(err);
       } else {
@@ -1269,264 +1465,40 @@ exports.setCustomRates = (req, res) => {
   res.json('Updated')
 }
 
+exports.workerRates = (req, res) => {
+  console.log('workerRates req', req.body)
+  WorkerRates.find({clientId: req.body.id}).exec(function(err, rates) {
+    if (err) {
+      console.log(err);
+    } else {
+      res.json(rates);
+    }
+  })
+}
 
+exports.setWorkerRates = (req, res) => {
+  console.log('setWorkerRates', req.body)
+  req.body.data.forEach(element => {
+    WorkerRates.findOne({_id:element._id}, function(err, obj) {
+      if (!obj)
+        res.status(404).send("data is not found");
+      else {
+          Object.assign(obj, element);
+          // client.statusStr = req.body.str;
+          obj.save().then(obj => {
+              // res.status(200).json(client);
+          })
+          .catch(err => {
+              // res.status(400).send("Update not possible");
+          });
+      }
 
+    });
+  });
+  res.json('Updated')
+}
 
 ////////// Not in use by Muzz dev //////////
-// exports.google = (req,res) =>{
-//     console.log('1');
-//     passport.authenticate('google', { scope:
-//         [ 'https://www.googleapis.com/auth/plus.login',
-//         , 'https://www.googleapis.com/auth/plus.profile.emails.read' ] })
-// };
-// exports.google_callback = (req, res)=>{
-//     console.log('2');
-//   passport.authenticate('google', { failureRedirect: '/' }),
-//   function(req, res) {
-//     // res.redirect('/account');
-//     res.status(500).json('ssss');
-//   };
-// }
-// exports.google_auth = (req, res) => {
-//     console.log('save-0')
-//     console.log(req.body.providerId);
-//     Job.findOne({ providerJobID: req.body.providerId, logtype: 1 }, function(err, client) {
-//         if (err) {
-//             return res.status(400).json('400 error');
-//         }
-//         //No Job was found... so create a new Job with values from Facebook (all the profile. stuff)
-//         if (!client) {
-//             console.log('save-1')
-//             client = new Client({
-//                 fullname: req.body.fullname,
-//                 email: req.body.email,
-//                 providerJobID: req.body.providerId,
-//                 logtype: 1,
-//                 //now in the future searching on Job.findOne({'facebook.id': profile.id } will match because of this next line
-//                 // facebook: profile._json
-//             });
-//             console.log('save-2')
-//             client.save(function(err) {
-//                 if (err) console.log(err);
-//                 res.status(200).json({ 'token': req.body.providerId }); // return done(err, client);
-//                 // res.status(200).json("Google Registered successfully");
-
-//             });
-//         } else {
-//             // const token = client.generateJwt();
-//             console.log('save-3')
-//             res.status(200).json({ 'token': req.body.providerId }); // return done(err, client);
-//             // res.status(200).json({token});
-//         }
-//     });
-// }
-// exports.facebook_auth = (req, res) => {
-//     console.log('save-0')
-//     console.log(req.body.providerId);
-//     Job.findOne({ providerJobID: req.body.providerId, logtype: 2 }, function(err, client) {
-//         if (err) {
-//             return res.status(400).json('400 error');
-//         }
-//         //No Job was found... so create a new Job with values from Facebook (all the profile. stuff)
-//         if (!client) {
-//             console.log('save-1')
-//             client = new Client({
-//                 fullname: req.body.fullname,
-//                 email: req.body.email,
-//                 providerJobID: req.body.providerId,
-//                 logtype: 2,
-//                 //now in the future searching on Job.findOne({'facebook.id': profile.id } will match because of this next line
-//                 // facebook: profile._json
-//             });
-//             console.log('save-2')
-//             client.save(function(err) {
-//                 if (err) console.log(err);
-//                 res.status(200).json({ 'token': req.body.providerId }); // return done(err, client);
-//                 // res.status(200).json("Google Registered successfully");
-
-//             });
-//         } else {
-//             // const token = client.generateJwt();
-//             console.log('save-3')
-//             res.status(200).json({ 'token': req.body.providerId }); // return done(err, client);
-//             // res.status(200).json({token});
-//         }
-//     });
-// }
-exports.JobToken = (req, res) => {
-    Job.findById(req.JobId, function(err, client) {
-        if (!client)
-            res.status(404).send("data is not found");
-        else
-            res.status(200).json(client)
-    });
-}
-exports.login = (req, res) => {
-    console.log('login1');
-    if (!req.body.emailAddress || !req.body.hash) {
-        return res.status(400).json(req.body.emailAddress);
-    }
-    // console.log(req)
-    console.log('login2');
-    passport.authenticate("Job", (err, client, info) => {
-        console.log(client);
-        let token;
-        if (err) {
-            console.log('err');
-            return res.status(200).json(false);
-        }
-        if (client) {
-            console.log('client');
-            // token = client.generateJwt();
-            res.status(200).json(client);
-        } else {
-            console.log('login3');
-            res.status(200).json(false);
-        }
-    })(req, res);
-};
-// exports.addMulti = (req, res) =>{
-//     var jsonArr = [];
-//     jsonArr = JSON.parse(req.body.json);
-//     var infoArr = [];
-//     jsonArr.forEach((element ,index)=>{
-//         Job.findOne({email: element[' email ']}).then(Job=>{
-//             if(Job){
-//                 infoArr.push('Failed : ' + index + 'th is existed email')
-//             }else{
-//                 const Job = new Client();
-//                 if(element[' fullname '])
-//                 Job.fullname = element[' fullname '];
-//                 if(element[' email '])
-//                     Job.email = element[' email '];
-//                 if(element[' phone '])
-//                     Job.phone = element[' phone '];
-//                 if(element[' clientLocation '])
-//                     Job.clientLocation = element[' clientLocation '];
-//                 if(element[' weddingDate '])
-//                     Job.weddingDate = element[' weddingDate '];
-//                 if(element[' weddingCity '])
-//                     Job.weddingCity = element[' weddingCity '];
-//                 if(element[' brideName '])
-//                     Job.brideName = element[' brideName '];
-//                 if(element[' groomName '])
-//                     Job.groomName = element[' groomName '];
-//                 if(element[' position '])
-//                     Job.position = element[' position '];
-//                 Job.setPassword('123456');
-//                 Job.save((err) => {
-//                     if (err) {
-//                         // res.status(500).json(err);
-//                         infoArr.push('Error 500: ' + err)
-//                     } else {
-//                         // const token = Job.generateJwt();
-//                         // res.status(200).json("Registered successfully");
-//                         infoArr.push('Success 200: ' + index)
-//                     }
-//                 });
-//             }
-//         })
-//     })
-//     res.status(200).json(infoArr)
-// }
-exports.update = (req, res) => {
-    var role = req.type;
-    var clientId = req.clientId;
-    if (role == 0) {
-        Job.findById(req.params.id, function(err, client) {
-
-            if (!client)
-                res.status(404).send("data is not found");
-            else {
-                tempPass = client.hash;
-                Object.assign(client, req.body);
-            }
-            console.log(client);
-            console.log(req.body);
-            if (req.body.hash != '')
-                client.setPassword(req.body.hash);
-            else
-                client.hash = tempPass;
-            client.save().then(client => {
-                    res.json('client updated!');
-                })
-                .catch(err => {
-                    res.status(400).send("Update not possible");
-                });
-        });
-    } else {
-        if (clientId == req.params.id) {
-            Job.findById(req.params.id, function(err, client) {
-                if (!client)
-                    res.status(404).send("data is not found");
-                else {
-                    tempPass = client.hash;
-                    Object.assign(client, req.body);
-                }
-                if (req.body.hash != '')
-                    client.setPassword(req.body.hash);
-                else
-                    client.hash = tempPass;
-                client.save().then(client => {
-                        res.json('client updated!');
-                    })
-                    .catch(err => {
-                        res.status(400).send("Update not possible");
-                    });
-            });
-        } else {
-            res.json('You are not owner of this profile. So you cannot update');
-        }
-    }
-};
-exports.updateProfile = (req, res) => {
-    // var role = req.type;
-    console.log('updateProfile')
-    console.log(req.body)
-        // var clientId = req.clientId;
-        // if (role == 0){
-    Job.findById(req.body._id, function(err, client) {
-        if (!client)
-            res.status(404).send("data is not found");
-        else {
-            tempPass = client.hash;
-            Object.assign(client, req.body);
-        }
-        console.log(req.body.hash)
-
-        if (req.body.hash)
-            client.setPassword(req.body.hash);
-        else {
-            client.hash = tempPass;
-        }
-        client.save().then(client => {
-                res.status(200).json(client);
-            })
-            .catch(err => {
-                res.status(400).send("Update not possible");
-            });
-    });
-};
-// exports.updateJobTimesheet = (timesheetId) => {
-//   console.log('Timesheet', timesheetId)
-//   Job.findById(Timesheet, function(err, client) {
-//       if (!client)
-//         console.log("data is not found");
-//       else {
-//         Object.assign(client, req.body);
-//         client.totalStaff = 0;
-//         client.shifts.forEach(element => {
-//           client.totalStaff += element.total;
-//         });
-//         client.save().then(client => {
-//           res.status(200).json(client);
-//         })
-//         .catch(err => {
-//           res.status(400).send("Update not possible");
-//         });
-//       }
-//   });
-// };
 
 exports.updateHash = (req, res) => {
     // var role = req.type;
@@ -1547,580 +1519,3 @@ exports.updateHash = (req, res) => {
         }
     });
 };
-
-exports.findByIdNum = (req, res) => {
-    Job.findOne({ id: req.body.id }, function(err, client) {
-        if (!client)
-            res.status(500).send("data is not found");
-        else
-            res.status(200).json(client);
-    });
-}
-exports.findById = (req, res) => {
-    var role = req.logtype;
-    // console.log(req.JobId)
-    if (role == 0) {
-        Job.findById(req.JobId, function(err, client) {
-            if (!client)
-                res.status(500).send("data is not found");
-            else
-                res.status(200).json(client);
-        });
-    } else {
-        // res.json('you are not admin , cannot access !');
-        console.log('abc')
-            // console.log(req.headers.token)
-        Job.findOne({ providerJobID: req.providerId }, function(err, client) {
-            if (!client)
-                res.status(500).send("data is not found");
-            else
-                res.status(200).json(client);
-        });
-    }
-}
-// exports.updateClientVendor = (req, res) => {
-    //     // var role = req.type;
-    //     // var clientId = req.clientId;
-    //     // if (role == 0){
-    //     Job.findOne({ 'email': req.body.tempEmail }, function(err, client) {
-    //         if (!client)
-    //             res.status(404).send("data is not found");
-    //         else
-    //             Object.assign(client, req.body);
-    //         // client.setPassword(req.body.hash);
-    //         client.save().then(client => {
-    //                 res.json('client updated!');
-    //             })
-    //             .catch(err => {
-    //                 res.status(400).send("Update not possible");
-    //             });
-    //     });
-    // };
-    // exports.delClient = (req, res) => {
-    //     Job.findOneAndRemove({ 'email': req.body.email }, function(err, client) {
-    //         if (err) res.json(err);
-    //         else res.json('Successfully removed');
-    //     })
-    // }
-
-// verify
-
-    // exports.phoneverify = (req, res) => {
-
-//     const nexmo = new Nexmo({
-//         apiKey: '23fe25b0',
-//         apiSecret: 'OV2v0WxOO13iLtQL',
-//     });
-
-//     const from = 8613322166930;
-//     // const to = (Number)(req.body.phone);
-//     const to = 8613322166930;
-//     const text = req.body.code;
-//     nexmo.message.sendSms(from, to, text, { type: 'unicode' }, (err, responseData) => {
-//         if (err) {
-//             console.log(err)
-//             return res.status(401).json(err);
-//         } else {
-//             if (responseData.messages[0]['status'] === "0") {
-//                 console.log("Message sent successfully.");
-//                 return res.status(200).json("Message sent successfully.");
-//             } else {
-//                 console.log(`Message failed with error: ${responseData.messages[0]['error-text']}`);
-//                 return res.status(200).json(`Message failed with error: ${responseData.messages[0]['error-text']}`);
-//             }
-//         }
-//     });
-// }
-// exports.setPhone = (req, res) => {
-//     Job.findById(req.body.id, function(err, client) {
-//         if (!client)
-//             res.status(500).send("data is not found");
-//         else {
-//             client.verifyStatus.phoneVerify = true;
-//             client.save().then(Job => {
-//                     res.json('Job updated!');
-//                 })
-//                 .catch(err => {
-//                     res.status(400).send("Update not possible");
-//                 });
-//         }
-//     });
-// }
-// exports.setPhoneEmail = (req, res) => {
-//     Job.findOne({email:req.email}, function(err, client) {
-//         if (!client)
-//             res.status(500).send("data is not found");
-//         else {
-//             client.verifyStatus.phoneVerify = true;
-//             client.save().then(Job => {
-//                     res.json('Job updated!');
-//                 })
-//                 .catch(err => {
-//                     res.status(400).send("Update not possible");
-//                 });
-//         }
-//     });
-// }
-exports.setEmail = (req, res) => {
-        Job.findById(req.body.id, function(err, client) {
-            if (!client)
-                res.status(500).send("data is not found");
-            else {
-                client.verifyStatus.emailVerify = true;
-                client.save().then(Job => {
-                        res.json('Job updated!');
-                    })
-                    .catch(err => {
-                        res.status(400).send("Update not possible");
-                    });
-            }
-        });
-    }
-    // =======   Bank  ============
-exports.getAllBank = (req, res) => {
-    Bank.find({}, function(err, client) {
-        if (err) {
-            console.log(err);
-        } else {
-            res.json(client);
-        }
-    })
-}
-exports.createBank = (req, res) => {
-    Bank.findById(req.body.id).then(location => {
-        if (location) {
-            return res.status(400).json({ reviewName: "location already exists" });
-        } else {
-            var location = new Bank(req.body);
-            if (req.body.type != 'Fund') {
-                var tempMonth = location.MaturityDate.getMonth();
-                tempMonth++;
-                location.topic = location.Issuer + ' - ' + location.Coupon.toFixed(2) + '% - ' + location.MaturityDate.getDate() + '/' + +tempMonth + '/' + +location.MaturityDate.getFullYear();
-
-            } else
-                location.topic = location.Issuer;
-            Bank.countDocuments({}, function(err, c) {
-                console.log('location count document')
-                location.id = c + 1;
-                location.save((err) => {
-                    if (err) {
-                        res.status(500).json(err);
-                    } else {
-                        res.status(200).json(location);
-                    }
-                });
-            })
-        }
-    });
-};
-
-exports.updateBank = (req, res) => {
-    Bank.findOne({ id: req.body.id }, function(err, client) {
-        if (!client)
-            res.status(500).send("data is not found");
-        else {
-            Object.assign(client, req.body);
-            console.log('updateBank')
-            console.log(req.body)
-            console.log(req.params.id)
-            if (client.type != 'Fund') {
-                var tempMonth = location.MaturityDate.getMonth();
-                tempMonth++;
-                client.topic = location.Issuer + ' - ' + client.Coupon.toFixed(2) + '% - ' + client.MaturityDate.getDate() + '/' + +tempMonth + '/' + +location.MaturityDate.getFullYear();
-            } else
-                client.topic = client.Issuer;
-            client.save().then(Job => {
-                    res.status(200).json(client);
-                })
-                .catch(err => {
-                    res.status(200).send("Update not possible");
-                });
-        }
-    });
-
-};
-exports.findBank = (req, res) => {
-    Bank.findOne({ id: req.params.id }, function(err, client) {
-        if (!client)
-            res.status(500).send("data is not found");
-        else {
-            res.status(200).json(client)
-        }
-    });
-
-};
-exports.removeBank = (req, res) => {
-    console.log('remove')
-    Bank.findOneAndDelete({ id: req.params.id }, function(err, city) {
-        if (err) res.json(err);
-        else {
-            // res.status(200).send('removed');
-            Bank.countDocuments({}, function(err1, c) {
-                console.log('c')
-                console.log('location count document')
-                Bank.findOne({ id: c }, function(err, client) {
-                    if (!client)
-                        res.status(500).send("data is not found");
-                    else {
-                        client.id = city.id;
-                        Bank.save().then(Job => {
-                                res.json('city updated!');
-                            })
-                            .catch(err => {
-                                res.status(400).send("Update not possible");
-                            });
-                    }
-                });
-
-            })
-        }
-    });
-};
-exports.removeMultiBank = (req, res) => {
-    console.log('remove')
-    var arrNum = req.body.prdocutIdsForDelete;
-    var count;
-    Bank.countDocuments({}, function(err1, c) {
-        count = c;
-    });
-    arrNum.forEach(element => {
-        Bank.findOneAndDelete({ id: element }, function(err, city) {
-            if (err) {} else {}
-        });
-    });
-    if (arrNum.length < count) {
-        console.log('1')
-        var forLen = count - arrNum.length;
-        var reArr = [-1];
-        var ind = 1;
-        for (let j = 1; j <= count; j++) {
-            var flag = arrNum.filter(subNum => subNum === j);
-            if (!flag) {
-                reArr[ind] = j;
-                ind++;
-            }
-        }
-        for (let i = inde; i <= forLen; i++) {
-            Bank.findOne({ id: i }, function(err1, subbank) {
-                if (!subbank) {
-                    Bind.findOne({ id: reArr[i] }, function(err2, ssBank) {
-                        if (ssBank) {
-                            ssBank.id = i;
-                            ssBank.save().then(Job => {
-                                    // res.json('city updated!');
-                                })
-                                .catch(err => {
-                                    // res.status(400).send("Update not possible");
-                                });
-                        }
-                    })
-                }
-            })
-        }
-    }
-};
-
-// =======   Request  ============
-exports.getAllRequest = (req, res) => {
-    Requests.find({}, function(err, client) {
-        if (err) {
-            console.log(err);
-        } else {
-            res.json(client);
-        }
-    }).populate(['JobId', 'bankId']).exec();
-}
-exports.getAllRequestId = (req, res) => {
-    Requests.find({ JobId: req.body.aId }, function(err, client) {
-        if (err) {
-            console.log(err);
-        } else {
-            res.json(client);
-        }
-    }).populate(['JobId', 'bankId']).exec();
-}
-exports.addRequest = (req, res) => {
-    Requests.findById(req.body.id).then(location => {
-        if (location) {
-            return res.status(400).json({ reviewName: "location already exists" });
-        } else {
-            var location = new Requests(req.body);
-            Requests.countDocuments({}, function(err, c) {
-                console.log('location count document')
-                location.id = c + 1;
-                location.save((err) => {
-                    if (err) {
-                        res.status(500).json(err);
-                    } else {
-                        Job.findById(location.JobId, function(errJob, Job) {
-                            if (!Job) {
-
-                            } else {
-                                Job.totalEquity += req.body.equity;
-                                Job.save().then(Job => {
-                                        res.status(200).json(location);
-                                        // res.json('city updated!');
-                                    })
-                                    .catch(err => {
-                                        // res.status(400).send("Update not possible");
-                                    });
-                            }
-                        })
-
-                    }
-                });
-            })
-        }
-    })
-};
-
-exports.updateRequest = (req, res) => {
-    Requests.findOne({ id: req.body.id }, function(err, client) {
-        if (!client)
-            res.status(500).send("data is not found");
-        else {
-            Job.findById(client.JobId, function(err, client1) {
-                var tempEquity = client1.totalEquity;
-                Object.assign(client, req.body);
-                client.save().then(Job => {
-                        client1.totalEquity += req.body.equity;
-                        client1.totalEquity -= tempEquity;
-                        client1.save().then(Jobx => {
-                                res.status(200).json(location);
-                                // res.json('city updated!');
-                            })
-                            .catch(err => {
-                                // res.status(400).send("Update not possible");
-                            });
-                        res.status(200).json(client);
-                    })
-                    .catch(err => {
-                        res.status(200).send("Update not possible");
-                    });
-            })
-
-        }
-    })
-
-};
-exports.findRequest = (req, res) => {
-    Bank.findOne({ id: req.params.id }, function(err, client) {
-        if (!client)
-            res.status(500).send("data is not found");
-        else {
-            res.status(200).json(client)
-        }
-    }).populate(['JobId', 'bankId']).exec();
-
-};
-exports.removeRequest = (req, res) => {
-    console.log('remove')
-    Requests.findOneAndDelete({ id: req.params.id }, function(err, city) {
-        if (err) res.json(err);
-        else {
-            if (city) {
-                Job.findById(city.JobId, function(err, client1) {
-                    client1.totalEquity -= req.body.equity;
-                    client1.save().then(Jobx => {
-                            // res.json('city updated!');
-                        })
-                        .catch(err => {
-                            // res.status(400).send("Update not possible");
-                        });
-                })
-            }
-            // res.status(200).send('removed');
-            Requests.countDocuments({}, function(err1, c) {
-                console.log('c')
-                console.log('location count document')
-                Requests.findOne({ id: c + 1 }, function(err, client) {
-                    if (!client)
-                        res.status(200).send("data is not found");
-                    else {
-                        client.id = city.id;
-                        client.save().then(Job => {
-                                res.json('city updated!');
-                            })
-                            .catch(err => {
-                                res.status(400).send("Update not possible");
-                            });
-                    }
-                });
-
-            })
-        }
-    });
-};
-exports.upload = (req, res) => {
-    console.log('= upload')
-    console.log(req.params.file)
-    console.log(req.file)
-    console.log(req.body)
-    res.status(200).send("OK");
-}
-exports.addFiles = (req, res) => {
-    Addfiles.findById(req.body.JobId).then(location => {
-        if (location) {
-            return res.status(400).json({ reviewName: "location already exists" });
-        } else {
-            var location = new Addfiles(req.body);
-            location.date = new Date();
-            location.save().then(Job => {
-                    res.json('city updated!');
-                })
-                .catch(err => {
-                    res.status(400).send("Update not possible");
-                });
-        }
-    })
-}
-exports.getFiles = (req, res) => {
-    console.log('getfiles')
-    Addfiles.find({ 'JobId': req.body.id }, function(err, client) {
-        if (err) {
-            console.log(err);
-        } else {
-            res.json(client);
-        }
-    }).populate(['JobId']).exec();
-}
-exports.getAllFiles = (req, res) => {
-    Addfiles.find({}, function(err, client) {
-        if (err) {
-            console.log(err);
-        } else {
-            res.json(client);
-        }
-    }).populate(['JobId']).exec();
-}
-exports.forgotPassword = (req, res) => {
-    Job.findOne({ 'emailAddress': req.params.email }).then(client => {
-        if (!client) {
-            return res.status(200).json(false)
-        } else {
-            var newPass = Math.random().toString(20).substr(2, 6)
-            client.setPassword(newPass);
-            console.log('  sdjklfsjdklfjsadl;fjsda;fjsa;lfj;sf;js')
-            let HelperOptions = {
-                from: 'Verify Notification',
-                to: req.params.email,
-                subject: 'Password Reset',
-                html: `
-                    <h3>Hi ${client.firstName} </h3>
-                    <p>You've recently requested a new password reset.</p>
-                    <h3>  New Password: ${newPass}</h3>
-                    <p> If you do not request a password reset. please ignore this email or reply to let us know . This password is only valid for the next 30 minutes</p>`,
-            };
-            transporter.sendMail(HelperOptions, (error, info) => {
-                if (error) {
-                    console.log(error);
-                    return res.status(401).json(error)
-                } else {
-                    client.save().then(Job1 => {
-                            res.json('password updated!');
-                        })
-                        .catch(err => {
-                            res.status(400).send("Update not possible");
-                        });
-                    return res.status(200).json(info);
-                }
-                // console.log('bbb');
-            })
-        }
-    });
-}
-exports.delFile = (req, res) => {
-    Addfiles.findOneAndDelete({ id: req.params.id }, function(err, city) {
-        if (err) res.json(err);
-        else {
-            res.status(200).json('deleted')
-        }
-    });
-}
-exports.addWorkerJob = (req, res) => {
-    // var role = req.type;
-    console.log('addWorkerJob')
-    console.log(req.body)
-        // var clientId = req.clientId;
-        // if (role == 0){
-    Job.findOne({id:req.body.id}, function(err, client) {
-        if (!client)
-            res.status(404).send("data is not found");
-        else {
-            // Object.assign(client, req.body);
-            if(req.body.tId == -1){
-                console.log('dvdvdvv')
-                client.fulfilled ++; ;
-                Timesheet.countDocuments({}, function(err, c) {
-                        var nowDate = new Date();
-                        var tempN = 'Time'+ req.body.name +nowDate.getMilliseconds() + c ;
-                        var tempTime ={
-                            id:c + 1,
-                            timesheetId:tempN,
-                            JobId_Id:client._id,
-                            JobId:client.JobId,
-                            workerId: req.body.wId,
-                            workerIdName:req.body.name,
-                            profilePhoto: req.body.img
-                        };
-                        const newTime = new Timesheet(tempTime);
-                                // console.log('*****')
-                        console.log(newTime)
-                        newTime.save().then(cli =>{
-                            client.timesheetId.push(cli._id);
-                                console.log('*****')
-                                console.log(newTime)
-                                // Job.countDocuments({}, function(err, c) {
-                                //     client.id = c + 1;
-                                     client.save().then(client => {
-                                        console.log('5')
-                                        res.status(200).json(client);
-                                    })
-                                    .catch(err => {
-                                        console.log('2')
-                                        console.log(err)
-                                        res.status(400).send("Update not possible");
-                                    });
-                                // });
-                        }).catch(err=>{
-                            console.log('1')
-                            console.log(err)
-                            res.status(400).send('error)');
-                        })
-                })
-                // client.workerId.push({id:req.body.wId, profilePhoto:req.body.img, workerId:req.body.name});
-            }
-            if(req.body.tId != -1){
-                console.log('cvcvcv')
-                client.fulfilled --;
-                // client.workerId = client.workerId.filter((obj)=> obj.id!=req.body.wId);
-
-                client.timesheetId = client.timesheetId.filter((obj)=> obj._id != req.body.tId);
-                console.log(client.timesheetId);
-                client.save().then(client => {
-                    console.log('4')
-                    res.status(200).json(client);
-                })
-                .catch(err => {
-                    console.log('3')
-                    console.log(err);
-                    res.status(400).send("Update not possible");
-                });
-            }
-        }
-
-    });
-};
-exports.removeTimesheetsJob = (req, res) =>{
-    req.body.arr.forEach((ele, index, arra)=>{
-    Timesheet.findByIdAndDelete(ele._id, function(err, city) {
-            if (err) res.json(err);
-            else {
-                if(index == (arra.length -1)){
-                    res.status(200).json(city);
-                }
-            }
-        });
-    })
-
-}

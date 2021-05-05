@@ -71,13 +71,6 @@ export class ClientCreateUpdateComponent implements OnInit {
       position: this.defaults.position || '',
       Password: '',
       password2: '',
-
-      hk_chargerateU25: this.defaults.hk_chargerateU25 || '',
-      hk_chargerateO25: this.defaults.hk_chargerateO25 || '',
-      fab_chargerateU25: this.defaults.fab_chargerateU25 || '',
-      fab_chargerateO25: this.defaults.fab_chargerateO25 || '',
-      boh_chargerateU25: this.defaults.boh_chargerateU25 || '',
-      boh_chargerateO25: this.defaults.boh_chargerateO25 || '',
     });
   }
 

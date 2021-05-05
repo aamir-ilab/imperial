@@ -76,9 +76,9 @@ export class ResetPasswordComponent implements OnInit {
         this.router.navigate(['/login']);
       })
     }
-    else
+    else{
       this.auth.openSnackbar('You have to Input Password');
-
-    this.router.navigate(['/']);
+      this.router.navigate(['/']);
+    }
   }
 }

@@ -51,6 +51,14 @@ export class AuthService {
       return this.http.post<any>(`${USERS_URL}setcustomRates`, {data});
     }
 
+    getWorkerRates(id): Observable<any>{
+      return this.http.post<any>(`${USERS_URL}workerRates`, {id});
+    }
+
+    setWorkerRates(data): Observable<any>{
+      return this.http.post<any>(`${USERS_URL}setworkerRates`, {data});
+    }
+
     setCurrentUser(){
       this.currenctUser = JSON.parse(localStorage.getItem('userInfo'));
     }
@@ -129,6 +137,12 @@ export class AuthService {
   }
   getExportTimesheets(): Observable<any>{
     return this.http.post<any>(`${USERS_URL}getExportTimesheets`, {});
+  }
+  customRatesUpdation(): Observable<any>{
+    return this.http.post<any>(`${USERS_URL}customRatesUpdation`, {});
+  }
+  workerRatesUpdation(): Observable<any>{
+    return this.http.post<any>(`${USERS_URL}workerRatesUpdation`, {});
   }
   getImportPayroll(rows: any, name: String): Observable<any>{
     console.log('rows', rows);
@@ -246,6 +260,9 @@ export class AuthService {
   }
   getAllInvoices(): Observable<Invoice[]>{
     return this.http.post<Invoice[]>(`${USERS_URL}getAllInvoices`, {});
+  }
+  getSelectedInvoices(inv_ids): Observable<Invoice[]>{
+    return this.http.post<Invoice[]>(`${USERS_URL}getSelectedInvoices`, {inv_ids});
   }
   getSelectedJobs(): Observable<Job[]>{
     const id = JSON.parse(localStorage.getItem('userInfo'))._id;

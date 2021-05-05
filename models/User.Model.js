@@ -110,12 +110,6 @@ var UserSchema = new mongoose.Schema({
     companyLogo:{type:String},
     companyUrl:{type:String}, // optional
     tradingName:{type:String}, //optional
-    hk_chargerateU25:{type:Number, default:0},
-    hk_chargerateO25: {type:Number, default:0},
-    fab_chargerateU25:{type:Number, default:0},
-    fab_chargerateO25: {type:Number, default:0},
-    boh_chargerateU25:{type:Number, default:0},
-    boh_chargerateO25: {type:Number, default:0},
     parentId:{type:String, default:''},
     // client specific feilds ends
     // admin specific feilds starts

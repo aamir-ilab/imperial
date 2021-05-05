@@ -5,12 +5,6 @@ var InvoiceinfoSchema = new mongoose.Schema({
     vat:{type:Number},
     payrateU25:{type:Number},
     payrateO25:{type:Number},
-    hk_chargerateU25:{type:Number},
-    hk_chargerateO25: {type:Number},
-    fab_chargerateU25:{type:Number},
-    fab_chargerateO25: {type:Number},
-    boh_chargerateU25:{type:Number},
-    boh_chargerateO25: {type:Number},
     logo:{type: String},
     footer:{type:String},
 }, { toJSON: { getters: true } });

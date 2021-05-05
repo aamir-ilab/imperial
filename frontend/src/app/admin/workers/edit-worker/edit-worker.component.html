@@ -12,7 +12,7 @@
   </vex-secondary-toolbar>
 
   <vex-page-layout-content class="vex-tabs p-0 card" vexContainer>
-    <form (ngSubmit)="save()" [formGroup]="workerForm">
+    <form (ngSubmit)="submit()" [formGroup]="workerForm">
       <mat-tab-group>
         <mat-tab label="Private & Confidential">
           <div class="p-6">
@@ -685,9 +685,9 @@
             </div>
           </div>
         </mat-tab>
-        <mat-tab label="Default Rates">
+        <mat-tab label="Custom Rates">
           <div class="p-6">
-            <form (ngSubmit)="submit()" [formGroup]="defaultRatesForm">
+            <form (ngSubmit)="submit()" [formGroup]="customRatesForm">
               <ng-template matTabContent>
                 <mat-tab-group [(selectedIndex)]="innerSelectedTabIndex" (selectedTabChange)="onTabChanged($event);">
                   <mat-tab label="Housekeeping">
@@ -706,19 +706,8 @@
                             </th>
                             <td mat-cell *matCellDef="let element">
                               <mat-icon class="currency">£</mat-icon>
-                              <div class="inline-block p-2" [attr.contenteditable]="true" (blur)="editDefaultRates('payrateU25', $event, element)">
+                              <div class="inline-block p-2" [attr.contenteditable]="true" (blur)="editCustomRates('payrateU25', $event, element)">
                                 {{element.payrateU25.toFixed(2)}}
-                              </div>
-                            </td>
-                          </ng-container>
-
-                          <ng-container matColumnDef="chargerateU25">
-                            <th *matHeaderCellDef class="uppercase" mat-header-cell mat-sort-header> Charge Rate (Under 25)
-                            </th>
-                            <td mat-cell *matCellDef="let element">
-                              <mat-icon class="currency">£</mat-icon>
-                              <div class="inline-block p-2" [attr.contenteditable]="true" (blur)="editDefaultRates('chargerateU25', $event, element)">
-                                {{element.chargerateU25.toFixed(2)}}
                               </div>
                             </td>
                           </ng-container>
@@ -728,19 +717,8 @@
                             </th>
                             <td mat-cell *matCellDef="let element">
                               <mat-icon class="currency">£</mat-icon>
-                              <div class="inline-block p-2" [attr.contenteditable]="true" (blur)="editDefaultRates('payrateO25', $event, element)">
+                              <div class="inline-block p-2" [attr.contenteditable]="true" (blur)="editCustomRates('payrateO25', $event, element)">
                                 {{element.payrateO25.toFixed(2)}}
-                              </div>
-                            </td>
-                          </ng-container>
-
-                          <ng-container matColumnDef="chargerateO25">
-                            <th *matHeaderCellDef class="uppercase" mat-header-cell mat-sort-header> Charge Rate (Over 25)
-                            </th>
-                            <td mat-cell *matCellDef="let element">
-                              <mat-icon class="currency">£</mat-icon>
-                              <div class="inline-block p-2" [attr.contenteditable]="true" (blur)="editDefaultRates('chargerateO25', $event, element)">
-                                {{element.chargerateO25.toFixed(2)}}
                               </div>
                             </td>
                           </ng-container>
@@ -750,7 +728,8 @@
                         </table>
                       </div>
                       <div fxLayout="row" fxLayoutAlign="end center" fxLayoutGap="8px">
-                        <button color="primary" mat-raised-button type="submit">Update</button>
+                        <button mat-button (click)="cancelBtn()"type="button">CANCEL</button>
+                        <button color="primary" mat-raised-button type="button" (click)="save()">Update</button>
                       </div>
                     </div>
                   </mat-tab>
@@ -770,7 +749,7 @@
                             </th>
                             <td mat-cell *matCellDef="let element">
                               <mat-icon class="currency">£</mat-icon>
-                              <div class="inline-block p-2" [attr.contenteditable]="true" (blur)="editDefaultRates('payrateU25', $event, element)">
+                              <div class="inline-block p-2" [attr.contenteditable]="true" (blur)="editCustomRates('payrateU25', $event, element)">
                                 {{element.payrateU25.toFixed(2)}}
                               </div>
                             </td>
@@ -781,7 +760,7 @@
                             </th>
                             <td mat-cell *matCellDef="let element">
                               <mat-icon class="currency">£</mat-icon>
-                              <div class="inline-block p-2" [attr.contenteditable]="true" (blur)="editDefaultRates('chargerateU25', $event, element)">
+                              <div class="inline-block p-2" [attr.contenteditable]="true" (blur)="editCustomRates('chargerateU25', $event, element)">
                                 {{element.chargerateU25.toFixed(2)}}
                               </div>
                             </td>
@@ -792,7 +771,7 @@
                             </th>
                             <td mat-cell *matCellDef="let element">
                               <mat-icon class="currency">£</mat-icon>
-                              <div class="inline-block p-2" [attr.contenteditable]="true" (blur)="editDefaultRates('payrateO25', $event, element)">
+                              <div class="inline-block p-2" [attr.contenteditable]="true" (blur)="editCustomRates('payrateO25', $event, element)">
                                 {{element.payrateO25.toFixed(2)}}
                               </div>
                             </td>
@@ -803,7 +782,7 @@
                             </th>
                             <td mat-cell *matCellDef="let element">
                               <mat-icon class="currency">£</mat-icon>
-                              <div class="inline-block p-2" [attr.contenteditable]="true" (blur)="editDefaultRates('chargerateO25', $event, element)">
+                              <div class="inline-block p-2" [attr.contenteditable]="true" (blur)="editCustomRates('chargerateO25', $event, element)">
                                 {{element.chargerateO25.toFixed(2)}}
                               </div>
                             </td>
@@ -814,7 +793,8 @@
                         </table>
                       </div>
                       <div fxLayout="row" fxLayoutAlign="end center" fxLayoutGap="8px">
-                        <button color="primary" mat-raised-button type="submit">Update</button>
+                        <button mat-button (click)="cancelBtn()"type="button">CANCEL</button>
+                        <button color="primary" mat-raised-button type="button" (click)="save()">Update</button>
                       </div>
                     </div>
                   </mat-tab>
@@ -834,7 +814,7 @@
                             </th>
                             <td mat-cell *matCellDef="let element">
                               <mat-icon class="currency">£</mat-icon>
-                              <div class="inline-block p-2" [attr.contenteditable]="true" (blur)="editDefaultRates('payrateU25', $event, element)">
+                              <div class="inline-block p-2" [attr.contenteditable]="true" (blur)="editCustomRates('payrateU25', $event, element)">
                                 {{element.payrateU25.toFixed(2)}}
                               </div>
                             </td>
@@ -845,7 +825,7 @@
                             </th>
                             <td mat-cell *matCellDef="let element">
                               <mat-icon class="currency">£</mat-icon>
-                              <div class="inline-block p-2" [attr.contenteditable]="true" (blur)="editDefaultRates('chargerateU25', $event, element)">
+                              <div class="inline-block p-2" [attr.contenteditable]="true" (blur)="editCustomRates('chargerateU25', $event, element)">
                                 {{element.chargerateU25.toFixed(2)}}
                               </div>
                             </td>
@@ -856,7 +836,7 @@
                             </th>
                             <td mat-cell *matCellDef="let element">
                               <mat-icon class="currency">£</mat-icon>
-                              <div class="inline-block p-2" [attr.contenteditable]="true" (blur)="editDefaultRates('payrateO25', $event, element)">
+                              <div class="inline-block p-2" [attr.contenteditable]="true" (blur)="editCustomRates('payrateO25', $event, element)">
                                 {{element.payrateO25.toFixed(2)}}
                               </div>
                             </td>
@@ -867,7 +847,7 @@
                             </th>
                             <td mat-cell *matCellDef="let element">
                               <mat-icon class="currency">£</mat-icon>
-                              <div class="inline-block p-2" [attr.contenteditable]="true" (blur)="editDefaultRates('chargerateO25', $event, element)">
+                              <div class="inline-block p-2" [attr.contenteditable]="true" (blur)="editCustomRates('chargerateO25', $event, element)">
                                 {{element.chargerateO25.toFixed(2)}}
                               </div>
                             </td>
@@ -878,7 +858,8 @@
                         </table>
                       </div>
                       <div fxLayout="row" fxLayoutAlign="end center" fxLayoutGap="8px">
-                        <button color="primary" mat-raised-button type="submit">Update</button>
+                        <button mat-button (click)="cancelBtn()"type="button">CANCEL</button>
+                        <button color="primary" mat-raised-button type="button" (click)="save()">Update</button>
                       </div>
                     </div>
                   </mat-tab>

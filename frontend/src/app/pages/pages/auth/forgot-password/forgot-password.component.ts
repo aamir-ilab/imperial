@@ -28,20 +28,9 @@ export class ForgotPasswordComponent implements OnInit {
   ngOnInit() {
   }
 
-  send() {
+  submit() {
     const controls = this.form.controls;
     console.log('Inside send method......!')
-    var obj = {
-      subject : "Reset your account password",
-      name : controls.email.value,
-      email: controls.email.value,
-      content1: `You have requested to reset your password with us.`,
-      content2: `Please follow the instructions below to proceed with resetting your account password.`,
-      content3:`If you have received this email in error, please ignore this email and contact the customer service team.`,
-      btn:'RESET MY PASSWORD',
-      btn_link:'',
-      link:''
-    };
     if(controls.email.value != '' && controls.email.value != null){
       this.auth.forgotPassword(controls.email.value).subscribe((res)=>{
         this.auth.openSnackbar('Please Check your email to reset your password!');
@@ -49,8 +38,10 @@ export class ForgotPasswordComponent implements OnInit {
       })
     }
     else
+    {
       this.auth.openSnackbar('You have to Input Email');
+      this.router.navigate(['/']);
+    }
 
-    this.router.navigate(['/']);
   }
 }

@@ -10,4 +10,5 @@ module.exports = () => {
     require('../models/InvoiceInfo.Model');
     require('../models/DefaultRates.Model');
     require('../models/CustomRates.Model');
+    require('../models/WorkerRates.Model');
 };

@@ -3,6 +3,7 @@ var mongoose = require('mongoose'),
 const User = mongoose.model('User');
 const Message = mongoose.model('Message');
 const CustomRates = mongoose.model('CustomRates');
+const WorkerRates = mongoose.model('WorkerRates');
 var jwt = require('jsonwebtoken');
 var randtoken = require('rand-token')
 // const Bank = mongoose.model('Bank');
@@ -84,31 +85,102 @@ exports.register = (req, res) => {
                 client.id = c + 1;
                 client.createdDate = new Date();
                 if(client.accountType == 'Worker'){
-                    User.countDocuments({ "surename": { "$regex": "^"+ client.surename.charAt(0) , "$options": "i" }, 'accountType':'Worker' }, function(err, c1){
-                        console.log('asdsda')
-                        var temp = client.surename.charAt(0);
-                        if(c1 < 10){
-                            temp += '000' + c1;
-                        }else if(c1 < 100){
-                            temp += '0' + c1;
-                        }else if(c1 < 1000){
-                            temp += '0' + c1;
-                        }else{
-                            temp += c1;
-                        }
-                        client.workerId = temp;
-                        client.save((err) => {
-                            if (err) {
-                                console.log(err);
-                                res.status(500).json(err);
-                            } else {
-                                console.log(client);
-                                // const token = client.generateJwt();
-                                res.status(200).json(client)
-                                    // res.status(200).json("Registered successfully");
+                  User.countDocuments({ "surename": { "$regex": "^"+ client.surename.charAt(0) , "$options": "i" }, 'accountType':'Worker' }, function(err, c1){
+                    console.log('asdsda')
+                    var temp = client.surename.charAt(0);
+                    if(c1 < 10){
+                        temp += '000' + c1;
+                    }else if(c1 < 100){
+                        temp += '0' + c1;
+                    }else if(c1 < 1000){
+                        temp += '0' + c1;
+                    }else{
+                        temp += c1;
+                    }
+                    client.workerId = temp;
+                    client.save((err) => {
+                        if (err) {
+                          console.log(err);
+                          res.status(500).json(err);
+                        } else {
+                          console.log(client);
+                          User.findOne({id:client.id}).exec(function (err, client){
+                            if (err) return res.json({error: err, status:400});
+                            else {
+                              const departments = ['Housekeeping', 'Back of House', 'Food and Beverage'];
+                              const rolesHK = ['Linen Porter', 'Floor Porter', 'Floor Supervisor', 'Room Supervisor', 'Evening Room Attendant', 'Public Area Attendant', 'Spa Attendant', 'Valet', 'Housekeeper'];
+                              const rolesBOH = ['Kitchen Porter', 'Night Kitchen Porter', 'Night Cleaners', 'Supervisor BOH (Back of House)', 'Food Runners', 'Breakfast Runners', 'Commis Chef', 'Breakfast Chef', 'Chef De Partie', 'Pastry Chef', 'Banqueting Porter'];
+                              const rolesFAB = ['Waiters', 'Night Waiters', 'Night Room Service', 'Supervisor Banqueting', 'Team Leader', 'Silver Service Waiters', 'Bar Staff', 'Cloakroom', 'Concierge', 'Hostess'];
+                              WorkerRates.findOne({}).then(obj => {
+                                departments.forEach(element => {
+                                  if(element === 'Housekeeping') {
+                                    rolesHK.forEach(role => {
+                                      const data = {
+                                        department: 'Housekeeping',
+                                        clientId:client._id,
+                                        role: role,
+                                        payrateU25: 0,
+                                        payrateO25: 0,
+                                      };
+                                      const newObj = new WorkerRates(data);
+                                      newObj.save((err) => {
+                                        if (err) {
+                                          console.log(err)
+                                          res.status(500).json(err);
+                                        } else {
+                                          console.log('added')
+                                        }
+                                      });
+                                    });
+                                  }
+                                  else if(element === 'Back of House') {
+                                    rolesBOH.forEach(role => {
+                                      const data = {
+                                        department: 'Back of House',
+                                        clientId:client._id,
+                                        role: role,
+                                        payrateU25: 0,
+                                        payrateO25: 0,
+                                      };
+                                      const newObj = new WorkerRates(data);
+                                      newObj.save((err) => {
+                                        if (err) {
+                                          console.log(err)
+                                          res.status(500).json(err);
+                                        } else {
+                                          console.log('added')
+                                        }
+                                      });
+                                    });
+                                  }
+                                  else {
+                                    rolesFAB.forEach(role => {
+                                      const data = {
+                                        department: 'Food and Beverage',
+                                        clientId:client._id,
+                                        role: role,
+                                        payrateU25: 0,
+                                        payrateO25: 0,
+                                      };
+                                      const newObj = new WorkerRates(data);
+                                      newObj.save((err) => {
+                                        if (err) {
+                                          console.log(err)
+                                          res.status(500).json(err);
+                                        } else {
+                                          console.log('added')
+                                        }
+                                      });
+                                    });
+                                  }
+                                });
+                              });
+                              res.status(200).json(client);
                             }
-                        });
-                    })
+                          });
+                        }
+                    });
+                  })
                 }
                 else if (client.accountType == 'Client') {
                   // add entries of custom rates for this client
@@ -513,9 +585,9 @@ exports.updateProfile = (req, res) => {
         //           clientId: client._id,
         //           role: role,
         //           payrateU25: 0,
-        //           chargerateU25: 0,
+        //           chargerateU25:0,
+        //           chargerateO25:0,
         //           payrateO25: 0,
-        //           chargerateO25: 0
         //         };
         //         const newObj = new CustomRates(data);
         //         newObj.save((err) => {
@@ -535,9 +607,9 @@ exports.updateProfile = (req, res) => {
         //           clientId: client._id,
         //           role: role,
         //           payrateU25: 0,
-        //           chargerateU25: 0,
+        //           chargerateU25:0,
+        //           chargerateO25:0,
         //           payrateO25: 0,
-        //           chargerateO25: 0
         //         };
         //         const newObj = new CustomRates(data);
         //         newObj.save((err) => {
@@ -557,9 +629,9 @@ exports.updateProfile = (req, res) => {
         //           clientId: client._id,
         //           role: role,
         //           payrateU25: 0,
-        //           chargerateU25: 0,
+        //           chargerateU25:0,
+        //           chargerateO25:0,
         //           payrateO25: 0,
-        //           chargerateO25: 0
         //         };
         //         const newObj = new CustomRates(data);
         //         newObj.save((err) => {
@@ -649,14 +721,48 @@ exports.delete = (req, res) => {
 };
 exports.removeUser = (req, res) =>{
   console.log('--removeUserReq--', req.body._id)
+  User.findOne({ _id: req.body._id }, function(err, user) {
+    if (err)
+    return res.json(err);
+    else {
+      console.log('user', user)
+      if(user && user.accountType === 'Worker'){
+        WorkerRates.find({clientId:req.body._id}, function(err, workerRates) {
+          if (workerRates){
+            workerRates.forEach(element => {
+              WorkerRates.findOneAndDelete({ _id: element._id }, function(err) {
+                if (err)
+                return res.json(err);
+              });
+            });
+
+            // WorkerRates.remove({_id: {$in: ids}})
+          }
+        });
+      }
+      else{
+        CustomRates.find({clientId:req.body._id}, function(err, customRates) {
+          if (customRates){
+            customRates.forEach(element => {
+              CustomRates.findOneAndDelete({ _id: element._id }, function(err) {
+                if (err)
+                return res.json(err);
+              });
+            });
+          }
+        });
+      }
+    }
+  });
   User.findOneAndDelete({ _id: req.body._id }, function(err, city) {
     if (err)
     return res.json(err);
     else {
       console.log('remove')
-      return res.status(200);
+      res.status(200);
     }
   });
+
 }
 exports.findByIdNum = (req, res) => {
     User.findOne({ id: req.body.id }, function(err, client) {
@@ -1562,8 +1668,8 @@ exports.forgotPassword = (req, res) => {
         } else {
           readHTMLFile((path.join(__dirname, '../public/pages/PasswordResetEmail.php')), function(err, html) {
           const name = ' ' + user.firstName;
-          link = "http://stagings.tk:5500/#/reset-password?accessToken=" + user.accessToken
-//          link = "http://localhost:4200/#/reset-password?accessToken=" + user.accessToken
+          // link = "http://stagings.tk:5500/#/reset-password?accessToken=" + user.accessToken
+         link = "http://stagings.tk:5500/#/reset-password?accessToken=" + user.accessToken
           var template = handlebars.compile(html);
           var replacements = {
             name: name,
@@ -1589,6 +1695,7 @@ exports.forgotPassword = (req, res) => {
     });
 }
 exports.resetPassword = (req, res) => {
+  console.log('resetPassword', req)
     User.findOne({ 'accessToken': req.body['token'] }).then(client => {
         if (!client) {
             return res.status(404).json('data not found')

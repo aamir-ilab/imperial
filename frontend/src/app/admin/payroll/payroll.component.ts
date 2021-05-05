@@ -173,15 +173,76 @@ export class PayrollComponent implements OnInit, AfterViewInit {
   }
 
   exportTimesheets(){
+    let defaultRateObjs = []; let customRateObjs = [];
+    let workerRateObjs = []; let finalRateObjs = [];
+    this.authService.openSnackbar('Please wait while your export sheets are getting ready.')
     this.authService.getExportTimesheets().subscribe((res)=>{
-      if(res.length > 0){
-        this.exportElmToCsv(res)
-        if(res[0].response === 'Successful'){
-          this.getData();
-        }
+      if(res.length > 0) {
+        defaultRateObjs = res;
+        console.log('defaultRateObjs res', defaultRateObjs);
+        //////// rates updation code start ////////
+        this.authService.customRatesUpdation().subscribe((resp)=>{
+          if(resp.length > 0) {
+            customRateObjs = resp;
+            console.log('customRatesUpdation res', customRateObjs);
+            this.authService.workerRatesUpdation().subscribe((response)=>{
+                if(response === 'successfull'){
+                  const unique = [...new Set(defaultRateObjs.map(item => item.timesheet_id))];
+                  console.log('unique', unique);
+                  this.authService.getSelectedInvoices(unique).subscribe((response)=>{
+                    if(response.length > 0) {
+                      let workers = [];
+                      const workerArr = response.map(invoice => (invoice.workers));
+                      workerArr.forEach(ele => {
+                        workers.push(...ele);
+                      });
+                      console.log('workers', workers);
+                      defaultRateObjs.forEach((ele, i) => {
+                        ele.WR_RATE = workers[i].payRate;
+                        ele.WR_UNITS = workers[i].payRate*workers[i].hours;
+                        finalRateObjs.push(ele);
+                      });
+                      if(defaultRateObjs.length === finalRateObjs.length){
+                        console.log('finalRateObjs', finalRateObjs);
+                        this.exportElmToCsv(finalRateObjs)
+                        if(finalRateObjs[0].response === 'Successful'){
+                          this.getData();
+                        }
+                      }
+                    }
+                  })
+                }
+
+
+              // if(response.length > 0) {
+              //   workerRateObjs = response;
+              //   console.log('workerRateObjs res', workerRateObjs);
+              //   defaultRateObjs.forEach((ele, i) => {
+              //     if(workerRateObjs[i].WR_RATE === null &&  workerRateObjs[i].WR_UNITS === null && customRateObjs[i].WR_RATE === null &&  customRateObjs[i].WR_UNITS === null){
+              //       finalRateObjs.push(defaultRateObjs[i]);
+              //     }
+              //     else if(workerRateObjs[i].WR_RATE === null &&  workerRateObjs[i].WR_UNITS === null){
+              //       finalRateObjs.push(customRateObjs[i]);
+              //     }
+              //     else{
+              //       finalRateObjs.push(workerRateObjs[i]);
+              //     }
+              //     if(defaultRateObjs.length === finalRateObjs.length){
+              //       console.log('finalRateObjs', finalRateObjs);
+              //       this.exportElmToCsv(finalRateObjs)
+              //       if(finalRateObjs[0].response === 'Successful'){
+              //         this.getData();
+              //       }
+              //     }
+              //   });
+              // }
+            });
+          }
+        });
+        //////// rates updation code end  ////////
       }
       else{
-        this.authService.openSnackbar('No Data')
+        this.authService.openSnackbar('No new timesheet to export')
       }
     })
   }

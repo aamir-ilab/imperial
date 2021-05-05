@@ -19,6 +19,10 @@ module.exports = (app) => {
   authRole([ROLE.ADMIN,ROLE.TEAM]), client.invoiceInfo);
   app.post('/getExportTimesheets',VerifyToken,
   authRole([ROLE.ADMIN,ROLE.TEAM]), client.getExportTimesheets);
+  app.post('/customRatesUpdation',VerifyToken,
+  authRole([ROLE.ADMIN,ROLE.TEAM]), client.customRatesUpdation);
+  app.post('/workerRatesUpdation',VerifyToken,
+  authRole([ROLE.ADMIN,ROLE.TEAM]), client.workerRatesUpdation);
   app.post('/getAllPayroll',VerifyToken,
   authRole([ROLE.ADMIN,ROLE.TEAM]),client.getAllPayroll);
   app.post("/job/getPayslips", VerifyToken, authRole(ROLE.WORKER), client.getPayslips);
@@ -27,6 +31,7 @@ module.exports = (app) => {
   app.post("/getWorkerJob", VerifyToken, authRole(ROLE.WORKER), client.getWorkerJob);
   app.post("/getClientJob", VerifyToken, authRole(ROLE.CLIENT), client.getClientJob);
   app.post("/getAllInvoices",VerifyToken, authRole([ROLE.ADMIN,ROLE.TEAM]), client.getAllInvoices);
+  app.post("/getSelectedInvoices",VerifyToken, authRole([ROLE.ADMIN,ROLE.TEAM]), client.getSelectedInvoices);
   app.post("/getClientInvoices",VerifyToken, authRole(ROLE.CLIENT), client.getClientInvoices);
   app.post("/getFindTimesheets",VerifyToken,authRole([ROLE.ADMIN,ROLE.TEAM,ROLE.CLIENT]) ,client.getFindTimesheets);
   app.post("/client/shiftDetail/email",VerifyToken, authRole([ROLE.ADMIN,ROLE.TEAM]), client.emailshiftDetail);
@@ -37,13 +42,11 @@ module.exports = (app) => {
   app.post("/defaultRates", VerifyToken, authRole([ROLE.ADMIN,ROLE.TEAM]), client.setDefaultRates);
   app.post("/customRates", VerifyToken, authRole([ROLE.ADMIN,ROLE.TEAM]), client.customRates);
   app.post("/setcustomRates", VerifyToken, authRole([ROLE.ADMIN,ROLE.TEAM]), client.setCustomRates);
+  app.post("/workerRates", VerifyToken, authRole([ROLE.ADMIN,ROLE.TEAM]), client.workerRates);
+  app.post("/setworkerRates", VerifyToken, authRole([ROLE.ADMIN,ROLE.TEAM]), client.setWorkerRates);
 
 
   ////////// Not in use by Muzz dev //////////
-  // app.post("/job/profile", VerifyToken, client.updateProfile);
   // app.post("/client/hash", client.updateHash);
-  // app.post("/client/verify/setEmail",VerifyToken, client.setEmail);
-  // app.post("/addWorkerJob",VerifyToken, client.addWorkerJob);
-  // app.post('/removeTimesheetsJob',VerifyToken,client.removeTimesheetsJob);
 
 };

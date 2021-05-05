@@ -113,7 +113,7 @@ export class CustomerCreateUpdateComponent implements OnInit {
         map(state => state ? this.filterStates(state) : this.states.slice())
       );
     this.AllClients = this.authService.AllUser;
-    this.AllClients = this.AllClients.filter((obj) => obj.accountType === 'Client');
+    this.AllClients = this.AllClients.filter((obj) => obj.accountType === 'Client' && obj.parentId === "");
     console.log('this.AllClients', this.AllClients);
     this.minDate = formatDate(new Date(), 'yyyy-MM-dd', 'en');
     console.log('minDate', this.minDate);
