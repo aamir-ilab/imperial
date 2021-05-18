@@ -18,6 +18,7 @@ var moment = require('moment');
 path = require('path');
 var dateFormat = require("dateformat");
 var nodemailer = require('nodemailer');
+const { Console } = require('console');
 var transport = nodemailer.createTransport({
   host: "smtp.mailtrap.io",
   port: 2525,
@@ -628,15 +629,15 @@ function getAge(dateString) {
   }
   return age;
 }
-function getDefaultRates(){
-  return new Promise((resolve,reject)=>{
+async function getDefaultRates(){
+  return await new Promise((resolve,reject)=>{
     var timesheetData = [];
     Timesheet.find({exportStatus: false, statusStr:'Completed'}).populate(['JobId_Id', 'workers.workerId', 'clientId']).exec(function(err, timesheets) {
       if (err) {
         console.log('error', err);
         reject(err);
       } else {
-        console.log('==timesheet==', timesheets)
+        // console.log('==timesheet==', timesheets)
         if (!(timesheets.length >0)){
           resolve(timesheetData);
         }else{
@@ -647,8 +648,8 @@ function getDefaultRates(){
               var mainbar = new Promise((resolve, reject)=>{
                 timesheets.forEach(timesheet => {
                   var inv_workers = [];var invoiceWorkers = [];
-                  console.log('--customRates--')
-                  console.log('element', timesheet.workers);
+                  // console.log('--customRates--')
+                  // console.log('element', timesheet.workers);
                   var innerbar = new Promise((resolve,reject)=>{
                     timesheet.workers.forEach((worker) => {
                       let tempRate = 0;  let chargeRate = 0;
@@ -658,27 +659,27 @@ function getDefaultRates(){
                       let chargerateU25 = 0 ; let chargerateO25 = 0;
                       let defaultRate = defaultRates.filter(x => x.role === worker.role);
                       defaultRate = defaultRate[0];
-                      console.log('defaultRate', defaultRate);
+                      // console.log('defaultRate', defaultRate);
                       chargerateU25 = defaultRate['chargerateU25'];
-                      console.log('chargerateU25', chargerateU25);
+                      // console.log('chargerateU25', chargerateU25);
                       chargerateO25 = defaultRate['chargerateO25'];
-                      console.log('chargerateO25', chargerateO25);
+                      // console.log('chargerateO25', chargerateO25);
                       // worker pay rate
                       payrateU25 = defaultRate['payrateU25'];
-                      console.log('payrateU25', payrateU25);
+                      // console.log('payrateU25', payrateU25);
                       payrateO25 = defaultRate['payrateO25'];
-                      console.log('payrateO25', payrateO25);
+                      // console.log('payrateO25', payrateO25);
       
                       tempRate = age < 25 ? payrateU25 : payrateO25;
-                      console.log('tempRate', tempRate);
+                      // console.log('tempRate', tempRate);
                       // worker net
                       let WR_UNITS = parseFloat(worker.hours.replace(':','.'))*tempRate;
-                      console.log('WR_UNITS', WR_UNITS);
+                      // console.log('WR_UNITS', WR_UNITS);
       
                       chargeRate = age < 25 ? chargerateU25 : chargerateO25;
-                      console.log('chargeRate', chargeRate);
+                      // console.log('chargeRate', chargeRate);
                       let inv_WR_net = parseFloat(worker.hours.replace(':','.'))*chargeRate;
-                      console.log('inv_WR_net', inv_WR_net);
+                      // console.log('inv_WR_net', inv_WR_net);
                       WR_UNITS = WR_UNITS.toFixed(2);
                       inv_WR_net = inv_WR_net.toFixed(2);
                       var obj ={
@@ -700,15 +701,15 @@ function getDefaultRates(){
                         client_Id: timesheet.clientId
                       }
                       inv_workers.push(inv_worker);
-                      console.log('inv_worker', inv_worker);
+                      // console.log('inv_worker', inv_worker);
                       resolve();
                     });
                   });
                   innerbar.then(()=>{
                     const invoice = new Invoice();
-                    console.log('All done!', inv_workers);
+                    // console.log('All done!', inv_workers);
                     invoiceWorkers.push(inv_workers);
-                    console.log('invoiceWorkers', invoiceWorkers)
+                    // console.log('invoiceWorkers', invoiceWorkers)
                     invoice.invoiceDate = new Date();
                     invoice.invoiceDueDate =  moment().add(invoiceinfo.dueDate, 'd').format('dddd, MMMM DD,YYYY');
                     invoice.workers = invoiceWorkers[0];
@@ -719,7 +720,7 @@ function getDefaultRates(){
                     invoice.totalVat = invoiceinfo.vat;
       
                     invoice.save().then(inv => {
-                      console.log("invoice", inv);
+                      console.log("invoice");
                       resolve();
                     })
                     .catch(err => {
@@ -742,21 +743,21 @@ function getDefaultRates(){
     })
   });
 }
-function getcustomRatesUpdation(){
-  var timesheetData = [];
-  return new Promise((resolve)=>{
+async function getcustomRatesUpdation(){
+  return  await new Promise((resolve)=>{
+    var timesheetData = [];
     Timesheet.find({exportStatus: false, statusStr:'Completed'}).populate(['JobId_Id', 'workers.workerId', 'clientId']).exec(function(err, timesheets) {
       if (err) {
         console.log('error', err);
       } else {
-        console.log('==timesheet==', timesheets)
+        // console.log('==timesheet==', timesheets)
         var bar = new Promise((resolve)=>{
           timesheets.forEach((timesheet,index) => {
             CustomRates.find({clientId: timesheet.clientId}, function(err, customRates) {
               if (customRates) {
                 var inv_workers = []; var invoiceWorkers = [];
                 console.log('--customRates--')
-                console.log('element', timesheet.workers);
+                // console.log('element', timesheet.workers);
                 var innerbar = new Promise((resolves)=>{
                   timesheet.workers.forEach((worker, i) => {
                     let tempRate = null;  let chargeRate = null; let inv_WR_net = null; let WR_UNITS = null;
@@ -766,31 +767,31 @@ function getcustomRatesUpdation(){
                     let chargerateU25 = 0 ; let chargerateO25 = 0;
                     let customRate = customRates.filter(x => x.role === worker.role);
                     customRate = customRate[0];
-                    console.log('customRate', customRate);
+                    // console.log('customRate', customRate);
                     chargerateU25 = customRate['chargerateU25'] > 0 ? customRate['chargerateU25'] : null;
-                    console.log('chargerateU25', chargerateU25);
+                    // console.log('chargerateU25', chargerateU25);
                     chargerateO25 = customRate['chargerateO25'] > 0 ? customRate['chargerateO25'] : null;
-                    console.log('chargerateO25', chargerateO25);
+                    // console.log('chargerateO25', chargerateO25);
                     // worker pay rate
                     payrateU25 = customRate['payrateU25'] > 0 ? customRate['payrateU25'] : null;
-                    console.log('payrateU25', payrateU25);
+                    // console.log('payrateU25', payrateU25);
                     payrateO25 = customRate['payrateO25'] > 0 ? customRate['payrateO25'] : null;
-                    console.log('payrateO25', payrateO25);
+                    // console.log('payrateO25', payrateO25);
       
                     tempRate = age < 25 ? payrateU25 : payrateO25;
-                    console.log('tempRate', tempRate);
+                    // console.log('tempRate', tempRate);
                     // worker net
                     if(tempRate !== null){
                       WR_UNITS = parseFloat(worker.hours.replace(':','.'))*tempRate;
-                      console.log('WR_UNITS', WR_UNITS);
+                      // console.log('WR_UNITS', WR_UNITS);
                       WR_UNITS = WR_UNITS && WR_UNITS.toFixed(2);
                     }
       
                     chargeRate = age < 25 ? chargerateU25 : chargerateO25;
-                    console.log('chargeRate', chargeRate);
+                    // console.log('chargeRate', chargeRate);
                     if(chargeRate !== null){
                       inv_WR_net = parseFloat(worker.hours.replace(':','.'))*chargeRate;
-                      console.log('inv_WR_net', inv_WR_net);
+                      // console.log('inv_WR_net', inv_WR_net);
                       inv_WR_net = inv_WR_net && inv_WR_net.toFixed(2);
                     }
                     var obj ={
@@ -812,7 +813,7 @@ function getcustomRatesUpdation(){
                       client_Id: timesheet.clientId
                     }
                     inv_workers.push(inv_worker);
-                    console.log('inv_worker', inv_worker);
+                    // console.log('inv_worker', inv_worker);
       
                     if(index === timesheets.length-1 && i === timesheet.workers.length-1){
                       // res.json(timesheetData);
@@ -824,13 +825,13 @@ function getcustomRatesUpdation(){
                 innerbar.then(()=>{
                   let inID = timesheet.timesheetId.replace(/TS/g, "INV");
                   Invoice.findOne({invoiceId:inID}, function(err, invoice) {
-                    console.log('All done!', inv_workers);
+                    // console.log('All done!', inv_workers);
                     invoiceWorkers.push(inv_workers);
-                    console.log('invoiceWorkers', invoiceWorkers)
+                    // console.log('invoiceWorkers', invoiceWorkers)
                     invoiceWorkers = invoiceWorkers[0];
                     invoice.workers.forEach((ele, i) => {
                       let invoiceWorker = invoiceWorkers[i];
-                      console.log('--invoiceWorker', invoiceWorkers[i]);
+                      // console.log('--invoiceWorker', invoiceWorkers[i]);
                       if(invoiceWorker.chargeRate !== null)
                         ele.chargeRate = invoiceWorker.chargeRate;
                       if(invoiceWorker.payRate !== null)
@@ -839,7 +840,7 @@ function getcustomRatesUpdation(){
                         ele.net = invoiceWorker.net;
                     });
                     invoice.save().then(inv => {
-                      console.log("saved invoice", inv);
+                      console.log("saved invoice");
                     })
                     .catch(err => {
                       console.log("invoice not created", err);
@@ -861,17 +862,16 @@ function getcustomRatesUpdation(){
     })
   });
 }
-function getworkerRatesUpdation(){
-  var timesheetData = [];
-  return new Promise((resolve)=>{
-
+async function getworkerRatesUpdation(){
+  return await new Promise((resolve)=>{
+    var timesheetData = [];
     Timesheet.find({exportStatus: false, statusStr:'Completed'}).populate(['JobId_Id', 'workers.workerId', 'clientId']).exec(function(err, timesheets) {
       if (err) {
         console.log('error', err);
       } else {
-        // console.log('==timesheet==', timesheets)
-  
-        var bar = new Promise((resolve, reject) => {
+        console.log('==timesheet==')
+        console.log('==workRates==')
+        var bar = new Promise((resolve) => {
           timesheets.forEach((timesheet, index) => {
             var inv_workers = [];var invoiceWorkers = [];
             // console.log('element', timesheet.workers);
@@ -881,7 +881,6 @@ function getworkerRatesUpdation(){
                 WorkerRates.find({clientId: worker.workerId}, function(err, workerRates) {
                   if (workerRates)
                   {
-                    console.log('--workerRates--', workerRates)
                     let tempRate = 0;  let chargeRate = 0; let WR_UNITS = null;
                     let age = getAge(worker.workerId.dateBirth);
   
@@ -891,7 +890,7 @@ function getworkerRatesUpdation(){
                     payrateO25 = workerRate['payrateO25'] > 0 ? workerRate['payrateO25'] : null;
   
                     tempRate = age < 25 ? payrateU25 : payrateO25;
-                    console.log('tempRate', tempRate)
+                    // console.log('tempRate', tempRate)
                     // worker net
                     if(tempRate !== null){
                       WR_UNITS = parseFloat(worker.hours.replace(':','.'))*tempRate;
@@ -907,7 +906,7 @@ function getworkerRatesUpdation(){
                       response : "Successful"
                     }
                     timesheetData.push(obj);
-                    console.log('timesheetData', timesheetData);
+                    // console.log('timesheetData', timesheetData);
                     var inv_worker = {
                       workerId: worker.workerId._id,
                       payRate: tempRate,
@@ -928,27 +927,30 @@ function getworkerRatesUpdation(){
               Invoice.findOne({invoiceId:inID}, function(err, invoice) {
                 invoiceWorkers.push(inv_workers);
                 invoiceWorkers = invoiceWorkers[0];
-  
-                invoice.workers.forEach((ele, i) => {
-                  let invoiceWorker = invoiceWorkers[i];
-                  console.log('--invoiceWorker', invoiceWorkers[i]);
-                  if (invoiceWorker.payRate !== null)
-                    ele.payRate = invoiceWorker.payRate;
+                let lastbar = new Promise(()=>{
+                  invoice.workers.forEach((ele, i) => {
+                    let invoiceWorker = invoiceWorkers[i];
+                    console.log('--invoiceWorker', invoiceWorkers[i]);
+                    if (invoiceWorker.payRate !== null)
+                      ele.payRate = invoiceWorker.payRate;
+                  });
+                  lastbar.then(()=>
+                    invoice.save().then(inv => {
+                      console.log("worker rates saved invoice");
+                      // res.send(inv);
+                    })
+                    .catch(err => {
+                      console.log("invoice not created", err);
+                    }));
+    
                 });
-                invoice.save().then(inv => {
-                  console.log("worker rates saved invoice", inv);
-                  // res.send(inv);
-                })
-                .catch(err => {
-                  console.log("invoice not created", err);
-                });
+                if (index === timesheets.length-1){
+                  resolve();
+                }
               });
             });
-            if (index === timesheets.length-1){
-              resolve();
-            }
-            Timesheet.updateMany({exportStatus: false, statusStr:'Completed'}, {"$set":{"exportStatus": true}}, {"multi": true}, (err, writeResult) => {
-            });
+            // Timesheet.updateMany({exportStatus: false, statusStr:'Completed'}, {"$set":{"exportStatus": true}}, {"multi": true}, (err, writeResult) => {
+            // });
           });
         });
         bar.then(() => {
@@ -960,8 +962,8 @@ function getworkerRatesUpdation(){
     })
   });
 }
-function getSelectedInvoices(req){
-  return new Promise((resolve,reject)=>{
+async function getSelectedInvoices(req){
+  return await new Promise((resolve,reject)=>{
     Invoice.find({ timesheetId : { $in : req } }).sort({ 'timesheetId': 1 }).populate(['client_Id','workers.workerId']).exec(function(err, client) {
         if (err) {
             console.log(err);
@@ -974,7 +976,7 @@ function getSelectedInvoices(req){
   });
 
 }
-exports.getExportTimesheets = (req, res) => {
+exports.getExportTimesheets = async (req, res) => {
   let defaultRateObjs = [];
   let finalRateObjs = [];
   getDefaultRates().then(
@@ -984,22 +986,25 @@ exports.getExportTimesheets = (req, res) => {
         getcustomRatesUpdation().then(resp=>{
           if(resp.length > 0){
             getworkerRatesUpdation().then((resp)=>{
-              const unique = [...new Set(defaultRateObjs.map(item => item.timesheet_id))];
-              console.log('unique', unique);
-              getSelectedInvoices(unique).then(response=>{
-                if(response.length > 0){
-                  let workers = [];
-                  const workerArr = response.map(invoice => (invoice.workers));
-                  workerArr.forEach(ele => {
-                  workers.push(...ele);})
-                  defaultRateObjs.forEach((ele, i) => {
-                  ele.WR_RATE = workers[i].payRate;
-                  ele.WR_UNITS = workers[i].payRate*workers[i].hours;
-                  finalRateObjs.push(ele);
-                  });
+              if(resp.length > 0){
+                const unique = [...new Set(defaultRateObjs.map(item => item.timesheet_id))];
+                console.log('unique', unique);
+                getSelectedInvoices(unique).then(response=>{
+                  if(response.length > 0){
+                    let workers = [];
+                    const workerArr = response.map(invoice => (invoice.workers));
+                    workerArr.forEach(ele => {
+                    workers.push(...ele);})
+                    console.log('Workers......', workers[3])
+                    defaultRateObjs.forEach((ele, i) => {
+                    ele.WR_RATE = workers[i].payRate;
+                    ele.WR_UNITS = workers[i].payRate*workers[i].hours;
+                    finalRateObjs.push(ele);
+                    });
+                  }
                   res.json(finalRateObjs)
-                }
-              });
+                });
+              }
             });
           }
         });
