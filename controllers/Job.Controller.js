@@ -628,307 +628,402 @@ function getAge(dateString) {
   }
   return age;
 }
+function getDefaultRates(){
+  return new Promise((resolve,reject)=>{
+    var timesheetData = [];
+    Timesheet.find({exportStatus: false, statusStr:'Completed'}).populate(['JobId_Id', 'workers.workerId', 'clientId']).exec(function(err, timesheets) {
+      if (err) {
+        console.log('error', err);
+        reject(err);
+      } else {
+        console.log('==timesheet==', timesheets)
+        if (!(timesheets.length >0)){
+          resolve(timesheetData);
+        }else{
+        InvoiceInfo.findOne({id:1}, function(err, invoiceinfo) {
+          DefaultRates.find({}, function(err, defaultRates) {
+            if (defaultRates)
+            {
+              var mainbar = new Promise((resolve, reject)=>{
+                timesheets.forEach(timesheet => {
+                  var inv_workers = [];var invoiceWorkers = [];
+                  console.log('--customRates--')
+                  console.log('element', timesheet.workers);
+                  var innerbar = new Promise((resolve,reject)=>{
+                    timesheet.workers.forEach((worker) => {
+                      let tempRate = 0;  let chargeRate = 0;
+                      let age = getAge(worker.workerId.dateBirth);
+      
+                      // client charge rate
+                      let chargerateU25 = 0 ; let chargerateO25 = 0;
+                      let defaultRate = defaultRates.filter(x => x.role === worker.role);
+                      defaultRate = defaultRate[0];
+                      console.log('defaultRate', defaultRate);
+                      chargerateU25 = defaultRate['chargerateU25'];
+                      console.log('chargerateU25', chargerateU25);
+                      chargerateO25 = defaultRate['chargerateO25'];
+                      console.log('chargerateO25', chargerateO25);
+                      // worker pay rate
+                      payrateU25 = defaultRate['payrateU25'];
+                      console.log('payrateU25', payrateU25);
+                      payrateO25 = defaultRate['payrateO25'];
+                      console.log('payrateO25', payrateO25);
+      
+                      tempRate = age < 25 ? payrateU25 : payrateO25;
+                      console.log('tempRate', tempRate);
+                      // worker net
+                      let WR_UNITS = parseFloat(worker.hours.replace(':','.'))*tempRate;
+                      console.log('WR_UNITS', WR_UNITS);
+      
+                      chargeRate = age < 25 ? chargerateU25 : chargerateO25;
+                      console.log('chargeRate', chargeRate);
+                      let inv_WR_net = parseFloat(worker.hours.replace(':','.'))*chargeRate;
+                      console.log('inv_WR_net', inv_WR_net);
+                      WR_UNITS = WR_UNITS.toFixed(2);
+                      inv_WR_net = inv_WR_net.toFixed(2);
+                      var obj ={
+                        timesheet_id: timesheet.timesheetId,
+                        WR_REF : worker.workerId.workerId,
+                        WR_UNITS: WR_UNITS,
+                        WR_TRNCDE :'p001',
+                        WR_RATE : tempRate,
+                        type : "Export Timesheets",
+                        response : "Successful"
+                      }
+                      timesheetData.push(obj);
+                      var inv_worker = {
+                        workerId: worker.workerId._id,
+                        chargeRate: chargeRate,
+                        payRate: tempRate,
+                        hours: parseFloat(worker.hours.replace(':','.')),
+                        net: inv_WR_net,
+                        client_Id: timesheet.clientId
+                      }
+                      inv_workers.push(inv_worker);
+                      console.log('inv_worker', inv_worker);
+                      resolve();
+                    });
+                  });
+                  innerbar.then(()=>{
+                    const invoice = new Invoice();
+                    console.log('All done!', inv_workers);
+                    invoiceWorkers.push(inv_workers);
+                    console.log('invoiceWorkers', invoiceWorkers)
+                    invoice.invoiceDate = new Date();
+                    invoice.invoiceDueDate =  moment().add(invoiceinfo.dueDate, 'd').format('dddd, MMMM DD,YYYY');
+                    invoice.workers = invoiceWorkers[0];
+                    invoice.client_Id = timesheet.clientId
+                    invoice.timesheetId = timesheet.timesheetId;
+                    invoice.timesheetId_id = timesheet._id;
+                    invoice.invoiceId = timesheet.timesheetId.replace(/TS/g, "INV");
+                    invoice.totalVat = invoiceinfo.vat;
+      
+                    invoice.save().then(inv => {
+                      console.log("invoice", inv);
+                      resolve();
+                    })
+                    .catch(err => {
+                      console.log("invoice not created", err);
+                    });
+                  });
+                  // Timesheet.updateMany({exportStatus: false, statusStr:'Completed'}, {"$set":{"exportStatus": true}}, {"multi": true}, (err, writeResult) => {});
+                });
+              });
+  
+            }
+            mainbar.then(()=>{
+              resolve(timesheetData);
+              // res.json(timesheetData);
+            });
+          });
+        })
+      }
+      }
+    })
+  });
+}
+function getcustomRatesUpdation(){
+  var timesheetData = [];
+  return new Promise((resolve)=>{
+    Timesheet.find({exportStatus: false, statusStr:'Completed'}).populate(['JobId_Id', 'workers.workerId', 'clientId']).exec(function(err, timesheets) {
+      if (err) {
+        console.log('error', err);
+      } else {
+        console.log('==timesheet==', timesheets)
+        var bar = new Promise((resolve)=>{
+          timesheets.forEach((timesheet,index) => {
+            CustomRates.find({clientId: timesheet.clientId}, function(err, customRates) {
+              if (customRates) {
+                var inv_workers = []; var invoiceWorkers = [];
+                console.log('--customRates--')
+                console.log('element', timesheet.workers);
+                var innerbar = new Promise((resolves)=>{
+                  timesheet.workers.forEach((worker, i) => {
+                    let tempRate = null;  let chargeRate = null; let inv_WR_net = null; let WR_UNITS = null;
+                    let age = getAge(worker.workerId.dateBirth);
+      
+                    // client charge rate
+                    let chargerateU25 = 0 ; let chargerateO25 = 0;
+                    let customRate = customRates.filter(x => x.role === worker.role);
+                    customRate = customRate[0];
+                    console.log('customRate', customRate);
+                    chargerateU25 = customRate['chargerateU25'] > 0 ? customRate['chargerateU25'] : null;
+                    console.log('chargerateU25', chargerateU25);
+                    chargerateO25 = customRate['chargerateO25'] > 0 ? customRate['chargerateO25'] : null;
+                    console.log('chargerateO25', chargerateO25);
+                    // worker pay rate
+                    payrateU25 = customRate['payrateU25'] > 0 ? customRate['payrateU25'] : null;
+                    console.log('payrateU25', payrateU25);
+                    payrateO25 = customRate['payrateO25'] > 0 ? customRate['payrateO25'] : null;
+                    console.log('payrateO25', payrateO25);
+      
+                    tempRate = age < 25 ? payrateU25 : payrateO25;
+                    console.log('tempRate', tempRate);
+                    // worker net
+                    if(tempRate !== null){
+                      WR_UNITS = parseFloat(worker.hours.replace(':','.'))*tempRate;
+                      console.log('WR_UNITS', WR_UNITS);
+                      WR_UNITS = WR_UNITS && WR_UNITS.toFixed(2);
+                    }
+      
+                    chargeRate = age < 25 ? chargerateU25 : chargerateO25;
+                    console.log('chargeRate', chargeRate);
+                    if(chargeRate !== null){
+                      inv_WR_net = parseFloat(worker.hours.replace(':','.'))*chargeRate;
+                      console.log('inv_WR_net', inv_WR_net);
+                      inv_WR_net = inv_WR_net && inv_WR_net.toFixed(2);
+                    }
+                    var obj ={
+                      timesheet_id: timesheet.timesheetId,
+                      WR_REF : worker.workerId.workerId,
+                      WR_UNITS: WR_UNITS,
+                      WR_TRNCDE :'p001',
+                      WR_RATE : tempRate,
+                      type : "Export Timesheets",
+                      response : "Successful"
+                    }
+                    timesheetData.push(obj);
+                    var inv_worker = {
+                      workerId: worker.workerId._id,
+                      chargeRate: chargeRate,
+                      payRate: tempRate,
+                      hours: parseFloat(worker.hours.replace(':','.')),
+                      net: inv_WR_net,
+                      client_Id: timesheet.clientId
+                    }
+                    inv_workers.push(inv_worker);
+                    console.log('inv_worker', inv_worker);
+      
+                    if(index === timesheets.length-1 && i === timesheet.workers.length-1){
+                      // res.json(timesheetData);
+                      resolves();
+                    }
+      
+                  });
+                });
+                innerbar.then(()=>{
+                  let inID = timesheet.timesheetId.replace(/TS/g, "INV");
+                  Invoice.findOne({invoiceId:inID}, function(err, invoice) {
+                    console.log('All done!', inv_workers);
+                    invoiceWorkers.push(inv_workers);
+                    console.log('invoiceWorkers', invoiceWorkers)
+                    invoiceWorkers = invoiceWorkers[0];
+                    invoice.workers.forEach((ele, i) => {
+                      let invoiceWorker = invoiceWorkers[i];
+                      console.log('--invoiceWorker', invoiceWorkers[i]);
+                      if(invoiceWorker.chargeRate !== null)
+                        ele.chargeRate = invoiceWorker.chargeRate;
+                      if(invoiceWorker.payRate !== null)
+                        ele.payRate = invoiceWorker.payRate;
+                      if(invoiceWorker.net !== null)
+                        ele.net = invoiceWorker.net;
+                    });
+                    invoice.save().then(inv => {
+                      console.log("saved invoice", inv);
+                    })
+                    .catch(err => {
+                      console.log("invoice not created", err);
+                    });
+                  })
+                  resolve();
+                });
+                // const invoice = new Invoice();
+              }
+            });
+          });
+        });
+        bar.then(()=>{
+          resolve(timesheetData);
+          // return timesheetData
+          // res.json(timesheetData)
+        });
+      }
+    })
+  });
+}
+function getworkerRatesUpdation(){
+  var timesheetData = [];
+  return new Promise((resolve)=>{
+
+    Timesheet.find({exportStatus: false, statusStr:'Completed'}).populate(['JobId_Id', 'workers.workerId', 'clientId']).exec(function(err, timesheets) {
+      if (err) {
+        console.log('error', err);
+      } else {
+        // console.log('==timesheet==', timesheets)
+  
+        var bar = new Promise((resolve, reject) => {
+          timesheets.forEach((timesheet, index) => {
+            var inv_workers = [];var invoiceWorkers = [];
+            // console.log('element', timesheet.workers);
+            var innerbar = new Promise((resolves, reject) => {
+              timesheet.workers.forEach((worker, i) => {
+                inv_workers = [];
+                WorkerRates.find({clientId: worker.workerId}, function(err, workerRates) {
+                  if (workerRates)
+                  {
+                    console.log('--workerRates--', workerRates)
+                    let tempRate = 0;  let chargeRate = 0; let WR_UNITS = null;
+                    let age = getAge(worker.workerId.dateBirth);
+  
+                    let workerRate = workerRates.filter(x => x.role === worker.role);
+                    workerRate = workerRate[0];
+                    payrateU25 = workerRate['payrateU25'] > 0 ? workerRate['payrateU25'] : null;
+                    payrateO25 = workerRate['payrateO25'] > 0 ? workerRate['payrateO25'] : null;
+  
+                    tempRate = age < 25 ? payrateU25 : payrateO25;
+                    console.log('tempRate', tempRate)
+                    // worker net
+                    if(tempRate !== null){
+                      WR_UNITS = parseFloat(worker.hours.replace(':','.'))*tempRate;
+                      WR_UNITS = WR_UNITS.toFixed(2);
+                    }
+                    var obj ={
+                      timesheet_id: timesheet.timesheetId,
+                      WR_REF : worker.workerId.workerId,
+                      WR_UNITS: WR_UNITS,
+                      WR_TRNCDE :'p001',
+                      WR_RATE : tempRate,
+                      type : "Export Timesheets",
+                      response : "Successful"
+                    }
+                    timesheetData.push(obj);
+                    console.log('timesheetData', timesheetData);
+                    var inv_worker = {
+                      workerId: worker.workerId._id,
+                      payRate: tempRate,
+                      hours: parseFloat(worker.hours.replace(':','.')),
+                      client_Id: timesheet.clientId
+                    }
+                    inv_workers.push(inv_worker);
+                    if (i === timesheet.workers.length-1){
+                      resolves();
+                    }
+                  }
+                });
+              });
+            });
+            innerbar.then(()=> {
+              console.log('inside inner bar')
+              let inID = timesheet.timesheetId.replace(/TS/g, "INV");
+              Invoice.findOne({invoiceId:inID}, function(err, invoice) {
+                invoiceWorkers.push(inv_workers);
+                invoiceWorkers = invoiceWorkers[0];
+  
+                invoice.workers.forEach((ele, i) => {
+                  let invoiceWorker = invoiceWorkers[i];
+                  console.log('--invoiceWorker', invoiceWorkers[i]);
+                  if (invoiceWorker.payRate !== null)
+                    ele.payRate = invoiceWorker.payRate;
+                });
+                invoice.save().then(inv => {
+                  console.log("worker rates saved invoice", inv);
+                  // res.send(inv);
+                })
+                .catch(err => {
+                  console.log("invoice not created", err);
+                });
+              });
+            });
+            if (index === timesheets.length-1){
+              resolve();
+            }
+            Timesheet.updateMany({exportStatus: false, statusStr:'Completed'}, {"$set":{"exportStatus": true}}, {"multi": true}, (err, writeResult) => {
+            });
+          });
+        });
+        bar.then(() => {
+          resolve(timesheetData)
+          // console.log('timesheetData', timesheetData)
+          // res.json('successfull');
+        });
+      }
+    })
+  });
+}
+function getSelectedInvoices(req){
+  return new Promise((resolve,reject)=>{
+    Invoice.find({ timesheetId : { $in : req } }).sort({ 'timesheetId': 1 }).populate(['client_Id','workers.workerId']).exec(function(err, client) {
+        if (err) {
+            console.log(err);
+            reject(err);
+        } else {
+          resolve(client);
+            // res.json(client);
+        }
+    })
+  });
+
+}
 exports.getExportTimesheets = (req, res) => {
-  var timesheetData = [];
-
-  Timesheet.find({exportStatus: false, statusStr:'Completed'}).populate(['JobId_Id', 'workers.workerId', 'clientId']).exec(function(err, timesheets) {
-    if (err) {
-      console.log('error', err);
-    } else {
-      console.log('==timesheet==', timesheets)
-
-      InvoiceInfo.findOne({id:1}, function(err, invoiceinfo) {
-        DefaultRates.find({}, function(err, defaultRates) {
-          if (defaultRates)
-          {
-            timesheets.forEach(timesheet => {
-              var inv_workers = [];var invoiceWorkers = [];
-              console.log('--customRates--')
-              console.log('element', timesheet.workers);
-              timesheet.workers.forEach((worker) => {
-                let tempRate = 0;  let chargeRate = 0;
-                let age = getAge(worker.workerId.dateBirth);
-
-                // client charge rate
-                let chargerateU25 = 0 ; let chargerateO25 = 0;
-                let defaultRate = defaultRates.filter(x => x.role === worker.role);
-                defaultRate = defaultRate[0];
-                console.log('defaultRate', defaultRate);
-                chargerateU25 = defaultRate['chargerateU25'];
-                console.log('chargerateU25', chargerateU25);
-                chargerateO25 = defaultRate['chargerateO25'];
-                console.log('chargerateO25', chargerateO25);
-                // worker pay rate
-                payrateU25 = defaultRate['payrateU25'];
-                console.log('payrateU25', payrateU25);
-                payrateO25 = defaultRate['payrateO25'];
-                console.log('payrateO25', payrateO25);
-
-                tempRate = age < 25 ? payrateU25 : payrateO25;
-                console.log('tempRate', tempRate);
-                // worker net
-                let WR_UNITS = parseFloat(worker.hours.replace(':','.'))*tempRate;
-                console.log('WR_UNITS', WR_UNITS);
-
-                chargeRate = age < 25 ? chargerateU25 : chargerateO25;
-                console.log('chargeRate', chargeRate);
-                let inv_WR_net = parseFloat(worker.hours.replace(':','.'))*chargeRate;
-                console.log('inv_WR_net', inv_WR_net);
-                WR_UNITS = WR_UNITS.toFixed(2);
-                inv_WR_net = inv_WR_net.toFixed(2);
-                var obj ={
-                  timesheet_id: timesheet.timesheetId,
-                  WR_REF : worker.workerId.workerId,
-                  WR_UNITS: WR_UNITS,
-                  WR_TRNCDE :'p001',
-                  WR_RATE : tempRate,
-                  type : "Export Timesheets",
-                  response : "Successful"
-                }
-                timesheetData.push(obj);
-                var inv_worker = {
-                  workerId: worker.workerId._id,
-                  chargeRate: chargeRate,
-                  payRate: tempRate,
-                  hours: parseFloat(worker.hours.replace(':','.')),
-                  net: inv_WR_net,
-                  client_Id: timesheet.clientId
-                }
-                inv_workers.push(inv_worker);
-                console.log('inv_worker', inv_worker);
-              });
-              const invoice = new Invoice();
-              console.log('All done!', inv_workers);
-              invoiceWorkers.push(inv_workers);
-              console.log('invoiceWorkers', invoiceWorkers)
-              invoice.invoiceDate = new Date();
-              invoice.invoiceDueDate =  moment().add(invoiceinfo.dueDate, 'd').format('dddd, MMMM DD,YYYY');
-              invoice.workers = invoiceWorkers[0];
-              invoice.client_Id = timesheet.clientId
-              invoice.timesheetId = timesheet.timesheetId;
-              invoice.timesheetId_id = timesheet._id;
-              invoice.invoiceId = timesheet.timesheetId.replace(/TS/g, "INV");
-              invoice.totalVat = invoiceinfo.vat;
-
-              invoice.save().then(inv => {
-                console.log("invoice", inv);
-              })
-              .catch(err => {
-                console.log("invoice not created", err);
-              });
-              // Timesheet.updateMany({exportStatus: false, statusStr:'Completed'}, {"$set":{"exportStatus": true}}, {"multi": true}, (err, writeResult) => {});
-            });
-
-          }
-          res.json(timesheetData);
-        });
-      })
-    }
-  })
-}
-
-exports.customRatesUpdation = (req, res) => {
-  var timesheetData = [];
-
-  Timesheet.find({exportStatus: false, statusStr:'Completed'}).populate(['JobId_Id', 'workers.workerId', 'clientId']).exec(function(err, timesheets) {
-    if (err) {
-      console.log('error', err);
-    } else {
-      console.log('==timesheet==', timesheets)
-      timesheets.forEach((timesheet,index) => {
-        CustomRates.find({clientId: timesheet.clientId}, function(err, customRates) {
-          if (customRates) {
-            var inv_workers = []; var invoiceWorkers = [];
-            console.log('--customRates--')
-            console.log('element', timesheet.workers);
-            timesheet.workers.forEach((worker, i) => {
-              let tempRate = null;  let chargeRate = null; let inv_WR_net = null; let WR_UNITS = null;
-              let age = getAge(worker.workerId.dateBirth);
-
-              // client charge rate
-              let chargerateU25 = 0 ; let chargerateO25 = 0;
-              let customRate = customRates.filter(x => x.role === worker.role);
-              customRate = customRate[0];
-              console.log('customRate', customRate);
-              chargerateU25 = customRate['chargerateU25'] > 0 ? customRate['chargerateU25'] : null;
-              console.log('chargerateU25', chargerateU25);
-              chargerateO25 = customRate['chargerateO25'] > 0 ? customRate['chargerateO25'] : null;
-              console.log('chargerateO25', chargerateO25);
-              // worker pay rate
-              payrateU25 = customRate['payrateU25'] > 0 ? customRate['payrateU25'] : null;
-              console.log('payrateU25', payrateU25);
-              payrateO25 = customRate['payrateO25'] > 0 ? customRate['payrateO25'] : null;
-              console.log('payrateO25', payrateO25);
-
-              tempRate = age < 25 ? payrateU25 : payrateO25;
-              console.log('tempRate', tempRate);
-              // worker net
-              if(tempRate !== null){
-                WR_UNITS = parseFloat(worker.hours.replace(':','.'))*tempRate;
-                console.log('WR_UNITS', WR_UNITS);
-                WR_UNITS = WR_UNITS && WR_UNITS.toFixed(2);
-              }
-
-              chargeRate = age < 25 ? chargerateU25 : chargerateO25;
-              console.log('chargeRate', chargeRate);
-              if(chargeRate !== null){
-                inv_WR_net = parseFloat(worker.hours.replace(':','.'))*chargeRate;
-                console.log('inv_WR_net', inv_WR_net);
-                inv_WR_net = inv_WR_net && inv_WR_net.toFixed(2);
-              }
-              var obj ={
-                timesheet_id: timesheet.timesheetId,
-                WR_REF : worker.workerId.workerId,
-                WR_UNITS: WR_UNITS,
-                WR_TRNCDE :'p001',
-                WR_RATE : tempRate,
-                type : "Export Timesheets",
-                response : "Successful"
-              }
-              timesheetData.push(obj);
-              var inv_worker = {
-                workerId: worker.workerId._id,
-                chargeRate: chargeRate,
-                payRate: tempRate,
-                hours: parseFloat(worker.hours.replace(':','.')),
-                net: inv_WR_net,
-                client_Id: timesheet.clientId
-              }
-              inv_workers.push(inv_worker);
-              console.log('inv_worker', inv_worker);
-
-              if(index === timesheets.length-1 && i === timesheet.workers.length-1){
-                res.json(timesheetData);
-              }
-
-            });
-            // const invoice = new Invoice();
-            let inID = timesheet.timesheetId.replace(/TS/g, "INV");
-            Invoice.findOne({invoiceId:inID}, function(err, invoice) {
-              console.log('All done!', inv_workers);
-              invoiceWorkers.push(inv_workers);
-              console.log('invoiceWorkers', invoiceWorkers)
-              invoiceWorkers = invoiceWorkers[0];
-              invoice.workers.forEach((ele, i) => {
-                let invoiceWorker = invoiceWorkers[i];
-                console.log('--invoiceWorker', invoiceWorkers[i]);
-                if(invoiceWorker.chargeRate !== null)
-                  ele.chargeRate = invoiceWorker.chargeRate;
-                if(invoiceWorker.payRate !== null)
-                  ele.payRate = invoiceWorker.payRate;
-                if(invoiceWorker.net !== null)
-                  ele.net = invoiceWorker.net;
-              });
-              invoice.save().then(inv => {
-                console.log("saved invoice", inv);
-              })
-              .catch(err => {
-                console.log("invoice not created", err);
-              });
-            })
-          }
-        });
-      });
-    }
-  })
-}
-
-exports.workerRatesUpdation = (req, res) => {
-  var timesheetData = [];
-
-  Timesheet.find({exportStatus: false, statusStr:'Completed'}).populate(['JobId_Id', 'workers.workerId', 'clientId']).exec(function(err, timesheets) {
-    if (err) {
-      console.log('error', err);
-    } else {
-      // console.log('==timesheet==', timesheets)
-
-      var bar = new Promise((resolve, reject) => {
-        timesheets.forEach((timesheet, index) => {
-          var inv_workers = [];var invoiceWorkers = [];
-          // console.log('element', timesheet.workers);
-          var innerbar = new Promise((resolves, reject) => {
-            timesheet.workers.forEach((worker, i) => {
-              inv_workers = [];
-              WorkerRates.find({clientId: worker.workerId}, function(err, workerRates) {
-                if (workerRates)
-                {
-                  console.log('--workerRates--', workerRates)
-                  let tempRate = 0;  let chargeRate = 0; let WR_UNITS = null;
-                  let age = getAge(worker.workerId.dateBirth);
-
-                  let workerRate = workerRates.filter(x => x.role === worker.role);
-                  workerRate = workerRate[0];
-                  payrateU25 = workerRate['payrateU25'] > 0 ? workerRate['payrateU25'] : null;
-                  payrateO25 = workerRate['payrateO25'] > 0 ? workerRate['payrateO25'] : null;
-
-                  tempRate = age < 25 ? payrateU25 : payrateO25;
-                  console.log('tempRate', tempRate)
-                  // worker net
-                  if(tempRate !== null){
-                    WR_UNITS = parseFloat(worker.hours.replace(':','.'))*tempRate;
-                    WR_UNITS = WR_UNITS.toFixed(2);
-                  }
-                  var obj ={
-                    timesheet_id: timesheet.timesheetId,
-                    WR_REF : worker.workerId.workerId,
-                    WR_UNITS: WR_UNITS,
-                    WR_TRNCDE :'p001',
-                    WR_RATE : tempRate,
-                    type : "Export Timesheets",
-                    response : "Successful"
-                  }
-                  timesheetData.push(obj);
-                  console.log('timesheetData', timesheetData);
-                  var inv_worker = {
-                    workerId: worker.workerId._id,
-                    payRate: tempRate,
-                    hours: parseFloat(worker.hours.replace(':','.')),
-                    client_Id: timesheet.clientId
-                  }
-                  inv_workers.push(inv_worker);
-                  if (i === timesheet.workers.length-1){
-                    resolves();
-                  }
+  let defaultRateObjs = [];
+  let finalRateObjs = [];
+  getDefaultRates().then(
+    data=>{
+      if(data.length > 0){
+        defaultRateObjs = data;
+        getcustomRatesUpdation().then(resp=>{
+          if(resp.length > 0){
+            getworkerRatesUpdation().then((resp)=>{
+              const unique = [...new Set(defaultRateObjs.map(item => item.timesheet_id))];
+              console.log('unique', unique);
+              getSelectedInvoices(unique).then(response=>{
+                if(response.length > 0){
+                  let workers = [];
+                  const workerArr = response.map(invoice => (invoice.workers));
+                  workerArr.forEach(ele => {
+                  workers.push(...ele);})
+                  defaultRateObjs.forEach((ele, i) => {
+                  ele.WR_RATE = workers[i].payRate;
+                  ele.WR_UNITS = workers[i].payRate*workers[i].hours;
+                  finalRateObjs.push(ele);
+                  });
+                  res.json(finalRateObjs)
                 }
               });
             });
-          });
-          innerbar.then(()=> {
-            console.log('inside inner bar')
-            let inID = timesheet.timesheetId.replace(/TS/g, "INV");
-            Invoice.findOne({invoiceId:inID}, function(err, invoice) {
-              invoiceWorkers.push(inv_workers);
-              invoiceWorkers = invoiceWorkers[0];
-
-              invoice.workers.forEach((ele, i) => {
-                let invoiceWorker = invoiceWorkers[i];
-                console.log('--invoiceWorker', invoiceWorkers[i]);
-                if (invoiceWorker.payRate !== null)
-                  ele.payRate = invoiceWorker.payRate;
-              });
-              invoice.save().then(inv => {
-                console.log("worker rates saved invoice", inv);
-                // res.send(inv);
-              })
-              .catch(err => {
-                console.log("invoice not created", err);
-              });
-            });
-          });
-          if (index === timesheets.length-1){
-            resolve();
           }
-          Timesheet.updateMany({exportStatus: false, statusStr:'Completed'}, {"$set":{"exportStatus": true}}, {"multi": true}, (err, writeResult) => {
-          });
         });
-      });
-      bar.then(() => {
-        console.log('timesheetData', timesheetData)
-        res.json('successfull');
-      });
+      }
+      else{
+        res.json(finalRateObjs)
+      }
     }
-  })
+    );
 }
+// exports.getExportTimesheets = (req, res) => {
+//   getDefaultRates().then(
+//     data=>res.json(data)
+//     );
+// }
+
+// exports.customRatesUpdation = (req, res) => {
+//   getcustomRatesUpdation().then(data=>res.json(data));
+
+// }
+
+// exports.workerRatesUpdation = (req, res) => {
+//   getworkerRatesUpdation().then(()=>res.json('successfull'));
+// }
 
 exports.getPayslips = (req, res) => {
   console.log('===  workedId ====', req.body._id)
@@ -959,16 +1054,17 @@ exports.getAllInvoices = (req, res) => {
       }
   })
 }
-exports.getSelectedInvoices = (req, res) => {
-  console.log('req', req.body)
-  Invoice.find({ timesheetId : { $in : req.body.inv_ids } }).sort({ 'timesheetId': 1 }).populate(['client_Id','workers.workerId']).exec(function(err, client) {
-      if (err) {
-          console.log(err);
-      } else {
-          res.json(client);
-      }
-  })
-}
+// exports.getSelectedInvoices = (req, res) => {
+//   gettSelectedInvoices(req).then(client=>res.json(client));
+//   // console.log('req', req.body)
+//   // Invoice.find({ timesheetId : { $in : req.body.inv_ids } }).sort({ 'timesheetId': 1 }).populate(['client_Id','workers.workerId']).exec(function(err, client) {
+//   //     if (err) {
+//   //         console.log(err);
+//   //     } else {
+//   //         res.json(client);
+//   //     }
+//   // })
+// }
 exports.getFindTimesheets = (req, res) => {
   if(req.body.userType == "Client"){
     Timesheet.find({statusStr:req.body.status, clientId:req.body.id }).exec(function(err, client) {
